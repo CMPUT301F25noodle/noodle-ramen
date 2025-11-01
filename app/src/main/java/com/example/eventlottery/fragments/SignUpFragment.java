@@ -1,14 +1,30 @@
 package com.example.eventlottery.fragments;
 
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.widget.ProgressBar;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import com.example.eventlottery.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SignUpFragment - Handles user sign up page
@@ -18,58 +34,23 @@ import com.example.eventlottery.R;
  */
 
 public class SignUpFragment extends Fragment {
+    private EditText nameField, phoneField, emailField, passwordField;
+    private Button organizerButton, entrantButton, signUpButton;
+    private RadioGroup notificationsGroup;
+    private ProgressBar progressBar;
+
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
+    private String selectedRole = "entrant"; //everyone will deafault to entrant
+    private boolean notificationsEnabled = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
 
-        Button organizerButton = view.findViewById(R.id.btn_organizer);
-        Button entrantButton = view.findViewById(R.id.btn_entrant);
-        Button signUpButton = view.findViewById(R.id.btn_sign_up);
-
-        EditText nameField = view.findViewById(R.id.et_name);
-        EditText phoneField = view.findViewById(R.id.et_phone);
-        EditText emailField = view.findViewById(R.id.et_email);
-        EditText passwordField = view.findViewById(R.id.et_password);
-
-        organizerButton.setOnClickListener(v -> Toast.makeText(getContext(), "Organizer selected", Toast.LENGTH_SHORT).show());
-
-        entrantButton.setOnClickListener(v -> Toast.makeText(getContext(), "Entrant selected", Toast.LENGTH_SHORT).show());
-
-        signUpButton.setOnClickListener(v -> {
-            String name = nameField.getText().toString();
-            String phone = phoneField.getText().toString();
-            String email = emailField.getText().toString();
-            String password = passwordField.getText().toString();
-
-            if (name.isEmpty()) {
-                nameField.setError("Please enter your name");
-                return;
-            }
-
-            if (phone.isEmpty()) {
-                phoneField.setError("Please enter your phone number");
-                return;
-            }
-
-            if (email.isEmpty()) {
-                emailField.setError("Please enter your email");
-                return;
-            }
-
-            if (password.isEmpty()) {
-                passwordField.setError("Please enter a password");
-                return;
-            }
-
-            if (password.length() < 6) {
-                passwordField.setError("Password must be at least 6 characters");
-                return;
-            }
-
-            Toast.makeText(getContext(), "Sign up successful!", Toast.LENGTH_SHORT).show();
-        });
-
-        return view;
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
     }
+
 }
