@@ -130,9 +130,78 @@ public class SignUpFragment extends Fragment {
      * sign up handler wil validate inputs and create account
      */
 
-    private void handleSignUp () {
+    private void handleSignUp() {
+        // Get input values
         String name = nameField.getText().toString().trim();
-        String
+        String phone = phoneField.getText().toString().trim();
+        String email = emailField.getText().toString().trim();
+        String password = passwordField.getText().toString().trim();
+
+        // Validate inputs
+        if (!validateInputs(name, email, password)) {
+            return;
+        }
+
+        // Disable button and show progress
+        signUpButton.setEnabled(false);
+        showLoading(true);
+
+        // Check if email already exists, then create account
+        checkEmailExists(email, exists -> {
+            if (exists) {
+                signUpButton.setEnabled(true);
+                showLoading(false);
+                emailField.setError("An account with this email already exists");
+                Toast.makeText(getContext(), "Email already registered. Please login instead.", Toast.LENGTH_LONG).show();
+            } else {
+                createUserAccount(name, email, password, phone);
+            }
+        });
     }
+
+    /**
+     * validaitng user inputs
+     */
+    private boolean validateInputs(String name, String email, String password) {
+        boolean isValid = true;
+
+        if (name.isEmpty()) {
+            nameField.setError("Please enter your name");
+            nameField.requestFocus();
+            isValid = false;
+        }
+        if (email.isEmpty()) {
+            emailField.setError("Please enter your email");
+            emailField.requestFocus();
+            isValid = false;
+
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailField.setError("Please enter a valid email address");
+            emailField.requestFocus();
+            isValid = false;
+        }
+        if (password.isEmpty()) {
+            passwordField.setError("Please enter a password");
+            passwordField.requestFocus();
+            isValid = false;
+        } else if (password.length() < 6) {
+            passwordField.setError("Password must be at least 6 characters");
+            passwordField.requestFocus();
+            isValid = false;
+        }
+
+        return isValid;
+
+    }
+    /**
+     * check if email already in db
+     * @param email we check
+     * @param callback Callback if its true we have email already or false doesnst exist
+     */
+    private void checkEmailExists(String email, EmailCheckCallback callback) {
+
+    }
+
+
 
 }
