@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
@@ -38,7 +39,8 @@ public class SignUpFragment extends Fragment {
     private Button organizerButton, entrantButton, signUpButton;
     private RadioGroup notificationsGroup;
     private ProgressBar progressBar;
-
+    private TextView loadingText;
+//sets up firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -51,6 +53,86 @@ public class SignUpFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        intializeViews(view);
+        setupListeners();
+
+        return view;
+
+    }
+
+    /**
+     * Initilaizes all the view components
+     * @param view
+     */
+
+    private void InitializeViews(View view) {
+        organizerButton = view.findViewById(R.id.btn_organizer);
+        entrantButton = view.findViewById(R.id.btn_entrant);
+        signUpButton = view.findViewById(R.id.btn_sign_up);
+
+        //inputs
+        nameField = view.findViewById(R.id.et_name);
+        phoneField = view.findViewById(R.id.et_phone);
+        emailField = view.findViewById(R.id.et_email);
+        passwordField = view.findViewById(R.id.et_password);
+        //notificaitons prefernce at sign up, will need one for the profile page
+        notificationsGroup = view.findViewById(R.id.rg_notifications);
+
+        //progess bar
+        progressBar = view.findViewById(R.id.progress_bar);
+        loadingText = view.findViewById(R.id.tv_loading);
+
+    }
+
+    /**
+     * set up listeners for clicks
+     *
+     */
+
+    private void setupListeners() {
+        organizerButton.setOnClickListener( v-> {
+            selectedRole = "organizer";
+            updateRoleButtonStyles();
+            Toast.makeText(getContext(), "Organizer role selected", Toast.LENGTH_SHORT).show();
+        });
+
+        entrantButton.setOnClickListener(v-> {
+            selectedRole = "entrant";
+            updateRoleButtonStyles();
+            Toast.makeText(getContext(), "Entrant role selected", Toast.LENGTH_SHORT).show();
+        });
+
+        notificationsGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rb_yes) {
+                notificationsEnabled = true;
+            } else if (checkedId == R.id.rb_no) {
+                notificationsEnabled = false;
+            }
+        });
+
+        signUpButton.setOnClickListener(v-> handleSignUp());
+        }
+
+
+
+        private void updateRoleButtonStyles () {
+            if (selectedRole.equals("organizer")) {
+                organizerButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
+                entrantButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
+            } else {
+                entrantButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
+                organizerButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
+            }
+        }
+
+    /**
+     * sign up handler wil validate inputs and create account
+     */
+
+    private void handleSignUp () {
+        String name = nameField.getText().toString().trim();
+        String
     }
 
 }
