@@ -40,6 +40,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
 
+    implementation("androidx.fragment:fragment:1.8.9")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
