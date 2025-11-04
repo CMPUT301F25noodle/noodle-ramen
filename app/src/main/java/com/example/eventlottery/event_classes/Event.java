@@ -1,0 +1,124 @@
+package com.example.eventlottery.event_classes;
+
+/**
+ * Represents an event in the lottery system.
+ * Immutable domain model with business logic, no UI concerns.
+ * Uses value objects for type safety.
+ */
+public class Event {
+    private final String id;
+    private final String title;
+    private final String organizationName;
+    private final Location location;
+    private final EventDates dates;
+    private final String imageUrl;
+    private final Waitlist waitlist;
+    private final Money price;
+    private final EventStatus status;
+
+    /**
+     * Creates an Event with all required information.
+     *
+     * @param id unique event identifier
+     * @param title event title
+     * @param organizationName name of organizing entity
+     * @param location event location
+     * @param dates event date range
+     * @param imageUrl URL to event image
+     * @param waitlist waitlist information
+     * @param price event price
+     * @param status event status
+     * @throws IllegalArgumentException if any parameter is null or invalid
+     */
+    public Event(String id, String title, String organizationName,
+                 Location location, EventDates dates, String imageUrl,
+                 Waitlist waitlist, Money price, EventStatus status) {
+        // Validate all inputs
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("Event ID cannot be null or empty");
+        }
+        if (title == null || title.isEmpty()) {
+            throw new IllegalArgumentException("Event title cannot be null or empty");
+        }
+        if (organizationName == null || organizationName.isEmpty()) {
+            throw new IllegalArgumentException("Organization name cannot be null or empty");
+        }
+        if (location == null) {
+            throw new IllegalArgumentException("Location cannot be null");
+        }
+        if (dates == null) {
+            throw new IllegalArgumentException("Dates cannot be null");
+        }
+        if (waitlist == null) {
+            throw new IllegalArgumentException("Waitlist cannot be null");
+        }
+        if (price == null) {
+            throw new IllegalArgumentException("Price cannot be null");
+        }
+        if (status == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+
+        // Assign to final fields (immutable)
+        this.id = id;
+        this.title = title;
+        this.organizationName = organizationName;
+        this.location = location;
+        this.dates = dates;
+        this.imageUrl = imageUrl;
+        this.waitlist = waitlist;
+        this.price = price;
+        this.status = status;
+    }
+
+    public String getId() { return id; }
+
+    public String getTitle() { return title; }
+
+    public String getOrganizationName() { return organizationName; }
+
+    public Location getLocation() { return location; }
+
+    public EventDates getDates() { return dates; }
+
+    public String getImageUrl() { return imageUrl; }
+
+    public Waitlist getWaitlist() { return waitlist; }
+
+    public Money getPrice() { return price; }
+
+    public EventStatus getStatus() { return status; }
+
+    /**
+     * Checks if event is accepting new signups.
+     * @return true if status is OPEN and spots are available
+     */
+    public boolean isAvailable() {
+        return status == EventStatus.OPEN && waitlist.hasAvailableSpots();
+    }
+
+    /**
+     * Checks if waitlist is full.
+     * @return true if at capacity
+     */
+    public boolean isWaitlistFull() {
+        return waitlist.isFull();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Event event = (Event) o;
+        return id.equals(event.id);
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", status=" + status +
+                '}';
+    }
+}
