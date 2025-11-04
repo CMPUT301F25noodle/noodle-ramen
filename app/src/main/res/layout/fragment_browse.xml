@@ -38,7 +38,7 @@
                 android:textColor="@android:color/black" />
         </LinearLayout>
 
-        <!-- Notification Icon -->
+        <!-- Notification and Profile -->
         <ImageView
             android:id="@+id/notificationIcon"
             android:layout_width="40dp"
@@ -48,7 +48,7 @@
             android:src="@android:drawable/ic_popup_reminder"
             android:contentDescription="Notifications" />
 
-        <!-- Profile Icon -->
+        <!-- Divider -->
         <ImageView
             android:id="@+id/profileIcon"
             android:layout_width="40dp"
@@ -71,7 +71,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Find Events Title -->
+        <!-- "Find Events" Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
                 android:hint="Search for an Event"
                 android:padding="12dp" />
 
-            <!-- Filter/Menu Icon -->
+            <!-- Filter -->
             <ImageView
                 android:id="@+id/filterIcon"
                 android:layout_width="48dp"
@@ -111,7 +111,7 @@
                 android:contentDescription="Filter" />
         </LinearLayout>
 
-        <!-- All Events Filter Button -->
+        <!-- Filter Bubbles (Right now its at ALL EVENTS to show that we are showing all events for now -->
         <Button
             android:id="@+id/allEventsButton"
             android:layout_width="wrap_content"
@@ -128,7 +128,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="All Events"
+            android:text="Events"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
