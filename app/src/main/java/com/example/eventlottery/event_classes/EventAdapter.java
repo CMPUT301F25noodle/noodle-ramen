@@ -157,8 +157,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             spotsText.setText(viewModel.getSpotsText());
 
             // Update button state
-            joinWaitlistButton.setText(viewModel.getJoinButtonText());
-            joinWaitlistButton.setEnabled(viewModel.isJoinButtonEnabled());
+            if (viewModel.isUserOnWaitlist()) {
+                joinWaitlistButton.setText("Leave Waitlist");
+                joinWaitlistButton.setEnabled(true);  // Always enabled to allow leaving
+            } else {
+                joinWaitlistButton.setText(viewModel.getJoinButtonText());
+                joinWaitlistButton.setEnabled(viewModel.isJoinButtonEnabled());
+            }
 
             // Attach click listeners
             joinWaitlistButton.setOnClickListener(v -> {
