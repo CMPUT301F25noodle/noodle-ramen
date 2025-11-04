@@ -13,8 +13,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.eventlottery.Event;
-import com.example.eventlottery.EventAdapter;
+import com.example.eventlottery.event_classes.Event;
+import com.example.eventlottery.event_classes.EventAdapter;
+import com.example.eventlottery.event_classes.EventViewModel;
+import com.example.eventlottery.event_classes.EventDates;
+import com.example.eventlottery.event_classes.EventStatus;
+import com.example.eventlottery.event_classes.Location;
+import com.example.eventlottery.event_classes.Money;
+import com.example.eventlottery.event_classes.Waitlist;
 import com.example.eventlottery.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,59 +74,53 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     private void loadSampleEvents() {
-        // Create sample events (replace with database/API calls later)
-        List<Event> sampleEvents = new ArrayList<>();
+        // Create sample events using modern approach with value objects
+        List<EventViewModel> sampleEventViewModels = new ArrayList<>();
 
-        sampleEvents.add(new Event(
+        // Event 1 - User is on waitlist
+        Event event1 = new Event(
                 "1",
                 "Event 1",
                 "Organization Name",
-                "Southgate Mall",
-                "10/15/2025",
-                "10/21/2025",
+                new Location("Southgate Mall"),
+                new EventDates("10/15/2025", "10/21/2025"),
                 "",
-                25,
-                45,
-                15,
-                65.0,
-                "Closed",
-                true
-        ));
+                new Waitlist(25, 45, 15),
+                new Money(65.0),
+                EventStatus.CLOSED
+        );
+        sampleEventViewModels.add(new EventViewModel(event1, true));
 
-        sampleEvents.add(new Event(
+        // Event 2 - User is NOT on waitlist
+        Event event2 = new Event(
                 "2",
                 "Event 3",
                 "Organization Name",
-                "West Edmonton Mall",
-                "10/15/2025",
-                "10/21/2025",
+                new Location("West Edmonton Mall"),
+                new EventDates("10/15/2025", "10/21/2025"),
                 "",
-                100,
-                100,
-                60,
-                0.0,
-                "2 days left",
-                false
-        ));
+                new Waitlist(100, 100, 60),
+                new Money(0.0),
+                EventStatus.ENDING_SOON
+        );
+        sampleEventViewModels.add(new EventViewModel(event2, false));
 
-        sampleEvents.add(new Event(
+        // Event 3 - User is NOT on waitlist
+        Event event3 = new Event(
                 "3",
                 "Event 4",
                 "Organization Name",
-                "Lendrum Place",
-                "10/15/2025",
-                "10/21/2025",
+                new Location("Lendrum Place"),
+                new EventDates("10/15/2025", "10/21/2025"),
                 "",
-                105,
-                150,
-                75,
-                15.0,
-                "3 days left",
-                false
-        ));
+                new Waitlist(105, 150, 75),
+                new Money(15.0),
+                new EventStatus("3 days left")
+        );
+        sampleEventViewModels.add(new EventViewModel(event3, false));
 
         // Update adapter with sample data
-        eventAdapter.updateEvents(sampleEvents);
+        eventAdapter.updateEvents(sampleEventViewModels);
     }
 
     private void setupClickListeners() {
@@ -133,49 +133,40 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
         // Filter button
         allEventsButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filter: All Events", Toast.LENGTH_SHORT).show();
             // TODO: Implement filter logic
         });
 
         // Filter icon
         filterIcon.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Open filters", Toast.LENGTH_SHORT).show();
             // TODO: Open filter dialog/bottom sheet
         });
 
         // Notification icon
         notificationIcon.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Notifications", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to notifications
+            // TODO: Go to notifications
         });
 
         // Profile icon
         profileIcon.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Profile", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to profile
+            // TODO: Go to profile
         });
     }
 
     private void performSearch(String query) {
-        Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
         // TODO: Implement search functionality
         // Filter events based on query
     }
 
     // EventAdapter.OnEventClickListener implementation
     @Override
-    public void onJoinWaitlistClick(Event event) {
-        Toast.makeText(getContext(), "Joining waitlist for: " + event.getTitle(),
-                Toast.LENGTH_SHORT).show();
-        // TODO: Implement join waitlist logic
+    public void onJoinWaitlistClick(EventViewModel eventViewModel) {
+        // TODO: Implement join waitlist logic here. When Joining
         // Update event status
         // Refresh RecyclerView
     }
 
     @Override
-    public void onEventPageClick(Event event) {
-        Toast.makeText(getContext(), "Opening: " + event.getTitle(),
-                Toast.LENGTH_SHORT).show();
+    public void onEventPageClick(EventViewModel eventViewModel) {
         // TODO: Navigate to event detail page
         // Pass event ID to detail fragment/activity
     }
