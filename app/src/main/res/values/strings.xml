@@ -16,4 +16,5 @@
     <string name="yes">Yes</string>
     <string name="information">Information</string>
     <string name="what_is_your_role">What is your role?</string>
+    <string name="creating_account">creating_account</string>
 </resources>
