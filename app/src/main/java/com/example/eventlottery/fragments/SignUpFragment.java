@@ -78,8 +78,8 @@ public class SignUpFragment extends Fragment {
         notificationsGroup = view.findViewById(R.id.rg_notifications);
 
         //progess bar
-     //   progressBar = view.findViewById(R.id.progress_bar);
-      //  loadingText = view.findViewById(R.id.tv_loading);
+        progressBar = view.findViewById(R.id.progress_bar);
+        loadingText = view.findViewById(R.id.tv_loading);
 
     }
 

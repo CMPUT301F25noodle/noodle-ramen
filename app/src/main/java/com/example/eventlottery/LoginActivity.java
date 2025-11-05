@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import android.content.Intent;
 
 /**
  * loginactivity - handles user login
@@ -66,11 +67,11 @@ public class LoginActivity extends AppCompatActivity {
          * handles sign up redirect message
          */
         signUpRedirect.setOnClickListener(v -> {
-            showLoading(true);
-            Toast.makeText(this, "sign up page not implemented yet", Toast.LENGTH_SHORT).show();
-            signUpRedirect.postDelayed(() -> showLoading(false), 1000);
+            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+            startActivity(intent);
         });
     }
+
 
     /**
      * handles user login with firebase

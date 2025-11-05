@@ -26,6 +26,10 @@
         <activity
             android:name=".QrGenerator"
             android:exported="false" />
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+
 
     </application>
 
