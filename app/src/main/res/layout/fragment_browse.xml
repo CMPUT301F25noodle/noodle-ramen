@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+
+    <!-- Header with Logo and Icons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- EventLottery Logo -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏰"
+                android:textSize="32sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EventLottery"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <!-- Notification and Profile -->
+        <ImageView
+            android:id="@+id/notificationIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_popup_reminder"
+            android:contentDescription="Notifications" />
+
+        <!-- Divider -->
+        <ImageView
+            android:id="@+id/profileIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_myplaces"
+            android:contentDescription="Profile" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+
+    <!-- Content Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- "Find Events" Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Find Events"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Search Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="325dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/search_background"
+                android:drawableStart="@android:drawable/ic_menu_search"
+                android:drawablePadding="8dp"
+                android:hint="Search for an Event"
+                android:padding="12dp" />
+
+            <!-- Filter -->
+            <ImageView
+                android:id="@+id/filterIcon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:src="@android:drawable/ic_menu_sort_by_size"
+                android:background="@drawable/search_background"
+                android:contentDescription="Filter" />
+        </LinearLayout>
+
+        <!-- Filter Bubbles (Right now its at ALL EVENTS to show that we are showing all events for now -->
+        <Button
+            android:id="@+id/allEventsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="All Events"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#CE93D8"
+            android:textAllCaps="false"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- All Events Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Events"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="8dp" />
+
+        <!-- RecyclerView for Events -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/eventsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
+
+</LinearLayout>
