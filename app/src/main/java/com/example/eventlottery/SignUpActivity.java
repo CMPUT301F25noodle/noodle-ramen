@@ -4,7 +4,7 @@ import androidx.core.app.ComponentActivity;
 
 import android.os.Bundle;
 import com.example.eventlottery.fragments.SignUpFragment;
-public class SignUpActivity extends ComponentActivity {
+public class SignUpActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
