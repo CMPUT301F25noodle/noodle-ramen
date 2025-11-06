@@ -20,28 +20,52 @@
     <string name="what_is_your_role">What is your role?</string>
     <string name="creating_account">creating_account</string>
 
-    <!-- QR Code strings -->
+    <!-- QR Code and Event Strings -->
     <string name="generate_qr">Generate QR</string>
     <string name="event_title">Event title</string>
-    <string name="todo">TODO</string>
+    <string name="pre_created_event">Pre Created Event</string>
+    <string name="waitlist_2">Waitlist: 2</string>
+    <string name="_2_days_left">2 days left</string>
+    <string name="go_to_event_page"><![CDATA[Go to Event Page >]]></string>
+    <string name="go_to_event_pagess"><![CDATA[Go to Event Page >]]></string>
+    <string name="manage">Manage</string>
+    <string name="edit">Edit</string>
     <string name="eventlottery">EventLottery</string>
-    <string name="_1">1</string>
-    <string name="scan">Scan</string>
+    <string name="todo">TODO</string>
+    <string name="todo1">TODO</string>
+    <string name="todo2">TODO</string>
+    <string name="todo4">TODO</string>
+    <string name="todo6">TODO</string>
+    <string name="todo7">TODO</string>
+    <string name="todo8">TODO</string>
+    <string name="todo09">TODO</string>
+
+    <!-- Event Dashboard / Organizer -->
+    <string name="leave_waitlist">Leave Waitlist</string>
+    <string name="waitlisted">Waitlisted</string>
+    <string name="won">Won</string>
+    <string name="registered">Registered</string>
+    <string name="create_event">Create Event</string>
+    <string name="pluss">+</string>
+    <string name="pending">Pending</string>
+    <string name="lost">Lost</string>
     <string name="my_events">My Events</string>
+    <string name="event_history">Event History</string>
+    <string name="event_1">Event 1</string>
+    <string name="_1">1</string>
+    <string name="southgate_mall">📍 Southgate Mall</string>
+
+    <!-- Create Event Form specific -->
+    <string name="scan">Scan</string>
+    <string name="image_1">Image 1</string>
+    <string name="image_2">Image 2</string>
     <string name="image_3">Image 3</string>
     <string name="add_image">Add Image</string>
-    <string name="geolocation_requirement">Geolocation Requirement</string>
     <string name="upload_images">Upload Images</string>
-    <string name="image_1">Image 1</string>
+    <string name="geolocation_requirement">Geolocation Requirement</string>
     <string name="waitlist_limit_optional">Waitlist Limit (optional)</string>
     <string name="pool_size">Pool Size</string>
-    <string name="todo1">TODO</string>
     <string name="event_information">Event Information</string>
-    <string name="todo2">TODO</string>
-    <string name="pre_created_event">Pre Created Event</string>
-    <string name="location">Location</string>
-    <string name="no1">No</string>
-    <string name="todo4">TODO</string>
     <string name="registration_period">Registration Period</string>
     <string name="end_date">End Date</string>
     <string name="browse">Browse</string>
@@ -55,12 +79,9 @@
     <string name="price_optional">Price (Optional)</string>
     <string name="yess">Yes</string>
     <string name="moneysign">$</string>
-    <string name="todo6">TODO</string>
-    <string name="image_2">Image 2</string>
-    <string name="todo7">TODO</string>
+    <string name="location">Location</string>
+    <string name="no1">No</string>
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
-    <string name="todo8">TODO</string>
-    <string name="todo09">TODO</string>
 
 </resources>
