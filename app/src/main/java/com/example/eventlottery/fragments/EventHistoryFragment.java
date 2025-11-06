@@ -55,18 +55,17 @@ public class EventHistoryFragment extends Fragment implements EventAdapter.OnEve
         registeredButton.setOnClickListener(v -> {
             // Handle registered button click
         });
-
+    } // The closing brace for setupClickListeners() was missing here.
 
     @Override
-    public void onJoinWaitlistClick(EventViewModel onJoinWaitlistClick) {
+    public void onJoinWaitlistClick(EventViewModel event) { // Added 'event' as the variable name
         // Handle join waitlist click
-        // TODO: Implement join waitlist logic
+        // TODO: Implement join waitlist logic using the 'event' object
     }
 
     @Override
-    public void onEventPageClick(EventViewModel onEventPageClick) {
+    public void onEventPageClick(EventViewModel event) { // Added 'event' as the variable name
         // Handle event page click
-        // TODO: Navigate to event detail page
+        // TODO: Navigate to event detail page using the 'event' object
     }
-    // Other methods and click listeners as needed
 }
