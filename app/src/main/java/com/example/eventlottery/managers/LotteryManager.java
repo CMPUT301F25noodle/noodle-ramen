@@ -1,9 +1,7 @@
 package com.example.eventlottery.managers;
-import android.app.NotificationManager;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
