@@ -55,7 +55,7 @@ public class NotificationActivity extends AppCompatActivity{
 
         db = FirebaseFirestore.getInstance();
 
-        userId = getUserId();
+        userId = getUserIdAndLoadNotifications();
 
         if (userId == null || userId.isEmpty()) {
             Toast.makeText(this, "Error: User not logged in", Toast.LENGTH_SHORT).show();
