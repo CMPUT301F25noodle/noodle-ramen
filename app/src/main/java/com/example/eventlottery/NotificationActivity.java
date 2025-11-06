@@ -1,5 +1,4 @@
 package com.example.eventlottery;
-import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -55,7 +54,7 @@ public class NotificationActivity extends AppCompatActivity{
 
         db = FirebaseFirestore.getInstance();
 
-        userId = getUserIdAndLoadNotifications();
+        getUserIdAndLoadNotifications();
 
         if (userId == null || userId.isEmpty()) {
             Toast.makeText(this, "Error: User not logged in", Toast.LENGTH_SHORT).show();
@@ -248,7 +247,7 @@ public class NotificationActivity extends AppCompatActivity{
                         progressBar.setVisibility(View.GONE);
 
 
-                        Toast.makeText(NotificationsActivity.this,
+                        Toast.makeText(NotificationActivity.this,
                                 "Invitation accepted! You're signed up for " + notification.getEventName(),
                                 Toast.LENGTH_LONG).show();
 
@@ -259,7 +258,7 @@ public class NotificationActivity extends AppCompatActivity{
                     public void onError(String error) {
                         Log.e(TAG, "Error accepting invitation: " + error);
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(NotificationsActivity.this,
+                        Toast.makeText(NotificationActivity.this,
                                 "Error: " + error,
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -314,7 +313,7 @@ public class NotificationActivity extends AppCompatActivity{
                         progressBar.setVisibility(View.GONE);
 
                         // Show success message
-                        Toast.makeText(NotificationsActivity.this,
+                        Toast.makeText(NotificationActivity.this,
                                 "Invitation declined. Your spot has been given to another person.",
                                 Toast.LENGTH_LONG).show();
 
@@ -325,7 +324,7 @@ public class NotificationActivity extends AppCompatActivity{
                     public void onError(String error) {
                         Log.e(TAG, "Error declining invitation: " + error);
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(NotificationsActivity.this,
+                        Toast.makeText(NotificationActivity.this,
                                 "Error: " + error,
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -358,7 +357,7 @@ public class NotificationActivity extends AppCompatActivity{
     private void getUserIdAndLoadNotifications() {
         SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
-        // Check if userId is cached
+        //check to see if the usre id has been cached
         String cachedUserId = prefs.getString("userId", null);
 
         if (cachedUserId != null && !cachedUserId.isEmpty()) {

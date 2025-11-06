@@ -4,7 +4,7 @@ package com.example.eventlottery.event_classes;
  * Represents an event location.
  * Immutable value object for type-safe location handling.
  */
-public class Location {
+public class  Location {
     private final String address;
 
     /**
