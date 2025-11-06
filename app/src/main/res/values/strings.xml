@@ -23,5 +23,44 @@
     <!-- QR Code strings -->
     <string name="generate_qr">Generate QR</string>
     <string name="event_title">Event title</string>
+    <string name="todo">TODO</string>
+    <string name="eventlottery">EventLottery</string>
+    <string name="_1">1</string>
+    <string name="scan">Scan</string>
+    <string name="my_events">My Events</string>
+    <string name="image_3">Image 3</string>
+    <string name="add_image">Add Image</string>
+    <string name="geolocation_requirement">Geolocation Requirement</string>
+    <string name="upload_images">Upload Images</string>
+    <string name="image_1">Image 1</string>
+    <string name="waitlist_limit_optional">Waitlist Limit (optional)</string>
+    <string name="pool_size">Pool Size</string>
+    <string name="todo1">TODO</string>
+    <string name="event_information">Event Information</string>
+    <string name="todo2">TODO</string>
+    <string name="pre_created_event">Pre Created Event</string>
+    <string name="location">Location</string>
+    <string name="no1">No</string>
+    <string name="todo4">TODO</string>
+    <string name="registration_period">Registration Period</string>
+    <string name="end_date">End Date</string>
+    <string name="browse">Browse</string>
+    <string name="event_description_criteria">Event Description Criteria</string>
+    <string name="start_date">Start Date</string>
+    <string name="_2025_12_20">2025-12-20</string>
+    <string name="date">2025-12-20</string>
+    <string name="additional_information">Additional Information</string>
+    <string name="eligibility_criteria">Eligibility Criteria</string>
+    <string name="organizer_name">Organizer Name</string>
+    <string name="price_optional">Price (Optional)</string>
+    <string name="yess">Yes</string>
+    <string name="moneysign">$</string>
+    <string name="todo6">TODO</string>
+    <string name="image_2">Image 2</string>
+    <string name="todo7">TODO</string>
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
+    <string name="todo8">TODO</string>
+    <string name="todo09">TODO</string>
 
 </resources>
