@@ -274,8 +274,8 @@ public class LotteryManager {
                 return;
             }
 
-            // Step 1: Update status to "accepted"
-            // Step 2: Add to accepted array
+            // changes the status to accepted for a user
+            // adds them into an array of the accepeted people
             Map<String, Object> updates = new HashMap<>();
             userStatus.put("status", "accepted");
             userStatus.put("acceptedTimestamp", String.valueOf(System.currentTimeMillis()));
@@ -299,9 +299,9 @@ public class LotteryManager {
     }
 
     /**
-     * Task 3: Handle entrant declining invitation
+     * Handle entrant declining invitation
      *
-     * Marks user as "declined" and automatically draws a replacement
+     * sets the user as delcined and initites the redraw process
      *
      * @param eventId The event ID
      * @param userId The user declining
@@ -338,7 +338,7 @@ public class LotteryManager {
                 return;
             }
 
-            // Step 1: Update status to "declined"
+            // updates the status to decliend
             userStatus.put("status", "declined");
             userStatus.put("declinedTimestamp", String.valueOf(System.currentTimeMillis()));
 
@@ -346,7 +346,7 @@ public class LotteryManager {
                     .addOnSuccessListener(aVoid -> {
                         Log.d(TAG, "User declined successfully, drawing replacement");
 
-                        // Step 2: Automatically draw replacement
+                        // draw their replacement
                         drawReplacement(eventId, new ReplacementCallback() {
                             @Override
                             public void onSuccess(String replacementUserId) {
@@ -378,7 +378,7 @@ public class LotteryManager {
         });
     }
 
-    // ========== Callback Interfaces ==========
+    //call backs
 
     /**
      * Callback for lottery initialization
@@ -400,7 +400,7 @@ public class LotteryManager {
     /**
      * Callback for status changes (accept/decline)
      */
-    public interface StatusCallback {
+        public interface StatusCallback {
         void onSuccess(String message);
         void onError(String error);
     }
