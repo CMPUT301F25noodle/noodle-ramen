@@ -17,53 +17,33 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Header with icon, title and timestamp -->
+        <!-- Header with title and timestamp -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:orientation="vertical"
             android:layout_marginBottom="4dp">
 
-            <!-- Notification icon -->
-            <ImageView
-                android:id="@+id/notification_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="12dp"
-                android:src="@drawable/ic_celebration"
-                android:tint="#ED90F6"
-                android:contentDescription="Notification icon" />
-
-            <!-- Title container -->
-            <LinearLayout
-                android:layout_width="0dp"
+            <!-- Notification title -->
+            <TextView
+                android:id="@+id/notification_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:text="You Won!"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"
+                android:letterSpacing="0.01" />
 
-                <!-- Notification title -->
-                <TextView
-                    android:id="@+id/notification_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="You Won!"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#1A1A1A"
-                    android:letterSpacing="0.01" />
-
-                <!-- Timestamp -->
-                <TextView
-                    android:id="@+id/notification_timestamp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="2 hours ago"
-                    android:textSize="12sp"
-                    android:textColor="#999999"
-                    android:layout_marginTop="2dp" />
-            </LinearLayout>
-
+            <!-- Timestamp -->
+            <TextView
+                android:id="@+id/notification_timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2 hours ago"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <!-- Divider line -->
@@ -100,33 +80,18 @@
                 android:padding="16dp">
 
                 <!-- Responded indicator (shown when already responded) -->
-                <LinearLayout
-                    android:id="@+id/responded_container"
+                <TextView
+                    android:id="@+id/responded_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:text="Responded"
+                    android:textSize="15sp"
+                    android:textColor="#6CD088"
+                    android:textStyle="bold"
                     android:gravity="center"
                     android:visibility="gone"
                     android:paddingTop="8dp"
-                    android:paddingBottom="8dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_check_circle"
-                        android:tint="#6CD088"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="Check icon" />
-
-                    <TextView
-                        android:id="@+id/responded_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Responded"
-                        android:textSize="14sp"
-                        android:textColor="#6CD088"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                    android:paddingBottom="8dp" />
 
                 <!-- Action Buttons Container -->
                 <LinearLayout
@@ -136,7 +101,7 @@
                     android:orientation="horizontal"
                     android:gravity="center">
 
-                    <!-- Decline button with rounded corners and icon -->
+                    <!-- Decline button with rounded corners -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/decline_button"
                         android:layout_width="0dp"
@@ -150,14 +115,10 @@
                         app:backgroundTint="#ED90F6"
                         app:cornerRadius="12dp"
                         app:elevation="2dp"
-                        app:icon="@drawable/ic_close"
-                        app:iconTint="@android:color/white"
-                        app:iconGravity="textStart"
-                        app:iconPadding="8dp"
                         android:textAllCaps="false"
                         style="@style/Widget.MaterialComponents.Button" />
 
-                    <!-- Accept button with rounded corners and icon -->
+                    <!-- Accept button with rounded corners -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/accept_button"
                         android:layout_width="0dp"
@@ -171,10 +132,6 @@
                         app:backgroundTint="#6CD088"
                         app:cornerRadius="12dp"
                         app:elevation="2dp"
-                        app:icon="@drawable/ic_check"
-                        app:iconTint="@android:color/white"
-                        app:iconGravity="textStart"
-                        app:iconPadding="8dp"
                         android:textAllCaps="false"
                         style="@style/Widget.MaterialComponents.Button" />
                 </LinearLayout>
