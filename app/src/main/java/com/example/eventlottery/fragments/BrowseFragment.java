@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.eventlottery.NotificationActivity;
 import com.example.eventlottery.event_classes.Event;
 import com.example.eventlottery.event_classes.EventAdapter;
 import com.example.eventlottery.event_classes.EventViewModel;
@@ -162,8 +164,11 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
         // Notification icon
         notificationIcon.setOnClickListener(v -> {
-            // TODO: Go to notifications
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
+            startActivity(intent);
+
         });
+
 
         // Profile icon
         profileIcon.setOnClickListener(v -> {
