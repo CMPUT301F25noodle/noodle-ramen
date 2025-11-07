@@ -104,11 +104,11 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/won_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Won"
                     android:textColor="@color/button_selected_colour"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     app:iconTint="@color/button_selected_colour" />
 
                 <com.google.android.material.button.MaterialButton

@@ -18,7 +18,7 @@ import com.example.eventlottery.event_classes.EventViewModel;
  * Created by: Jana
  *Handles the tabs that show events that the user registered, won, lost, and is pending in.
  */
-public class EventHistoryFragment extends Fragment implements EventAdapter.OnEventClickListener {
+public abstract class EventHistoryFragment extends Fragment implements EventAdapter.OnEventClickListener {
     private Button pendingButton;
     private Button wonButton;
     private Button lostButton;
@@ -55,8 +55,9 @@ public class EventHistoryFragment extends Fragment implements EventAdapter.OnEve
         registeredButton.setOnClickListener(v -> {
             // Handle registered button click
         });
+    }
 
-
+/*
     @Override
     public void onJoinWaitlistClick(EventViewModel onJoinWaitlistClick) {
         // Handle join waitlist click
@@ -69,4 +70,5 @@ public class EventHistoryFragment extends Fragment implements EventAdapter.OnEve
         // TODO: Navigate to event detail page
     }
     // Other methods and click listeners as needed
-}
+    */
+    }

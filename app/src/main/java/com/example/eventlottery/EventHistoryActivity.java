@@ -16,7 +16,6 @@ public class EventHistoryActivity extends AppCompatActivity {
     */
     private Button myEventsButton, browseButton, scanButton, toggleButtons;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState, Object findviewbyID) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_history_page);
