@@ -1,5 +1,6 @@
 package com.example.eventlottery.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.eventlottery.NotificationActivity;
 import com.example.eventlottery.event_classes.Event;
 import com.example.eventlottery.event_classes.EventAdapter;
 import com.example.eventlottery.event_classes.EventViewModel;
@@ -27,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.example.eventlottery.managers.WaitlistManager;
+import com.example.eventlottery.ProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -197,13 +201,20 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
         // Notification icon
         notificationIcon.setOnClickListener(v -> {
-            // TODO: Go to notifications
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
+            startActivity(intent);
+
         });
+
 
         // Profile icon
         profileIcon.setOnClickListener(v -> {
-            // TODO: Go to profile
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new ProfileFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
+
     }
 
     private void performSearch(String query) {
@@ -312,4 +323,8 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         currentEventViewModels = updatedList;
         eventAdapter.updateEvents(updatedList);
     }
+
+
+
+
 }
