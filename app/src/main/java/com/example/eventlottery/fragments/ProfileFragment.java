@@ -27,7 +27,15 @@ import java.util.Map;
 
 /**
  * ProfileFragment
- * Displays user's profile info and allows editing or deletion
+ *
+ * Displays the logged-in user's profile inside a Fragment-based UI.
+ * Allows navigation to EditProfileActivity for profile updates and
+ * deletion of the user's account.
+ *
+ * Automatically reloads updated user information when the fragment resumes.
+ *
+ * @author Junseok Song
+ * @since 2025-11-06
  */
 public class ProfileFragment extends Fragment {
 
@@ -75,7 +83,10 @@ public class ProfileFragment extends Fragment {
 
         return view;
     }
-
+    /**
+     * Called when the fragment becomes visible again.
+     * Reloads the latest profile data from Firestore.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -114,32 +125,12 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Enable editing and save updates to Firestore
-     */
-    private void editAccount() {
-        // Enable fields
-        emailEditText.setEnabled(true);
-        phoneEditText.setEnabled(true);
-
-        String newEmail = emailEditText.getText().toString().trim();
-        String newPhone = phoneEditText.getText().toString().trim();
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("email", newEmail);
-        updates.put("phone", newPhone);
-
-        db.collection("users").document(userId)
-                .update(updates)
-                .addOnSuccessListener(v -> {
-                    Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_SHORT).show();
-                    loadProfileData();
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
-
-    /**
-     * Delete Firebase user account
+     * Confirms and deletes the user's account from both Firebase Authentication
+     * and Firestore. After deletion, the user is signed out and redirected to
+     * the login screen.
+     *
+     * @see FirebaseAuth
+     * @see FirebaseFirestore
      */
     private void deleteAccount() {
         if (auth.getCurrentUser() == null || userId == null) return;
