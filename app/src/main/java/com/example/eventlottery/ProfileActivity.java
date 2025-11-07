@@ -1,5 +1,6 @@
 package com.example.eventlottery;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,7 +76,9 @@ public class ProfileActivity extends AppCompatActivity {
         );
 
         // Edit / Save
-        editAccountButton.setOnClickListener(v -> onEditOrSave());
+        editAccountButton.setOnClickListener(v -> {
+            startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
+        });
 
         // Delete
         deleteAccountButton.setOnClickListener(v -> deleteAccount());
@@ -177,4 +180,6 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
     }
+
+
 }
