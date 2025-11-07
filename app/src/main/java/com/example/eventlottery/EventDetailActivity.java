@@ -3,6 +3,7 @@ package com.example.eventlottery;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,21 +26,37 @@ import java.util.Map;
  */
 public class EventDetailActivity extends AppCompatActivity {
 
-    private TextView eventTitle, eventDescription;
-    private ImageView eventQrImage;
+    private TextView eventTitle, eventDescription, eventCriteria;
+    private TextView statusBadge, priceText, locationText, dateText;
+    private TextView waitlistInfo, spotsText;
+    private ImageView qrCodeImage, backButton;
+    private Button joinWaitlistButton, shareButton;
 
     private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_event_detail);
+        setContentView(R.layout.fragment_event_detail);
 
         eventTitle = findViewById(R.id.eventTitle);
         eventDescription = findViewById(R.id.eventDescription);
-        eventQrImage = findViewById(R.id.eventQrImage);
+        eventCriteria = findViewById(R.id.eventCriteria);
+        statusBadge = findViewById(R.id.statusBadge);
+        priceText = findViewById(R.id.priceText);
+        locationText = findViewById(R.id.locationText);
+        dateText = findViewById(R.id.dateText);
+        waitlistInfo = findViewById(R.id.waitlistInfo);
+        spotsText = findViewById(R.id.spotsText);
+        qrCodeImage = findViewById(R.id.qrCodeImage);
+        joinWaitlistButton = findViewById(R.id.joinWaitlistButton);
+        shareButton = findViewById(R.id.shareButton);
+        backButton = findViewById(R.id.backButton);
 
         db = FirebaseFirestore.getInstance();
+
+        // Setup back button
+        backButton.setOnClickListener(v -> finish());
 
         String eventId = getIntent().getStringExtra("eventId");
         if (eventId == null) {
@@ -56,15 +73,69 @@ public class EventDetailActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
-                        String title = doc.getString("title");
-                        String desc = doc.getString("description");
-                        String qrPayload = doc.getString("qrPayload");
+                        // Read all fields from Firestore
+                        String eventName = doc.getString("eventName");
+                        String description = doc.getString("description");
+                        String eligibility = doc.getString("eligibility");
+                        String location = doc.getString("location");
+                        String startDate = doc.getString("startDate");
+                        String endDate = doc.getString("endDate");
+                        String priceStr = doc.getString("price");
+                        String waitlistLimitStr = doc.getString("waitlistLimit");
+                        String entrantMaxStr = doc.getString("entrantMaxCapacity");
 
-                        eventTitle.setText(title);
-                        eventDescription.setText(desc);
+                        // Set event title
+                        eventTitle.setText(eventName != null ? eventName : "Untitled Event");
 
+                        // Set event description
+                        eventDescription.setText(description != null ? description : "No description available");
+
+                        // Set event criteria (eligibility)
+                        eventCriteria.setText(eligibility != null ? eligibility : "No specific criteria");
+
+                        // Set location
+                        locationText.setText(location != null ? location : "TBD");
+
+                        // Set date range
+                        if (startDate != null && endDate != null) {
+                            dateText.setText(startDate + " - " + endDate);
+                        } else {
+                            dateText.setText("Date TBD");
+                        }
+
+                        // Set price
+                        if (priceStr != null && !priceStr.isEmpty()) {
+                            priceText.setText("$" + priceStr);
+                        } else {
+                            priceText.setText("Free");
+                        }
+
+                        // Set status badge (simple for now)
+                        statusBadge.setText("Open");
+
+                        // Set waitlist info
+                        int waitlistLimit = waitlistLimitStr != null ? Integer.parseInt(waitlistLimitStr) : 0;
+                        waitlistInfo.setText("Waitlist limit: " + waitlistLimit);
+
+                        // Set spots available
+                        int entrantMax = entrantMaxStr != null ? Integer.parseInt(entrantMaxStr) : 0;
+                        spotsText.setText(entrantMax + " spots");
+
+                        // Join waitlist button (simple toast for MVP)
+                        joinWaitlistButton.setOnClickListener(v -> {
+                            Toast.makeText(this, "Join waitlist functionality coming soon", Toast.LENGTH_SHORT).show();
+                        });
+
+                        // Generate and display QR code
+                        String qrPayload = "eventlottery://event/" + eventId;
                         Bitmap qr = createQrBitmap(qrPayload, 400);
-                        eventQrImage.setImageBitmap(qr);
+                        qrCodeImage.setImageBitmap(qr);
+
+                        // Share button (simple toast for MVP)
+                        shareButton.setOnClickListener(v -> {
+                            Toast.makeText(this, "Share functionality coming soon", Toast.LENGTH_SHORT).show();
+                        });
+
                     } else {
                         Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
                     }

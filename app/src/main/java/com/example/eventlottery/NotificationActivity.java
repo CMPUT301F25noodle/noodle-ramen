@@ -54,6 +54,10 @@ public class NotificationActivity extends AppCompatActivity{
 
         db = FirebaseFirestore.getInstance();
 
+        // Initialize views FIRST before trying to use them
+        initializeViews();
+        setupRecyclerView();
+
         getUserIdAndLoadNotifications();
 
         if (userId == null || userId.isEmpty()) {
@@ -64,9 +68,6 @@ public class NotificationActivity extends AppCompatActivity{
 
         lotteryManager = new LotteryManager();
         notificationManager = new NotificationManager();
-
-        initializeViews();
-        setupRecyclerView();
 
         loadNotifications();
 
