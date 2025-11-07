@@ -32,6 +32,10 @@ import com.example.eventlottery.managers.WaitlistManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Fragment for browse functionaltiy, shows on main page
+ * ALlows user to scroll through event cards and select the event they want to join
+ */
 
 
 public class BrowseFragment extends Fragment implements EventAdapter.OnEventClickListener {
@@ -47,6 +51,18 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private String currentUserId;
     private List<EventViewModel> currentEventViewModels = new ArrayList<>();
 
+    /**
+     * fragment instantiates the interface
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -73,6 +89,11 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
         return view;
     }
+
+    /**
+     * intilazes the UI componenets
+     * @param view
+     */
 
     private void initViews(View view) {
         recyclerView = view.findViewById(R.id.events_recycler_view);
@@ -176,6 +197,9 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                 });
     }
 
+    /**
+     * sets up cluck listeners for the search bar and filter buttons
+     */
     private void setupClickListeners() {
         // Search functionality
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
@@ -202,6 +226,11 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     // EventAdapter.OnEventClickListener implementation
+
+    /**
+     * handles the click on joinwaitlist and leave waitlist functionaltiy
+     * @param eventViewModel the event that was clicked
+     */
     @Override
     public void onJoinWaitlistClick(EventViewModel eventViewModel) {
         if (currentUserId == null) {
@@ -220,6 +249,10 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         }
     }
 
+    /**
+     * hanldes the clicking on the main part of the event card body
+     * @param eventViewModel the event that was clicked
+     */
     @Override
     public void onEventPageClick(EventViewModel eventViewModel) {
         Intent intent = new Intent(getActivity(), EventDetailActivity.class);
@@ -228,7 +261,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     /**
-     * join event wailist
+     * join event wailist for specified event
      *
      * @param eventViewModel
      */
