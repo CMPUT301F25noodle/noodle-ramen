@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.R;
@@ -29,7 +30,6 @@ public class OrganizerDashboardFragment extends Fragment {
 
     // ui elements
     private LinearLayout btnCreateEvent;
-    private ImageView ivNotifications, ivProfile;
     private Button tabRegistered, tabWon, tabLost, tabPending;
     private LinearLayout myEventsContainer, eventHistoryContainer;
 
@@ -53,7 +53,6 @@ public class OrganizerDashboardFragment extends Fragment {
 
         initializeViews(view);
         setupListeners();
-        setupBottomNavigation();
         loadMyEvents();
         loadEventHistory("pending");
 
@@ -65,8 +64,6 @@ public class OrganizerDashboardFragment extends Fragment {
      */
     private void initializeViews(View view) {
         btnCreateEvent = view.findViewById(R.id.btn_create_event);
-        ivNotifications = view.findViewById(R.id.iv_notifications);
-        ivProfile = view.findViewById(R.id.iv_profile);
 
         tabRegistered = view.findViewById(R.id.tab_registered);
         tabWon = view.findViewById(R.id.tab_won);
@@ -85,14 +82,6 @@ public class OrganizerDashboardFragment extends Fragment {
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, new CreateEventFragment())
                     .commit();
-        });
-
-        ivNotifications.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "notifications page not linked yet", Toast.LENGTH_SHORT).show();
-        });
-
-        ivProfile.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "profile page not linked yet", Toast.LENGTH_SHORT).show();
         });
 
         tabRegistered.setOnClickListener(v -> {
@@ -117,56 +106,23 @@ public class OrganizerDashboardFragment extends Fragment {
     }
 
     /**
-     * sets up bottom navigation from mainactivity
-     */
-    private void setupBottomNavigation() {
-        if (getActivity() != null) {
-            View rootView = getActivity().findViewById(android.R.id.content);
-            LinearLayout mainLayout = (LinearLayout) rootView.getRootView().findViewById(R.id.fragmentContainer).getParent();
-
-            if (mainLayout != null && mainLayout.getChildCount() > 1) {
-                LinearLayout navBar = (LinearLayout) mainLayout.getChildAt(1);
-
-                View navBrowse = navBar.getChildAt(0);
-                View navMyEvents = navBar.getChildAt(1);
-                View navScan = navBar.getChildAt(2);
-
-                navBrowse.setOnClickListener(v -> {
-                    getParentFragmentManager().beginTransaction()
-                            .replace(R.id.fragmentContainer, new BrowseFragment())
-                            .commit();
-                });
-
-                navMyEvents.setOnClickListener(v -> {
-                    Toast.makeText(getContext(), "already on my events page", Toast.LENGTH_SHORT).show();
-                });
-
-                navScan.setOnClickListener(v -> {
-                    Intent intent = new Intent(getActivity(), QrGenerator.class);
-                    startActivity(intent);
-                });
-            }
-        }
-    }
-
-    /**
      * updates tab button styles
      */
     private void updateTabSelection(Button selectedTab) {
-        tabRegistered.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
-        tabRegistered.setTextColor(getResources().getColor(android.R.color.white));
+        tabRegistered.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
+        tabRegistered.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
-        tabWon.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
-        tabWon.setTextColor(getResources().getColor(android.R.color.white));
+        tabWon.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
+        tabWon.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
-        tabLost.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
-        tabLost.setTextColor(getResources().getColor(android.R.color.white));
+        tabLost.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
+        tabLost.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
-        tabPending.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
-        tabPending.setTextColor(getResources().getColor(android.R.color.white));
+        tabPending.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
+        tabPending.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
-        selectedTab.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
-        selectedTab.setTextColor(getResources().getColor(android.R.color.white));
+        selectedTab.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+        selectedTab.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
     }
 
     /**

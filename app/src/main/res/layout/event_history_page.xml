@@ -6,70 +6,12 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <!-- EventLottery Logo -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="⏰"
-                android:textSize="32sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="EventLottery"
-                android:textColor="@android:color/black"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Notification and Profile -->
-        <ImageView
-            android:id="@+id/notificationIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:background="#DE638D"
-            android:contentDescription="Notifications"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_popup_reminder" />
-
-        <!-- Divider -->
-        <ImageView
-            android:id="@+id/profileIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="#7DD180"
-            android:contentDescription="Profile"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_myplaces" />
-
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="383dp"
         android:layout_height="314dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="0.092">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/textView3"
@@ -96,118 +38,40 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/registered_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Registered"
-                    android:textColor="@color/button_selected_colour"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                    android:textColor="@color/button_selected_colour" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/won_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Won"
                     android:textColor="@color/button_selected_colour"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     app:iconTint="@color/button_selected_colour" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/lost_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="77dp"
                     android:layout_height="wrap_content"
                     android:text="Lost"
                     android:textColor="@color/button_selected_colour"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     app:iconTint="@color/button_selected_colour" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/pending_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Pending"
                     android:textColor="@color/button_selected_colour"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:iconTint="@color/button_selected_colour"/>
+                    app:iconTint="@color/button_selected_colour" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="402dp"
-        android:layout_height="61dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="0.998">
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/browse_bottom_nav_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#77CEC8C8"
-            android:text="Browse"
-            android:textColor="#0B0A0A"
-            android:textSize="10sp"
-            app:iconPadding="2dp"
-            app:iconSize="2dp" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/my_events_bottom_nav_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#77CEC8C8"
-            android:text="My Events"
-            android:textColor="#0B0A0A"
-            android:textSize="10sp"
-            app:iconPadding="2dp"
-            app:iconSize="2dp" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/scan_bottom_nav_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#77CEC8C8"
-            android:text="Scan"
-            android:textColor="#0B0A0A"
-            android:textSize="10sp"
-            app:iconPadding="2dp"
-            app:iconSize="2dp" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
 
     </LinearLayout>
 

@@ -2,6 +2,7 @@ package com.example.eventlottery;
 
 // Imports from both branches
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.eventlottery.fragments.CreateEventFragment;
 import com.example.eventlottery.fragments.BrowseFragment;
 import com.example.eventlottery.fragments.EventHistoryFragment;
+import com.example.eventlottery.fragments.OrganizerDashboardFragment;
 import com.example.eventlottery.fragments.ProfileFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,9 +77,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
         navMyEvents.setOnClickListener(v -> {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new EventHistoryFragment())
-                    .commit();
+            // Check user role from SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String userRole = prefs.getString("userRole", "entrant");
+
+            // Load appropriate fragment based on role
+            if ("organizer".equals(userRole)) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, new OrganizerDashboardFragment())
+                        .commit();
+            } else {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, new EventHistoryFragment())
+                        .commit();
+            }
         });
         navScan.setOnClickListener(v -> {
             // TODO: Implement camera/QR scanning functionality
