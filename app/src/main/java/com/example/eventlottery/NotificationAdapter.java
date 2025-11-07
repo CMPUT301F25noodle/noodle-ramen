@@ -143,11 +143,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         private String getTitleForType(String type) {
             switch (type) {
                 case NotificationManager.TYPE_WIN:
-                    return "🎉 You Won!";
+                    return " You Won!";
                 case NotificationManager.TYPE_REPLACEMENT:
-                    return "🎉 You Won!";
+                    return " You Won!";
                 case NotificationManager.TYPE_LOSS:
-                    return "📋 Lottery Results";
+                    return " Lottery Results";
                 default:
                     return "Notification";
             }

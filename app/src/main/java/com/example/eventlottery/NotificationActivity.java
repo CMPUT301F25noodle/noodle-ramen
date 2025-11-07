@@ -58,18 +58,18 @@ public class NotificationActivity extends AppCompatActivity{
         initializeViews();
         setupRecyclerView();
 
-        getUserIdAndLoadNotifications();
+     //   getUserIdAndLoadNotifications();
 
-        if (userId == null || userId.isEmpty()) {
-            Toast.makeText(this, "Error: User not logged in", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
+      //  if (userId == null || userId.isEmpty()) {
+      //      Toast.makeText(this, "Error: User not logged in", Toast.LENGTH_SHORT).show();
+      //      finish();
+      //      return;
+     //   }
 
         lotteryManager = new LotteryManager();
         notificationManager = new NotificationManager();
 
-        loadNotifications();
+        getUserIdAndLoadNotifications();
 
     }
 
@@ -388,7 +388,7 @@ public class NotificationActivity extends AppCompatActivity{
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (!querySnapshot.isEmpty()) {
-                        // Found user - get the document ID (which is the userId)
+
                         DocumentSnapshot userDoc = querySnapshot.getDocuments().get(0);
                         userId = userDoc.getId();
 
