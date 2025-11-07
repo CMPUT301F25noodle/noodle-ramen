@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">EventLottery</string>
+
+    <!-- Login/Signup strings -->
+    <string name="event">Event</string>
+    <string name="lottery">Lottery</string>
+    <string name="sign">Sign</string>
+    <string name="up">up</string>
+    <string name="organizer">Organizer</string>
+    <string name="entrant">Entrant</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="name">Name</string>
+    <string name="would_you_like_to_receive_notifications">Would You Like to Receive Notifications?</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="no">No</string>
+    <string name="sign_up">Sign up</string>
+    <string name="yes">Yes</string>
+    <string name="information">Information</string>
+    <string name="what_is_your_role">What is your role?</string>
+    <string name="creating_account">creating_account</string>
+
+    <!-- QR Code strings -->
+    <string name="generate_qr">Generate QR</string>
+    <string name="event_title">Event title</string>
+    <string name="Eventlogo">⏰</string>
+    <string name="eventlottery">EventLottery</string>
+    <string name="user_name">User name</string>
+    <string name="role">Role</string>
+    <string name="edit_account">Edit Account</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="info">Information</string>
+    <string name="phone_number1">Phone Number</string>
+    <string name="email1">Email</string>
+    <string name="change_password_from_security_screen">Change password from Security screen</string>
+
 </resources>

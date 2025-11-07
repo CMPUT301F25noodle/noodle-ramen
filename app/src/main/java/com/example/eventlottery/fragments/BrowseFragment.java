@@ -1,5 +1,6 @@
 package com.example.eventlottery.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,9 @@ import com.example.eventlottery.event_classes.Waitlist;
 import com.example.eventlottery.R;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.eventlottery.managers.WaitlistManager;
+import com.example.eventlottery.ProfileActivity;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class BrowseFragment extends Fragment implements EventAdapter.OnEventClickListener {
 
@@ -35,11 +39,24 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private ImageView notificationIcon;
     private ImageView profileIcon;
 
+    private WaitlistManager waitlistManager;
+    private FirebaseAuth auth;
+    private String currentUserId;
+    private List<EventViewModel> currentEventViewModels = new ArrayList<>();
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_browse, container, false);
+
+        auth = FirebaseAuth.getInstance();
+        waitlistManager = WaitlistManager.getInstance();
+
+
+        if (auth.getCurrentUser() != null) {
+            currentUserId = auth.getCurrentUser().getUid();
+        }
 
         // Initialize views and Setup Recycler View
         initViews(view);
@@ -119,6 +136,8 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         );
         sampleEventViewModels.add(new EventViewModel(event3, false));
 
+        currentEventViewModels = sampleEventViewModels;
+
         // Update adapter with sample data
         eventAdapter.updateEvents(sampleEventViewModels);
     }
@@ -148,8 +167,12 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
         // Profile icon
         profileIcon.setOnClickListener(v -> {
-            // TODO: Go to profile
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new ProfileFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
+
     }
 
     private void performSearch(String query) {
@@ -160,9 +183,20 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     // EventAdapter.OnEventClickListener implementation
     @Override
     public void onJoinWaitlistClick(EventViewModel eventViewModel) {
-        // TODO: Implement join waitlist logic here. When Joining
-        // Update event status
-        // Refresh RecyclerView
+        if (currentUserId == null) {
+            Toast.makeText(getContext(), "Please log in to join waitlist",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if user is already on waitlist
+        if (eventViewModel.isUserOnWaitlist()) {
+            // User wants to LEAVE waitlist
+            leaveWaitlist(eventViewModel);
+        } else {
+            // User wants to JOIN waitlist
+            joinWaitlist(eventViewModel);
+        }
     }
 
     @Override
@@ -170,4 +204,85 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         // TODO: Navigate to event detail page
         // Pass event ID to detail fragment/activity
     }
+
+    /**
+     * join event wailist
+     *
+     * @param eventViewModel
+     */
+
+    private void joinWaitlist(EventViewModel eventViewModel) {
+        String eventId = eventViewModel.getId();
+
+        waitlistManager.joinWaitlist(eventId, new WaitlistManager.WaitlistCallback() {
+            @Override
+            public void onSuccess() {
+                // Create new ViewModel with updated waitlist status
+                EventViewModel updatedViewModel = eventViewModel.withWaitlistStatus(true);
+
+                // Update the list
+                updateEventViewModel(eventId, updatedViewModel);
+
+                Toast.makeText(getContext(),
+                        "Successfully joined waitlist for " + eventViewModel.getTitle(),
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(getContext(),
+                        "Failed to join waitlist: " + error,
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /**
+     * leave event wait list
+     * @param eventViewModel
+     */
+    private void leaveWaitlist(EventViewModel eventViewModel) {
+        String eventId = eventViewModel.getId();
+
+        waitlistManager.leaveWaitlist(eventId, new WaitlistManager.WaitlistCallback() {
+            @Override
+            public void onSuccess() {
+                // Create new ViewModel with updated waitlist status
+                EventViewModel updatedViewModel = eventViewModel.withWaitlistStatus(false);
+
+                // Update the list
+                updateEventViewModel(eventId, updatedViewModel);
+
+                Toast.makeText(getContext(),
+                        "Successfully left waitlist for " + eventViewModel.getTitle(),
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(getContext(),
+                        "Failed to leave waitlist: " + error,
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void updateEventViewModel(String eventId, EventViewModel updatedViewModel) {
+        List<EventViewModel> updatedList = new ArrayList<>();
+
+        for (EventViewModel vm : currentEventViewModels) {
+            if (vm.getId().equals(eventId)) {
+                updatedList.add(updatedViewModel);
+            } else {
+                updatedList.add(vm);
+            }
+        }
+
+        currentEventViewModels = updatedList;
+        eventAdapter.updateEvents(updatedList);
+    }
+
+
+
+
 }
