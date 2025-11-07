@@ -37,8 +37,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
-
-
     implementation("androidx.fragment:fragment:1.8.9")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation(libs.appcompat)
@@ -46,7 +44,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation("com.google.zxing:core:3.5.3")
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0") // ready-to-use camera scanner
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

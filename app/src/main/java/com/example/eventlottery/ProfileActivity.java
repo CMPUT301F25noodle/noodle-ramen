@@ -17,11 +17,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ProfileActivity (Activity version)
- * - Loads user profile from Firestore
- * - Allows edit (toggle enable -> update -> lock)
- * - Allows delete account
- * NOTE: Password is never displayed; show a hint only.
+ * ProfileActivity
+ *
+ * Displays the user's profile information (name, role, email, phone, password hint).
+ * Provides buttons to edit the profile or delete the account.
+ * Automatically reloads the profile from Firestore when resumed.
+ *
+ * <p>Associated layout: activity_profile.xml</p>
+ *
+ * @see EditProfileActivity
+ * @see FirebaseAuth
+ * @see FirebaseFirestore
+ * @author Junseok Song
+ * @since 2025-11-05
  */
 public class ProfileActivity extends AppCompatActivity {
 
@@ -85,8 +93,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Reads the user document from Firestore and fills UI.
-     * Fields are locked initially.
+     * Retrieves the user's profile data from Firestore and updates the UI.
+     * Fields are locked in read-only mode after loading.
      */
     private void loadProfileData() {
         if (userId == null) return;
@@ -119,41 +127,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Toggles between Edit mode and Save action.
-     */
-    private void onEditOrSave() {
-        if (!isEditMode) {
-            // Enter edit mode
-            setEditable(true);
-            isEditMode = true;
-            editAccountButton.setText("Save");
-            Toast.makeText(this, "Edit mode enabled", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Save changes to Firestore
-        String newEmail = emailEditText.getText().toString().trim();
-        String newPhone = phoneEditText.getText().toString().trim();
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("email", newEmail);
-        updates.put("phone", newPhone);
-
-        db.collection("users").document(userId)
-                .update(updates)
-                .addOnSuccessListener(v -> {
-                    Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show();
-                    setEditable(false);
-                    isEditMode = false;
-                    editAccountButton.setText("Edit Account");
-                    loadProfileData(); // refresh UI
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
-    }
-
-    /**
      * Enable/disable input fields.
      */
     private void setEditable(boolean enabled) {
@@ -162,10 +135,13 @@ public class ProfileActivity extends AppCompatActivity {
         // password field stays disabled (hint only)
         passwordHintField.setEnabled(false);
     }
-
     /**
-     * Deletes the Firebase user account.
-     * (Consider adding a confirmation dialog in production.)
+     * Deletes the user's Firebase account and Firestore user document.
+     * Prompts for confirmation before deletion.
+     * After successful deletion, signs out and finishes the activity.
+     *
+     * @see FirebaseAuth
+     * @see FirebaseFirestore
      */
     private void deleteAccount() {
         if (auth.getCurrentUser() == null) return;
