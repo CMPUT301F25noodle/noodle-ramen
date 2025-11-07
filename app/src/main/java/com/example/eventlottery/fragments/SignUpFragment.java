@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ProgressBar;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.LoginActivity;
@@ -117,11 +118,11 @@ public class SignUpFragment extends Fragment {
 
         private void updateRoleButtonStyles () {
             if (selectedRole.equals("organizer")) {
-                organizerButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
-                entrantButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
+                organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+                entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
             } else {
-                entrantButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
-                organizerButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
+                entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+                organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
             }
         }
 

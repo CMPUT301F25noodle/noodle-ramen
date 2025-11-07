@@ -34,6 +34,8 @@ import com.example.eventlottery.ProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+
+
 public class BrowseFragment extends Fragment implements EventAdapter.OnEventClickListener {
 
     private RecyclerView recyclerView;
@@ -41,9 +43,6 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private EditText searchEditText;
     private Button allEventsButton;
     private ImageView filterIcon;
-    private ImageView notificationIcon;
-    private ImageView profileIcon;
-
     private WaitlistManager waitlistManager;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -82,8 +81,6 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         searchEditText = view.findViewById(R.id.searchEditText);
         allEventsButton = view.findViewById(R.id.allEventsButton);
         filterIcon = view.findViewById(R.id.filterIcon);
-        notificationIcon = view.findViewById(R.id.notificationIcon);
-        profileIcon = view.findViewById(R.id.profileIcon);
     }
 
     private void setupRecyclerView() {
@@ -197,22 +194,6 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         // Filter icon
         filterIcon.setOnClickListener(v -> {
             // TODO: Open filter dialog/bottom sheet
-        });
-
-        // Notification icon
-        notificationIcon.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), NotificationActivity.class);
-            startActivity(intent);
-
-        });
-
-
-        // Profile icon
-        profileIcon.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new ProfileFragment())
-                    .addToBackStack(null)
-                    .commit();
         });
 
     }

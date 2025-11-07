@@ -17,6 +17,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 import android.content.Intent;
 
 /**
@@ -32,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private CheckBox rememberMe;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.login_activity);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         initializeViews();
         setupListeners();
         checkRememberedUser();
@@ -93,12 +97,8 @@ public class LoginActivity extends AppCompatActivity {
                             if (rememberMe.isChecked()) {
                                 saveLogin(email, password);
                             }
-                            Toast.makeText(this, "login successful", Toast.LENGTH_SHORT).show();
-
-                            Intent intent  = new Intent (LoginActivity.this, MainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+                            // Fetch user role from Firestore
+                            fetchUserRole(user.getUid());
                         }
                     } else {
                         Exception e = task.getException();
@@ -160,5 +160,37 @@ public class LoginActivity extends AppCompatActivity {
             passwordField.setText(password);
             rememberMe.setChecked(true);
         }
+    }
+
+    /**
+     * fetches user role from Firestore and saves to SharedPreferences
+     */
+    private void fetchUserRole(String userId) {
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String role = documentSnapshot.getString("role");
+                        if (role != null) {
+                            // Save role to SharedPreferences
+                            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("userRole", role);
+                            editor.apply();
+                        }
+                        Toast.makeText(this, "login successful", Toast.LENGTH_SHORT).show();
+
+                        // Navigate to MainActivity
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "user data not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "failed to fetch user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 }
