@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Back Button Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,7 +20,7 @@
             android:background="@android:color/white">
 
             <ImageView
-                android:id="@+id/backButton"
+                android:id="@+id/back_button"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@android:drawable/ic_menu_revert"
@@ -40,14 +39,14 @@
                 android:layout_marginStart="16dp" />
         </LinearLayout>
 
-        <!-- Image Carousel Section -->
         <FrameLayout
+            android:id="@+id/image_container"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:layout_margin="16dp"
             android:background="#F0F0F0">
 
-            <!-- Main Image Display -->
+            <!-- Main Image Display (there should be 3 but we'll only display 1 in the MVP -->
             <ImageView
                 android:id="@+id/eventMainImage"
                 android:layout_width="match_parent"
@@ -55,7 +54,7 @@
                 android:scaleType="centerCrop"
                 android:visibility="gone" />
 
-            <!-- Placeholder Text -->
+            <!-- Placeholder Text (IMG) -->
             <TextView
                 android:id="@+id/imagePlaceholder"
                 android:layout_width="wrap_content"
@@ -65,17 +64,12 @@
                 android:textColor="#999999"
                 android:textSize="18sp" />
 
-            <!-- Left Arrow -->
-
-            <!-- Right Arrow -->
-
-            <!-- Thumbnail Strip (Right Side) -->
             <LinearLayout
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
-                android:orientation="vertical"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical" />
         </FrameLayout>
 
         <!-- Event Info Section -->
@@ -96,18 +90,18 @@
 
                 <!-- Event Title -->
                 <TextView
-                    android:id="@+id/eventTitle"
+                    android:id="@+id/event_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Event 4 @"
+                    android:text="Event 4"
+                    android:textColor="@android:color/black"
                     android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black" />
+                    android:textStyle="bold" />
 
                 <!-- Status Badge -->
                 <TextView
-                    android:id="@+id/statusBadge"
+                    android:id="@+id/status_badge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="2 days left"
@@ -121,7 +115,7 @@
 
                 <!-- Price -->
                 <TextView
-                    android:id="@+id/priceText"
+                    android:id="@+id/price_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="$15"
@@ -132,7 +126,7 @@
 
             <!-- Join Waitlist Button -->
             <Button
-                android:id="@+id/joinWaitlistButton"
+                android:id="@+id/join_waitlist_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Join Waitlist"
@@ -166,7 +160,7 @@
                         android:layout_marginEnd="4dp" />
 
                     <TextView
-                        android:id="@+id/waitlistInfo"
+                        android:id="@+id/waitlist_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="105 on the waitlist"
@@ -176,7 +170,7 @@
 
                 <!-- Spots Available -->
                 <TextView
-                    android:id="@+id/spotsText"
+                    android:id="@+id/spots_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="75 spots"
@@ -201,7 +195,7 @@
                     android:layout_marginEnd="8dp" />
 
                 <TextView
-                    android:id="@+id/locationText"
+                    android:id="@+id/location_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Lendrum Place"
@@ -225,7 +219,7 @@
                     android:layout_marginEnd="8dp" />
 
                 <TextView
-                    android:id="@+id/dateText"
+                    android:id="@+id/date_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="10/15/2025 - 10/21/2025"
@@ -264,7 +258,7 @@
                     android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/eventDescription"
+                    android:id="@+id/event_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Event description will appear here..."
@@ -305,7 +299,7 @@
                     android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/eventCriteria"
+                    android:id="@+id/event_criteria"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Event criteria will appear here..."
@@ -325,7 +319,7 @@
 
             <!-- QR Code Image -->
             <ImageView
-                android:id="@+id/qrCodeImage"
+                android:id="@+id/qr_code_image"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:src="@android:drawable/ic_menu_gallery"
@@ -334,9 +328,9 @@
                 android:layout_marginBottom="16dp"
                 android:contentDescription="Event QR Code" />
 
-            <!-- Share Button -->
+            <!-- Share Button (won't be added till Part 4 -->
             <Button
-                android:id="@+id/shareButton"
+                android:id="@+id/share_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Share"

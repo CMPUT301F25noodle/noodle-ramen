@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlottery.EventDetailActivity;
-import com.example.eventlottery.NotificationActivity;
 import com.example.eventlottery.event_classes.Event;
 import com.example.eventlottery.event_classes.EventAdapter;
 import com.example.eventlottery.event_classes.EventViewModel;
@@ -27,11 +26,9 @@ import com.example.eventlottery.event_classes.Money;
 import com.example.eventlottery.event_classes.Waitlist;
 import com.example.eventlottery.R;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import com.example.eventlottery.managers.WaitlistManager;
-import com.example.eventlottery.ProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -78,10 +75,10 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     private void initViews(View view) {
-        recyclerView = view.findViewById(R.id.eventsRecyclerView);
-        searchEditText = view.findViewById(R.id.searchEditText);
-        allEventsButton = view.findViewById(R.id.allEventsButton);
-        filterIcon = view.findViewById(R.id.filterIcon);
+        recyclerView = view.findViewById(R.id.events_recycler_view);
+        searchEditText = view.findViewById(R.id.search_edit_text);
+        allEventsButton = view.findViewById(R.id.filter_status_badge);
+        filterIcon = view.findViewById(R.id.fitler_button);
     }
 
     private void setupRecyclerView() {

@@ -39,7 +39,7 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/searchEditText"
+                android:id="@+id/search_edit_text"
                 android:layout_width="325dp"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="8dp"
@@ -52,7 +52,7 @@
 
             <!-- Filter -->
             <ImageView
-                android:id="@+id/filterIcon"
+                android:id="@+id/fitler_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/search_background"
@@ -63,7 +63,7 @@
 
         <!-- Filter Bubbles (Right now its at ALL EVENTS to show that we are showing all events for now -->
         <Button
-            android:id="@+id/allEventsButton"
+            android:id="@+id/filter_status_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -93,7 +93,7 @@
 
         <!-- RecyclerView for Events -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/eventsRecyclerView"
+            android:id="@+id/events_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"

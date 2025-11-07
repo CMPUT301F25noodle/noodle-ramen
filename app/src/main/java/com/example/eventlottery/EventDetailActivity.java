@@ -39,19 +39,19 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_event_detail);
 
-        eventTitle = findViewById(R.id.eventTitle);
-        eventDescription = findViewById(R.id.eventDescription);
-        eventCriteria = findViewById(R.id.eventCriteria);
-        statusBadge = findViewById(R.id.statusBadge);
-        priceText = findViewById(R.id.priceText);
-        locationText = findViewById(R.id.locationText);
-        dateText = findViewById(R.id.dateText);
-        waitlistInfo = findViewById(R.id.waitlistInfo);
-        spotsText = findViewById(R.id.spotsText);
-        qrCodeImage = findViewById(R.id.qrCodeImage);
-        joinWaitlistButton = findViewById(R.id.joinWaitlistButton);
-        shareButton = findViewById(R.id.shareButton);
-        backButton = findViewById(R.id.backButton);
+        eventTitle = findViewById(R.id.event_title);
+        eventDescription = findViewById(R.id.event_description);
+        eventCriteria = findViewById(R.id.event_criteria);
+        statusBadge = findViewById(R.id.status_badge);
+        priceText = findViewById(R.id.price_text);
+        locationText = findViewById(R.id.location_text);
+        dateText = findViewById(R.id.date_text);
+        waitlistInfo = findViewById(R.id.waitlist_info);
+        spotsText = findViewById(R.id.spots_text);
+        qrCodeImage = findViewById(R.id.qr_code_image);
+        joinWaitlistButton = findViewById(R.id.join_waitlist_button);
+        shareButton = findViewById(R.id.share_button);
+        backButton = findViewById(R.id.back_button);
 
         db = FirebaseFirestore.getInstance();
 
