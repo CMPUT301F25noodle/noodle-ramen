@@ -11,29 +11,41 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 
 public class EventHistoryActivity extends AppCompatActivity {
     /*
-    *put the browse, scan, and my events fragment here
-    *
-    */
-    private Button myEventsButton, browseButton, scanButton, toggleButtons;
+     *put the browse, scan, and my events fragment here
+     *
+     */
+    private Button myEventsButton, browseButton, scanButton;
 
-    protected void onCreate(Bundle savedInstanceState, Object findviewbyID) {
+    // This is the corrected onCreate method
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_history_page);
         myEventsButton = findViewById(R.id.my_events_bottom_nav_button);
         browseButton = findViewById(R.id.browse_bottom_nav_button);
-
         scanButton = findViewById(R.id.scan_bottom_nav_button);
-        //myEventsButton.setOnClickListener(v -> {//shows events registered by user}
+
+        // Load EventHistoryFragment by default when the activity starts
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new EventHistoryFragment())
+                    .commit();
+        }
 
         browseButton.setOnClickListener(v -> {
-            //shows events registered by user
+            // Switch to the BrowseFragment
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, new BrowseFragment())
                     .commit();
         });
-        //scanButton.setOnClickListener(v -> {}
 
+        myEventsButton.setOnClickListener(v -> {
+            // Switch back to the EventHistoryFragment
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new EventHistoryFragment())
+                    .commit();
+        });
 
+        // scanButton.setOnClickListener(v -> { /* TODO: Implement scan functionality */ });
     }
-
 }
