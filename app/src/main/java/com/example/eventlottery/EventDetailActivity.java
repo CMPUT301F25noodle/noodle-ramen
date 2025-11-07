@@ -23,6 +23,8 @@ import java.util.Map;
 
 /**
  * Shows event details and its QR code.
+ * fetches data from firebase
+ * retrieves the event details that were entered by the organizer
  */
 public class EventDetailActivity extends AppCompatActivity {
 
@@ -34,6 +36,14 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
 
+    /**
+     * called when activity is made, intializes the UI, firebase instance
+     * REtieves the event ID, and triggers loading of the event
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +78,10 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEvent(eventId);
     }
 
+    /**
+     * fetche event data from the events collection in firebase
+     * @param eventId
+     */
     private void loadEvent(String eventId) {
         db.collection("events").document(eventId)
                 .get()
@@ -144,6 +158,12 @@ public class EventDetailActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * generates a QR code uses the string content for it
+     * @param content the string data that is encoded in the QR code
+     * @param sizePx
+     * @return
+     */
     private Bitmap createQrBitmap(String content, int sizePx) {
         try {
             QRCodeWriter writer = new QRCodeWriter();
