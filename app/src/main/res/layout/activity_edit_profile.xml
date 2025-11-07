@@ -25,29 +25,26 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⏰"
-                    android:textSize="28sp"
-                    android:layout_marginEnd="8dp" />
+                <ImageView
+                    android:id="@+id/backButton3"
+                    android:layout_width="46dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="0"
+                    android:clickable="true"
+                    android:contentDescription="Back"
+                    android:focusable="true"
+                    android:src="@android:drawable/ic_menu_revert" />
 
                 <TextView
+                    android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="EventLottery"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black" />
+                    android:layout_weight="0"
+                    android:text="Back"
+                    android:textSize="20sp" />
+
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/notificationIcon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_popup_reminder"
-                android:contentDescription="Notifications" />
         </LinearLayout>
 
         <!-- Profile Card -->

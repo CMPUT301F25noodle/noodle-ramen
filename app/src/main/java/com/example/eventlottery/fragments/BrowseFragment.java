@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.eventlottery.EventDetailActivity;
 import com.example.eventlottery.NotificationActivity;
 import com.example.eventlottery.event_classes.Event;
 import com.example.eventlottery.event_classes.EventAdapter;
@@ -224,8 +225,9 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
     @Override
     public void onEventPageClick(EventViewModel eventViewModel) {
-        // TODO: Navigate to event detail page
-        // Pass event ID to detail fragment/activity
+        Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+        intent.putExtra("eventId", eventViewModel.getId());
+        startActivity(intent);
     }
 
     /**

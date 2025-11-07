@@ -93,9 +93,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         navScan.setOnClickListener(v -> {
-            // TODO: Implement camera/QR scanning functionality
-            // This will be implemented later
-            android.widget.Toast.makeText(this, "Scan feature coming soon", android.widget.Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, QrScannerActivity.class);
+            startActivity(intent);
         });
 
 

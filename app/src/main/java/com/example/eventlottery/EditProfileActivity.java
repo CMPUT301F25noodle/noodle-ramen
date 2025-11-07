@@ -38,7 +38,6 @@ import java.util.Map;
 public class EditProfileActivity extends AppCompatActivity {
 
     // Header bits (optional action)
-    private ImageView notificationIcon;
 
     // Top summary
     private TextView userNameText, userRoleText;
@@ -68,7 +67,6 @@ public class EditProfileActivity extends AppCompatActivity {
         userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
         // Bind UI
-        notificationIcon  = findViewById(R.id.notificationIcon);
         userNameText      = findViewById(R.id.userNameText);
         userRoleText      = findViewById(R.id.userRoleText);
 
