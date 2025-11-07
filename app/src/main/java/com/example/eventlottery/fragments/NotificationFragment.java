@@ -32,6 +32,12 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
+/**
+ * notificaiton fragment for contains the notifications that are sent to user
+ * they can access the notifcaitons and enroll in events from there
+ * uses lottery manager as logic for win or lose
+ */
+
 public class NotificationFragment extends Fragment {
     private static final String TAG = "NotificationsFragment";
 
@@ -48,12 +54,30 @@ public class NotificationFragment extends Fragment {
 
     private List<Notification> notificationsList;
 
+    /**
+     * instanties the fragment into the user interface
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.notification_fragment, container, false);
     }
 
+    /**
+     *
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -67,13 +91,18 @@ public class NotificationFragment extends Fragment {
         lotteryManager = new LotteryManager();
         notificationManager = new NotificationManager();
     }
-
+/**
+ * intializes UI compoenents finding frm fragment
+ */
     private void initializeViews(View view) {
         notificationsRecyclerView = view.findViewById(R.id.notifications_recycler_view);
         progressBar = view.findViewById(R.id.progress_bar);
         emptyStateTextView = view.findViewById(R.id.empty_state_text);
     }
 
+    /**
+     * configref the recycler viewwith listetning for if accepted or declined
+     */
     private void setupRecyclerView() {
         notificationsList = new ArrayList<>();
 
@@ -93,6 +122,9 @@ public class NotificationFragment extends Fragment {
         notificationsRecyclerView.setAdapter(adapter);
     }
 
+    /**
+     * add a listener to get the notifcaitons taht have been sent to the user
+     */
     private void loadNotifications() {
         Log.d(TAG, "Loading notifications for user: " + userId);
 
@@ -139,6 +171,11 @@ public class NotificationFragment extends Fragment {
                 });
     }
 
+    /**
+     * converts the firestore object into an object that can be shown to user
+     * @param document
+     * @return
+     */
     private Notification documentToNotification(DocumentSnapshot document) {
         try {
             Notification notification = new Notification();
@@ -163,6 +200,10 @@ public class NotificationFragment extends Fragment {
         emptyStateTextView.setText("No notifications yet");
     }
 
+    /**
+     * handles the accept button click, checking db to see if they have already accepted
+     * @param notification
+     */
     private void handleAcceptClicked(Notification notification) {
         Log.d(TAG, "Accept clicked for notification: " + notification.getId());
 
@@ -206,6 +247,10 @@ public class NotificationFragment extends Fragment {
                 });
     }
 
+    /**
+     * decline button is clicked handles logic for it
+     * @param notification
+     */
     private void handleDeclineClicked(Notification notification) {
         Log.d(TAG, "Decline clicked for notification: " + notification.getId());
 
@@ -259,6 +304,9 @@ public class NotificationFragment extends Fragment {
                 .addOnFailureListener(e -> Log.e(TAG, "Error marking notification as responded", e));
     }
 
+    /**
+     * gets the current user ID so user can be assigned to the correct evvent
+     */
     private void getUserIdAndLoadNotifications() {
         SharedPreferences prefs = getActivity().getSharedPreferences("AppPrefs", MODE_PRIVATE);
         String cachedUserId = prefs.getString("userId", null);
