@@ -13,7 +13,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
  * Created by: Jana
  * Handles the tabs that show events that the user registered, won, lost, and is pending in.
  */
- *
+
 public class EventHistoryActivity extends AppCompatActivity {
     private Button myEventsButton, browseButton, scanButton;
 
