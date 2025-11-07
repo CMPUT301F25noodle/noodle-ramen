@@ -126,17 +126,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             super(itemView);
 
             // Find and cache all view references
-            statusBadge = itemView.findViewById(R.id.statusBadge);
-            priceText = itemView.findViewById(R.id.priceText);
+            statusBadge = itemView.findViewById(R.id.status_badge);
+            priceText = itemView.findViewById(R.id.price_text);
             eventImage = itemView.findViewById(R.id.eventImage);
-            eventTitle = itemView.findViewById(R.id.eventTitle);
-            organizationName = itemView.findViewById(R.id.organizationName);
-            locationText = itemView.findViewById(R.id.locationText);
-            dateRangeText = itemView.findViewById(R.id.dateRangeText);
-            waitlistInfo = itemView.findViewById(R.id.waitlistInfo);
-            spotsText = itemView.findViewById(R.id.spotsText);
-            joinWaitlistButton = itemView.findViewById(R.id.joinWaitlistButton);
-            goToEventButton = itemView.findViewById(R.id.goToEventButton);
+            eventTitle = itemView.findViewById(R.id.event_title);
+            organizationName = itemView.findViewById(R.id.organization_name);
+            locationText = itemView.findViewById(R.id.location_text);
+            dateRangeText = itemView.findViewById(R.id.date_range_text);
+            waitlistInfo = itemView.findViewById(R.id.waitlist_info);
+            spotsText = itemView.findViewById(R.id.spots_text);
+            joinWaitlistButton = itemView.findViewById(R.id.join_waitlist_button);
+            goToEventButton = itemView.findViewById(R.id.go_to_event_button);
         }
 
         /**

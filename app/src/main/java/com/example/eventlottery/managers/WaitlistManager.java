@@ -155,6 +155,8 @@ public class WaitlistManager {
         DocumentReference eventRef = db.collection("events").document(eventId);
         batch.update(eventRef, "waitlistCount", FieldValue.increment(1));
 
+        batch.update(eventRef, "waitlistUsers", FieldValue.arrayUnion(userId));
+
 
         DocumentReference userRef = db.collection("users").document(userId);
         Map<String, Object> waitlistData = new HashMap<>();
@@ -187,6 +189,7 @@ public class WaitlistManager {
 
         DocumentReference eventRef = db.collection("events").document(eventId);
         batch.update(eventRef, "waitlistCount", FieldValue.increment(-1));
+        batch.update(eventRef,"waitlistUsers", FieldValue.arrayRemove(userId));
 
 
         DocumentReference userRef = db.collection("users").document(userId);

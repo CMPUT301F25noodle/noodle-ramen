@@ -12,10 +12,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ProgressBar;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.eventlottery.LoginActivity;
 
-
+import android.content.Intent;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -116,11 +118,11 @@ public class SignUpFragment extends Fragment {
 
         private void updateRoleButtonStyles () {
             if (selectedRole.equals("organizer")) {
-                organizerButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
-                entrantButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
+                organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+                entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
             } else {
-                entrantButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_purple));
-                organizerButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));
+                entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+                organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
             }
         }
 
@@ -305,8 +307,14 @@ public class SignUpFragment extends Fragment {
     }
 
     private void navigateToHomePage() {
-        Toast.makeText(getContext(), "Welcome! Home page not yet implemented.", Toast.LENGTH_SHORT).show();
-        // TODO: Navigate to home fragment when ready
+        Toast.makeText(getContext(), "Account created successfully! Please login.", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 
     /**

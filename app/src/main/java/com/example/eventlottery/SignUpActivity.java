@@ -4,6 +4,10 @@ import androidx.core.app.ComponentActivity;
 
 import android.os.Bundle;
 import com.example.eventlottery.fragments.SignUpFragment;
+
+/**
+ * continas the fragment for the signup form
+ */
 public class SignUpActivity extends AppCompatActivity{
 
     @Override

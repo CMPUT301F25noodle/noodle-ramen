@@ -9,12 +9,15 @@ public class Event {
     private final String id;
     private final String title;
     private final String organizationName;
+    private final String description;
+    private final String eligibility;
     private final Location location;
     private final EventDates dates;
     private final String imageUrl;
     private final Waitlist waitlist;
     private final Money price;
     private final EventStatus status;
+    private final boolean geolocationRequired;
 
     /**
      * Creates an Event with all required information.
@@ -22,17 +25,20 @@ public class Event {
      * @param id unique event identifier
      * @param title event title
      * @param organizationName name of organizing entity
+     * @param description event description
+     * @param eligibility eligibility criteria for the event
      * @param location event location
      * @param dates event date range
      * @param imageUrl URL to event image
      * @param waitlist waitlist information
      * @param price event price
      * @param status event status
+     * @param geolocationRequired whether geolocation is required for this event
      * @throws IllegalArgumentException if any parameter is null or invalid
      */
-    public Event(String id, String title, String organizationName,
-                 Location location, EventDates dates, String imageUrl,
-                 Waitlist waitlist, Money price, EventStatus status) {
+    public Event(String id, String title, String organizationName, String description,
+                 String eligibility, Location location, EventDates dates, String imageUrl,
+                 Waitlist waitlist, Money price, EventStatus status, boolean geolocationRequired) {
         // Validate all inputs
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("Event ID cannot be null or empty");
@@ -42,6 +48,12 @@ public class Event {
         }
         if (organizationName == null || organizationName.isEmpty()) {
             throw new IllegalArgumentException("Organization name cannot be null or empty");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("Description cannot be null");
+        }
+        if (eligibility == null) {
+            throw new IllegalArgumentException("Eligibility cannot be null");
         }
         if (location == null) {
             throw new IllegalArgumentException("Location cannot be null");
@@ -63,12 +75,15 @@ public class Event {
         this.id = id;
         this.title = title;
         this.organizationName = organizationName;
+        this.description = description;
+        this.eligibility = eligibility;
         this.location = location;
         this.dates = dates;
         this.imageUrl = imageUrl;
         this.waitlist = waitlist;
         this.price = price;
         this.status = status;
+        this.geolocationRequired = geolocationRequired;
     }
 
     public String getId() { return id; }
@@ -76,6 +91,10 @@ public class Event {
     public String getTitle() { return title; }
 
     public String getOrganizationName() { return organizationName; }
+
+    public String getDescription() { return description; }
+
+    public String getEligibility() { return eligibility; }
 
     public Location getLocation() { return location; }
 
@@ -88,6 +107,8 @@ public class Event {
     public Money getPrice() { return price; }
 
     public EventStatus getStatus() { return status; }
+
+    public boolean isGeolocationRequired() { return geolocationRequired; }
 
     /**
      * Checks if event is accepting new signups.

@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.eventlottery.EventDetailActivity;
 import com.example.eventlottery.event_classes.Event;
 import com.example.eventlottery.event_classes.EventAdapter;
 import com.example.eventlottery.event_classes.EventViewModel;
@@ -25,9 +27,16 @@ import com.example.eventlottery.event_classes.Waitlist;
 import com.example.eventlottery.R;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.example.eventlottery.managers.WaitlistManager;
-import com.example.eventlottery.ProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+/**
+ * Fragment for browse functionaltiy, shows on main page
+ * ALlows user to scroll through event cards and select the event they want to join
+ */
+
 
 public class BrowseFragment extends Fragment implements EventAdapter.OnEventClickListener {
 
@@ -36,14 +45,24 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private EditText searchEditText;
     private Button allEventsButton;
     private ImageView filterIcon;
-    private ImageView notificationIcon;
-    private ImageView profileIcon;
-
     private WaitlistManager waitlistManager;
     private FirebaseAuth auth;
+    private FirebaseFirestore db;
     private String currentUserId;
     private List<EventViewModel> currentEventViewModels = new ArrayList<>();
 
+    /**
+     * fragment instantiates the interface
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -51,8 +70,8 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         View view = inflater.inflate(R.layout.fragment_browse, container, false);
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         waitlistManager = WaitlistManager.getInstance();
-
 
         if (auth.getCurrentUser() != null) {
             currentUserId = auth.getCurrentUser().getUid();
@@ -62,8 +81,8 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         initViews(view);
         setupRecyclerView();
 
-        // Load sample events (replace with real data later)
-        loadSampleEvents();
+        // Load events from Firestore
+        loadEventsFromFirebase();
 
         // Set up click listeners
         setupClickListeners();
@@ -71,13 +90,16 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         return view;
     }
 
+    /**
+     * intilazes the UI componenets
+     * @param view
+     */
+
     private void initViews(View view) {
-        recyclerView = view.findViewById(R.id.eventsRecyclerView);
-        searchEditText = view.findViewById(R.id.searchEditText);
-        allEventsButton = view.findViewById(R.id.allEventsButton);
-        filterIcon = view.findViewById(R.id.filterIcon);
-        notificationIcon = view.findViewById(R.id.notificationIcon);
-        profileIcon = view.findViewById(R.id.profileIcon);
+        recyclerView = view.findViewById(R.id.events_recycler_view);
+        searchEditText = view.findViewById(R.id.search_edit_text);
+        allEventsButton = view.findViewById(R.id.filter_status_badge);
+        filterIcon = view.findViewById(R.id.fitler_button);
     }
 
     private void setupRecyclerView() {
@@ -90,58 +112,94 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         recyclerView.setAdapter(eventAdapter);
     }
 
-    private void loadSampleEvents() {
-        // Create sample events using modern approach with value objects
-        List<EventViewModel> sampleEventViewModels = new ArrayList<>();
+    /**
+     * Loads events from Firestore and displays them.
+     */
+    private void loadEventsFromFirebase() {
+        db.collection("events")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<EventViewModel> eventViewModels = new ArrayList<>();
 
-        // Event 1 - User is on waitlist
-        Event event1 = new Event(
-                "1",
-                "Event 1",
-                "Organization Name",
-                new Location("Southgate Mall"),
-                new EventDates("10/15/2025", "10/21/2025"),
-                "",
-                new Waitlist(25, 45, 15),
-                new Money(65.0),
-                EventStatus.CLOSED
-        );
-        sampleEventViewModels.add(new EventViewModel(event1, true));
+                    queryDocumentSnapshots.forEach(document -> {
+                        try {
+                            // Extract fields from Firestore document
+                            String id = document.getId();
+                            String eventName = document.getString("eventName");
+                            String organizer = document.getString("organizer");
+                            String description = document.getString("description");
+                            String eligibility = document.getString("eligibility");
+                            String locationStr = document.getString("location");
+                            String startDate = document.getString("startDate");
+                            String endDate = document.getString("endDate");
+                            String priceStr = document.getString("price");
+                            String waitlistLimitStr = document.getString("waitlistLimit");
+                            String entrantMaxStr = document.getString("entrantMaxCapacity");
+                            Boolean geolocationRequired = document.getBoolean("geolocationRequired");
 
-        // Event 2 - User is NOT on waitlist
-        Event event2 = new Event(
-                "2",
-                "Event 3",
-                "Organization Name",
-                new Location("West Edmonton Mall"),
-                new EventDates("10/15/2025", "10/21/2025"),
-                "",
-                new Waitlist(100, 100, 60),
-                new Money(0.0),
-                EventStatus.ENDING_SOON
-        );
-        sampleEventViewModels.add(new EventViewModel(event2, false));
+                            // Convert to proper types with defaults
+                            double price = 0.0;
+                            if (priceStr != null && !priceStr.isEmpty()) {
+                                price = Double.parseDouble(priceStr);
+                            }
 
-        // Event 3 - User is NOT on waitlist
-        Event event3 = new Event(
-                "3",
-                "Event 4",
-                "Organization Name",
-                new Location("Lendrum Place"),
-                new EventDates("10/15/2025", "10/21/2025"),
-                "",
-                new Waitlist(105, 150, 75),
-                new Money(15.0),
-                new EventStatus("3 days left")
-        );
-        sampleEventViewModels.add(new EventViewModel(event3, false));
+                            int waitlistLimit = 0;
+                            if (waitlistLimitStr != null && !waitlistLimitStr.isEmpty()) {
+                                waitlistLimit = Integer.parseInt(waitlistLimitStr);
+                            }
 
-        currentEventViewModels = sampleEventViewModels;
+                            int entrantMax = 0;
+                            if (entrantMaxStr != null && !entrantMaxStr.isEmpty()) {
+                                entrantMax = Integer.parseInt(entrantMaxStr);
+                            }
 
-        // Update adapter with sample data
-        eventAdapter.updateEvents(sampleEventViewModels);
+                            // Create Event object
+                            Event event = new Event(
+                                    id,
+                                    eventName != null ? eventName : "Untitled Event",
+                                    organizer != null ? organizer : "Unknown Organizer",
+                                    description != null ? description : "",
+                                    eligibility != null ? eligibility : "",
+                                    new Location(locationStr != null ? locationStr : "TBD"),
+                                    new EventDates(
+                                            startDate != null ? startDate : "",
+                                            endDate != null ? endDate : ""
+                                    ),
+                                    "", // imageUrl - empty for now
+                                    new Waitlist(0, waitlistLimit, entrantMax), // currentCount starts at 0
+                                    new Money(price),
+                                    EventStatus.OPEN, // All events are OPEN by default for MVP
+                                    geolocationRequired != null ? geolocationRequired : false
+                            );
+
+                            // TODO: Check if user is actually on waitlist for this event
+                            EventViewModel viewModel = new EventViewModel(event, false);
+                            eventViewModels.add(viewModel);
+
+                        } catch (Exception e) {
+                            // exception to log
+
+                        }
+                    });
+
+                    // Update UI with loaded events
+                    currentEventViewModels = eventViewModels;
+                    eventAdapter.updateEvents(eventViewModels);
+
+                    if (eventViewModels.isEmpty()) {
+                        Toast.makeText(getContext(), "No events found. Long press profile icon to seed data.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to load events: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
     }
 
+    /**
+     * sets up cluck listeners for the search bar and filter buttons
+     */
     private void setupClickListeners() {
         // Search functionality
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
@@ -160,19 +218,6 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
             // TODO: Open filter dialog/bottom sheet
         });
 
-        // Notification icon
-        notificationIcon.setOnClickListener(v -> {
-            // TODO: Go to notifications
-        });
-
-        // Profile icon
-        profileIcon.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new ProfileFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
-
     }
 
     private void performSearch(String query) {
@@ -181,6 +226,11 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     // EventAdapter.OnEventClickListener implementation
+
+    /**
+     * handles the click on joinwaitlist and leave waitlist functionaltiy
+     * @param eventViewModel the event that was clicked
+     */
     @Override
     public void onJoinWaitlistClick(EventViewModel eventViewModel) {
         if (currentUserId == null) {
@@ -199,14 +249,19 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         }
     }
 
+    /**
+     * hanldes the clicking on the main part of the event card body
+     * @param eventViewModel the event that was clicked
+     */
     @Override
     public void onEventPageClick(EventViewModel eventViewModel) {
-        // TODO: Navigate to event detail page
-        // Pass event ID to detail fragment/activity
+        Intent intent = new Intent(getActivity(), EventDetailActivity.class);
+        intent.putExtra("eventId", eventViewModel.getId());
+        startActivity(intent);
     }
 
     /**
-     * join event wailist
+     * join event wailist for specified event
      *
      * @param eventViewModel
      */

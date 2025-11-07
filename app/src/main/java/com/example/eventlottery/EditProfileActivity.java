@@ -18,17 +18,31 @@ import java.util.Map;
 
 /**
  * EditProfileActivity
- * - Shows the "edit mode" UI (second screenshot)
- * - Pencil icons enable each field
- * - "Done Edit" saves to Firestore and closes
+ *
+ * Displays editable user profile fields (email, phone, and password hint).
+ * Each field can be unlocked using the pencil icon.
+ * When the "Done Edit" button is pressed, updated data is saved to Firestore
+ * and the activity closes with RESULT_OK.
+ *
+ * <p>Firestore structure:
+ * users/{userId} → { name, email, phone, role, passwordHint }
+ *
+ * <p>Flow:
+ * 1. Load user data from Firestore
+ * 2. Enable individual fields on edit
+ * 3. Save updates and return to previous screen
+ *
+ * @author junseok Song
+ * @since 2025-11-06
  */
 public class EditProfileActivity extends AppCompatActivity {
 
     // Header bits (optional action)
-    private ImageView notificationIcon;
 
     // Top summary
     private TextView userNameText, userRoleText;
+    //back button
+    private ImageView backButton;
 
     // Info fields
     private EditText phoneEditText, emailEditText, passwordHintField;
@@ -55,7 +69,7 @@ public class EditProfileActivity extends AppCompatActivity {
         userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
         // Bind UI
-        notificationIcon  = findViewById(R.id.notificationIcon);
+        backButton = findViewById(R.id.backButton3);
         userNameText      = findViewById(R.id.userNameText);
         userRoleText      = findViewById(R.id.userRoleText);
 
@@ -68,6 +82,8 @@ public class EditProfileActivity extends AppCompatActivity {
         passwordEditBtn   = findViewById(R.id.passwordEditBtn);
 
         doneButton        = findViewById(R.id.doneButton);
+
+        backButton.setOnClickListener(v-> finish());
 
         // Load current profile values
         loadProfile();
@@ -94,7 +110,10 @@ public class EditProfileActivity extends AppCompatActivity {
         // Save + close
         doneButton.setOnClickListener(v -> saveAndClose());
     }
-
+    /**
+     * Loads the current user's profile data from Firestore and populates the UI fields.
+     * If the user is not signed in or no document exists, the activity finishes.
+     */
     private void loadProfile() {
         if (userId == null) {
             Toast.makeText(this, "Not signed in", Toast.LENGTH_SHORT).show();
@@ -131,7 +150,10 @@ public class EditProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Load failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
     }
-
+    /**
+     * Saves the updated email, phone, and password hint values to Firestore.
+     * Closes the activity upon successful update.
+     */
     private void saveAndClose() {
         if (userId == null) return;
 
