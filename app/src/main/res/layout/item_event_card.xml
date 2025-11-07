@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
@@ -182,11 +183,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="center_vertical">
 
-                <!-- "Join Waitlist" Button -->
                 <Button
-                    android:id="@+id/joinWaitlistButton"
+                    android:id="@+id/primaryButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -196,16 +196,28 @@
                     android:backgroundTint="#CE93D8"
                     android:textAllCaps="false" />
 
-                <!-- "Go to Event Page" Button -->
-                <Button
-                    android:id="@+id/goToEventButton"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/secondaryButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Go to Event Page >"
+                    android:layout_marginEnd="8dp"
+                    android:text="Decline"
                     android:textColor="#666666"
-                    android:backgroundTint="@android:color/transparent"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:textAllCaps="false" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/goToEventButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Event Page >"
+                    android:textColor="#666666"
                     android:textAllCaps="false"
-                    style="?attr/materialButtonOutlinedStyle" />
+                    android:paddingHorizontal="4dp"
+                    android:minWidth="0dp" />
             </LinearLayout>
         </LinearLayout>
 

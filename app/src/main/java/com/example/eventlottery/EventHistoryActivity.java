@@ -8,12 +8,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.eventlottery.fragments.BrowseFragment;
 import com.example.eventlottery.fragments.EventHistoryFragment;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-
+/**
+ * EventHistoryActivity - Handles event history page
+ * Created by: Jana
+ * Handles the tabs that show events that the user registered, won, lost, and is pending in.
+ */
+ *
 public class EventHistoryActivity extends AppCompatActivity {
-    /*
-     *put the browse, scan, and my events fragment here
-     *
-     */
     private Button myEventsButton, browseButton, scanButton;
 
     // This is the corrected onCreate method

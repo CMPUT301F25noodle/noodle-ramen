@@ -104,7 +104,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                 new Money(65.0),
                 EventStatus.CLOSED
         );
-        sampleEventViewModels.add(new EventViewModel(event1, true));
+        sampleEventViewModels.add(new EventViewModel(event1, true, status));
 
         // Event 2 - User is NOT on waitlist
         Event event2 = new Event(
@@ -118,7 +118,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                 new Money(0.0),
                 EventStatus.ENDING_SOON
         );
-        sampleEventViewModels.add(new EventViewModel(event2, false));
+        sampleEventViewModels.add(new EventViewModel(event2, false, status));
 
         // Event 3 - User is NOT on waitlist
         Event event3 = new Event(
@@ -132,7 +132,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                 new Money(15.0),
                 new EventStatus("3 days left")
         );
-        sampleEventViewModels.add(new EventViewModel(event3, false));
+        sampleEventViewModels.add(new EventViewModel(event3, false, status));
 
         currentEventViewModels = sampleEventViewModels;
 

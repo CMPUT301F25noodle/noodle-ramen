@@ -3,7 +3,6 @@ package com.example.eventlottery.event_classes;
 /**
  * ViewModel for presenting Event data in the UI.
  * Wraps an Event and adds presentation logic and user-specific state.
- * Handles formatting and UI state without modifying the domain Event.
  */
 public class EventViewModel {
     /** The wrapped Event object */
@@ -12,118 +11,97 @@ public class EventViewModel {
     /** Whether the current user is on this event's waitlist */
     private final boolean isUserOnWaitlist;
 
+    /** The specific status of the user for this event (WON, LOST, PENDING, REGISTERED) */
+    private final String status;
+
     /**
-     * Creates an EventViewModel with user-specific waitlist status.
+     * Main Constructor.
      *
-     * @param event the Event to wrap
+     * @param event            the Event to wrap
      * @param isUserOnWaitlist whether user is on waitlist
+     * @param status           the user's specific status for this event
      * @throws IllegalArgumentException if event is null
      */
-    public EventViewModel(Event event, boolean isUserOnWaitlist) {
+    public EventViewModel(Event event, boolean isUserOnWaitlist, String status) {
         if (event == null) {
             throw new IllegalArgumentException("Event cannot be null");
         }
         this.event = event;
         this.isUserOnWaitlist = isUserOnWaitlist;
+        this.status = status;
     }
 
     /**
-     * Creates an EventViewModel with user not on waitlist.
+     * Secondary constructor for simple cases (defaults to "NONE" status and not on waitlist).
      *
      * @param event the Event to wrap
-     * @throws IllegalArgumentException if event is null
      */
     public EventViewModel(Event event) {
-        this(event, false);
+        // You must provide a default status here if you use this constructor
+        this(event, false, "NONE");
     }
 
-    /** @return the underlying Event */
+    /** @return the user's specific status for this event */
+    public String getStatus() { return status; }
+
+    /**
+     * Creates a new ViewModel with updated waitlist status, keeping the same event status.
+     */
+    public EventViewModel withWaitlistStatus(boolean newStatus) {
+        return new EventViewModel(this.event, newStatus, this.status);
+    }
+
+    // --- DELEGATED METHODS (Pass-through to the Event object) ---
+
     public Event getEvent() { return event; }
-
-    /** @return true if user is on waitlist */
     public boolean isUserOnWaitlist() { return isUserOnWaitlist; }
-
-    /** @return event ID */
     public String getId() { return event.getId(); }
-
-    /** @return event title */
     public String getTitle() { return event.getTitle(); }
-
-    /** @return organization name */
     public String getOrganizationName() { return event.getOrganizationName(); }
-
-    /** @return image URL */
     public String getImageUrl() { return event.getImageUrl(); }
 
-    /** @return organization name with "by" prefix */
     public String getFormattedOrganization() {
         return "by " + event.getOrganizationName();
     }
 
-    /** @return location address */
     public String getLocationText() {
+        // Ensure event.getLocation() isn't null before calling getAddress() to avoid crashes
+        if (event.getLocation() == null) return "Unknown Location";
         return event.getLocation().getAddress();
     }
 
-    /** @return formatted date range */
     public String getDateRange() {
         return event.getDates().toRangeString();
     }
 
-    /** @return formatted price ("$25" or "Free") */
     public String getFormattedPrice() {
         return event.getPrice().toDisplayString();
     }
 
-    /** @return status text */
+    // NOTE: This might conflict with your new 'status' field if you aren't careful.
+    // Consider renaming this to 'getEventGlobalStatusText()' if it's different from the user's status.
     public String getStatusText() {
         return event.getStatus().getDisplayText();
     }
 
-    /** @return formatted waitlist info */
     public String getWaitlistInfo() {
         return event.getWaitlist().getWaitlistInfoText();
     }
 
-    /** @return formatted available spots */
     public String getSpotsText() {
         return event.getWaitlist().getAvailableSpotsText();
     }
 
-    /**
-     * Gets button text based on user's waitlist status.
-     * @return "On Waitlist" if user is on list, "Join Waitlist" otherwise
-     */
     public String getJoinButtonText() {
-        if (isUserOnWaitlist) {
-            return "On Waitlist";
-        }
-        return "Join Waitlist";
+        return isUserOnWaitlist ? "On Waitlist" : "Join Waitlist";
     }
 
-    /**
-     * Determines if join button should be enabled.
-     * @return true if user can join (not on list and event available)
-     */
     public boolean isJoinButtonEnabled() {
         return !isUserOnWaitlist && event.isAvailable();
     }
 
-    /**
-     * Checks if full badge should be shown.
-     * @return true if waitlist is full
-     */
     public boolean shouldShowFullBadge() {
         return event.isWaitlistFull();
-    }
-
-    /**
-     * Creates a new ViewModel with updated waitlist status.
-     * @param newStatus new waitlist membership status
-     * @return new EventViewModel with updated status
-     */
-    public EventViewModel withWaitlistStatus(boolean newStatus) {
-        return new EventViewModel(event, newStatus);
     }
 
     @Override
@@ -131,7 +109,17 @@ public class EventViewModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EventViewModel that = (EventViewModel) o;
-        return isUserOnWaitlist == that.isUserOnWaitlist && event.equals(that.event);
+        // Also check if the status matches
+        return isUserOnWaitlist == that.isUserOnWaitlist &&
+                event.equals(that.event) &&
+                (status == null ? that.status == null : status.equals(that.status));
     }
-
+    // Temporary constructor for testing UI without a real database
+    public EventViewModel(String title, String location, String status) {
+        // You'll need to create a dummy Event object here if Event is final
+        // Or just store these values temporarily if you are just testing UI
+        this.event = new Event(title, location, null, null, null, null, null, null); // Simplified for example
+        this.status = status;
+        this.isUserOnWaitlist = "PENDING".equals(status);
+    }
 }

@@ -1,184 +1,141 @@
 package com.example.eventlottery.event_classes;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.eventlottery.R;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Adapter for displaying a list of events in a RecyclerView.
- * Connects event data to the RecyclerView by creating and binding ViewHolders.
+ * EventAdapter - Handles event history page
+ * Created by: Jana
+ * Handles the tabs that show events that the user registered, won, lost, and is pending in.
  */
+
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
-    private List<EventViewModel> eventViewModels; // Models
-    private OnEventClickListener listener; // Listeners
+    private List<EventViewModel> eventViewModels;
+    private final OnEventClickListener listener;
 
-    /**
-     * Interface for handling user interactions with event cards.
-     */
     public interface OnEventClickListener {
-        /**
-         * Called when user clicks the "Join Waitlist" button.
-         * @param eventViewModel the event that was clicked
-         */
-        void onJoinWaitlistClick(EventViewModel eventViewModel);
-
-        /**
-         * Called when user clicks the "Go to Event Page" button.
-         * @param eventViewModel the event that was clicked
-         */
-        void onEventPageClick(EventViewModel eventViewModel);
+        void onEventPageClick(EventViewModel viewModel);
+        void onPrimaryActionClick(EventViewModel viewModel); // Combined action (Join, Accept, Opt-in)
+        void onSecondaryActionClick(EventViewModel viewModel); // Secondary action (Decline, Leave)
     }
 
-    /**
-     * Creates an EventAdapter with event data and click listener.
-     *
-     * @param eventViewModels list of events to display
-     * @param listener callback for button clicks
-     */
     public EventAdapter(List<EventViewModel> eventViewModels, OnEventClickListener listener) {
         this.eventViewModels = eventViewModels != null ? eventViewModels : new ArrayList<>();
         this.listener = listener;
     }
 
-    /**
-     * Creates a new ViewHolder by inflating the item layout.
-     * Called by RecyclerView when it needs a new view.
-     *
-     * @param parent the RecyclerView
-     * @param viewType the view type (not used, we have only one type)
-     * @return new EventViewHolder wrapping the inflated view
-     */
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_event_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_event_card, parent, false);
         return new EventViewHolder(view);
     }
 
-    /**
-     * Binds event data to a ViewHolder at the specified position.
-     * Called by RecyclerView when an item becomes visible.
-     *
-     * @param holder the ViewHolder to bind data to
-     * @param position the position in the data list
-     */
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        EventViewModel viewModel = eventViewModels.get(position);
-        holder.bind(viewModel, listener);
+        holder.bind(eventViewModels.get(position), listener);
     }
 
-    /**
-     * Returns the total number of items in the list.
-     *
-     * @return size of the event list
-     */
     @Override
-    public int getItemCount() {
-        return eventViewModels.size();
-    }
+    public int getItemCount() { return eventViewModels.size(); }
 
-    /**
-     * Updates the adapter with a new list of events and refreshes the RecyclerView.
-     *
-     * @param newEventViewModels new list of events to display
-     */
     public void updateEvents(List<EventViewModel> newEventViewModels) {
         this.eventViewModels = newEventViewModels != null ? newEventViewModels : new ArrayList<>();
         notifyDataSetChanged();
     }
 
-    /**
-     * ViewHolder for one event card. Caches view references for performance.
-     * Made static to avoid holding reference to outer Adapter class.
-     */
     static class EventViewHolder extends RecyclerView.ViewHolder {
-        // UI element references
-        private TextView statusBadge;
-        private TextView priceText;
-        private ImageView eventImage;
-        private TextView eventTitle;
-        private TextView organizationName;
-        private TextView locationText;
-        private TextView dateRangeText;
-        private TextView waitlistInfo;
-        private TextView spotsText;
-        private Button joinWaitlistButton;
-        private Button goToEventButton;
+        private final TextView statusBadge, priceText, eventTitle, organizationName, locationText, dateRangeText, waitlistInfo, spotsText;
+        private final Button primaryButton, secondaryButton, goToEventButton;
 
-        /**
-         * Creates a ViewHolder and caches references to all child views.
-         *
-         * @param itemView the layout for one event card
-         */
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            // Find and cache all view references
             statusBadge = itemView.findViewById(R.id.statusBadge);
             priceText = itemView.findViewById(R.id.priceText);
-            eventImage = itemView.findViewById(R.id.eventImage);
             eventTitle = itemView.findViewById(R.id.eventTitle);
             organizationName = itemView.findViewById(R.id.organizationName);
             locationText = itemView.findViewById(R.id.locationText);
             dateRangeText = itemView.findViewById(R.id.dateRangeText);
             waitlistInfo = itemView.findViewById(R.id.waitlistInfo);
             spotsText = itemView.findViewById(R.id.spotsText);
-            joinWaitlistButton = itemView.findViewById(R.id.joinWaitlistButton);
+            primaryButton = itemView.findViewById(R.id.primaryButton);
+            secondaryButton = itemView.findViewById(R.id.secondaryButton);
             goToEventButton = itemView.findViewById(R.id.goToEventButton);
         }
 
-        /**
-         * Binds event data from ViewModel to the UI elements.
-         *
-         * @param viewModel the event data to display
-         * @param listener callback for button clicks
-         */
-        public void bind(EventViewModel viewModel, OnEventClickListener listener) {
-            // Set text on all UI elements
-            statusBadge.setText(viewModel.getStatusText());
-            priceText.setText(viewModel.getFormattedPrice());
-            eventTitle.setText(viewModel.getTitle());
-            organizationName.setText(viewModel.getFormattedOrganization());
-            locationText.setText(viewModel.getLocationText());
-            dateRangeText.setText(viewModel.getDateRange());
-            waitlistInfo.setText(viewModel.getWaitlistInfo());
-            spotsText.setText(viewModel.getSpotsText());
+        public void bind(EventViewModel vm, OnEventClickListener listener) {
+            // 1. Bind Data to Views
+            // (Ensure your EventViewModel has these getter methods!)
+            eventTitle.setText(vm.getTitle());
+            locationText.setText(vm.getLocationText());
+            organizationName.setText(vm.getFormattedOrganization());
+            dateRangeText.setText(vm.getDateRange());
+            priceText.setText(vm.getFormattedPrice());
+            waitlistInfo.setText(vm.getWaitlistInfo());
+            spotsText.setText(vm.getSpotsText());
 
-            // Update button state
-            if (viewModel.isUserOnWaitlist()) {
-                joinWaitlistButton.setText("Leave Waitlist");
-                joinWaitlistButton.setEnabled(true);  // Always enabled to allow leaving
-            } else {
-                joinWaitlistButton.setText(viewModel.getJoinButtonText());
-                joinWaitlistButton.setEnabled(viewModel.isJoinButtonEnabled());
+            // navigation Button Always Active
+            goToEventButton.setOnClickListener(v -> listener.onEventPageClick(vm));
+
+            //reset Button States for Recycling
+            primaryButton.setVisibility(View.VISIBLE);
+            primaryButton.setEnabled(true);
+            // default purple look
+            primaryButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#CE93D8")));
+            primaryButton.setTextColor(Color.WHITE);
+
+            secondaryButton.setVisibility(View.GONE);
+            secondaryButton.setOnClickListener(null);
+
+            // configure Status
+            String status = vm.getStatus() != null ? vm.getStatus() : "NONE";
+            statusBadge.setText(status);
+
+            switch (status) {
+                case "WON":
+                    primaryButton.setText("Accept");
+                    primaryButton.setOnClickListener(v -> listener.onPrimaryActionClick(vm));
+                    secondaryButton.setVisibility(View.VISIBLE);
+                    secondaryButton.setText("Decline");
+                    secondaryButton.setOnClickListener(v -> listener.onSecondaryActionClick(vm));
+                    break;
+
+                case "LOST":
+                    primaryButton.setText("Opt-in for Retry");
+                    primaryButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#90A4AE")));
+                    primaryButton.setOnClickListener(v -> listener.onPrimaryActionClick(vm));
+                    break;
+
+                case "REGISTERED":
+                    primaryButton.setText("Attending");
+                    primaryButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#81C784")));
+                    primaryButton.setEnabled(false); // Acts as a badge
+                    break;
+
+                case "PENDING":
+                    primaryButton.setText("Waitlisted");
+                    primaryButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFB74D")));
+                    primaryButton.setEnabled(false); // Acts as a badge
+                    secondaryButton.setVisibility(View.VISIBLE);
+                    secondaryButton.setText("Leave");
+                    secondaryButton.setOnClickListener(v -> listener.onSecondaryActionClick(vm));
+                    break;
+
+                default: // Browse mode
+                    primaryButton.setText("Join Waitlist");
+                    primaryButton.setOnClickListener(v -> listener.onPrimaryActionClick(vm));
+                    break;
             }
-
-            // Attach click listeners
-            joinWaitlistButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onJoinWaitlistClick(viewModel);
-                }
-            });
-
-            goToEventButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onEventPageClick(viewModel);
-                }
-            });
-
-            // TODO: Load image from Database
         }
     }
 }
