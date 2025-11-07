@@ -4,6 +4,41 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- Top Bar with Notification and Profile Icons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#F3E5F5"
+        android:gravity="end"
+        android:elevation="4dp">
+
+        <!-- Notification Icon -->
+        <ImageView
+            android:id="@+id/notificationIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_notifications"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Notifications" />
+
+        <!-- Profile Icon -->
+        <ImageView
+            android:id="@+id/profileIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_profile"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Profile" />
+
+    </LinearLayout>
+
     <!-- Event Fragment Container -->
     <FrameLayout
         android:id="@+id/fragmentContainer"
@@ -11,34 +46,63 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- Nav -->
+    <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:gravity="center">
+        android:background="#F3E5F5"
+        android:gravity="center"
+        android:elevation="8dp">
 
+        <!-- Browse Button -->
         <TextView
+            android:id="@+id/nav_browse"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Browse"
-            android:gravity="center" />
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#CE93D8"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground" />
 
+        <!-- My Events Button -->
         <TextView
+            android:id="@+id/nav_my_events"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="My Events"
-            android:gravity="center" />
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#CE93D8"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground" />
 
+        <!-- Scan Button -->
         <TextView
+            android:id="@+id/nav_scan"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Scan"
-            android:gravity="center" />
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#CE93D8"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground" />
     </LinearLayout>
 
 </LinearLayout>
