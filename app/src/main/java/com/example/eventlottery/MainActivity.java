@@ -14,9 +14,9 @@ import com.example.eventlottery.fragments.CreateEventFragment;
 import com.example.eventlottery.fragments.BrowseFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView navBrowse;
-    private TextView navMyEvents;
-    private TextView navScan;
+    //private TextView navBrowse;
+   // private TextView navMyEvents;
+   // private TextView navScan;
 
 
     @Override
@@ -24,9 +24,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        navBrowse = findViewById(R.id.nav_browse);
-        navMyEvents = findViewById(R.id.nav_my_events);
-        navScan = findViewById(R.id.nav_scan);
+       // navBrowse = findViewById(R.id.nav_browse);
+      //  navMyEvents = findViewById(R.id.nav_my_events);
+       // navScan = findViewById(R.id.nav_scan);
 
 
         // Load BrowseFragment by default
@@ -37,16 +37,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupNavigation() {
-        navBrowse.setOnClickListener(v-> {
-            loadFragment(new BrowseFragment());
-            highlightNavButton(navBrowse);
-        });
+    //private void setupNavigation() {
+    //    navBrowse.setOnClickListener(v-> {
+    //        loadFragment(new BrowseFragment());
+   //         highlightNavButton(navBrowse);
+   //     });
 
-        navMyEvents.setOnClickListener(v-> {
+    //    navMyEvents.setOnClickListener(v-> {
 
-        });
-    }
+   //     });
+  //  }
 
 
 }
