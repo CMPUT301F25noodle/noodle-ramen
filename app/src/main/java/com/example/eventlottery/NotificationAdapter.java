@@ -15,6 +15,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+/**
+ * resposible for the layout of the actual notificaiton
+ * shows the display of the accept and decline buttons
+ */
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
     private List<Notification> notifications;
     private OnNotificationClickListener listener;
