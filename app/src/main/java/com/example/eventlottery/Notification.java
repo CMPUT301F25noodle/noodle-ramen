@@ -2,6 +2,10 @@ package com.example.eventlottery;
 
 import com.example.eventlottery.managers.NotificationManager;
 
+/**
+ * represents a single notifcation that is sent to a user
+ * models the data strcuture of the notication document that is stored in db
+ */
 public class Notification {
     private String id;              // Document ID
     private String type;            // "win", "loss", or "replacement"
