@@ -31,7 +31,6 @@
             android:name=".SignUpActivity"
             android:exported="false" />
 
-
     </application>
 
 </manifest>
