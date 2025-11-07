@@ -52,6 +52,12 @@ public class EventViewModel {
     /** @return organization name */
     public String getOrganizationName() { return event.getOrganizationName(); }
 
+    /** @return description */
+    public String getDescription() { return event.getDescription(); }
+
+    /** @return eligibility criteria */
+    public String getEligibility() { return event.getEligibility(); }
+
     /** @return image URL */
     public String getImageUrl() { return event.getImageUrl(); }
 
@@ -115,6 +121,14 @@ public class EventViewModel {
      */
     public boolean shouldShowFullBadge() {
         return event.isWaitlistFull();
+    }
+
+    /**
+     * Checks if geolocation is required for this event.
+     * @return true if geolocation is required
+     */
+    public boolean isGeolocationRequired() {
+        return event.isGeolocationRequired();
     }
 
     /**
