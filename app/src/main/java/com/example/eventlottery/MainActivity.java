@@ -1,34 +1,33 @@
 package com.example.eventlottery;
 
-// Imports from both branches
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
-// Common androidx imports
-import androidx.activity.EdgeToEdge;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 // Fragment imports
-import com.example.eventlottery.fragments.CreateEventFragment;
 import com.example.eventlottery.fragments.BrowseFragment;
 import com.example.eventlottery.fragments.EventHistoryFragment;
 import com.example.eventlottery.fragments.NotificationFragment;
 import com.example.eventlottery.fragments.OrganizerDashboardFragment;
 import com.example.eventlottery.fragments.ProfileFragment;
 
+/**
+ * Holds the global top bar and bottom nav bar
+ */
 public class MainActivity extends AppCompatActivity {
+
+
     private ImageView profileIcon, notificationIcon;
 
     private TextView navBrowse;
      private TextView navMyEvents;
      private TextView navScan;
 
-    // New variable from feature branch
 
 
 
