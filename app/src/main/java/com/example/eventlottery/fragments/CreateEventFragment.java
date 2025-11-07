@@ -25,6 +25,10 @@ import java.util.Map;
  * created by: ibrahim
  */
 
+/**
+ * provides the form that organizers use to create events
+ * saves event details from form into firebase
+ */
 public class CreateEventFragment extends Fragment {
 
     // ui elements
@@ -39,6 +43,20 @@ public class CreateEventFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String currentUserId;
+
+    /**
+     * instanties the fragment in the user interface view
+     * instializes the firebasses instances
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
 
     @Nullable
     @Override
