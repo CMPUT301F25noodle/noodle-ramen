@@ -78,11 +78,15 @@ public class OrganizerDashboardFragment extends Fragment {
      * sets up button actions
      */
     private void setupListeners() {
-        btnCreateEvent.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new CreateEventFragment())
-                    .commit();
-        });
+        if (btnCreateEvent != null) {
+            btnCreateEvent.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, new CreateEventFragment())
+                            .commit();
+                }
+            });
+        }
 
         tabRegistered.setOnClickListener(v -> {
             updateTabSelection(tabRegistered);
@@ -138,24 +142,49 @@ public class OrganizerDashboardFragment extends Fragment {
                 .whereEqualTo("organizer", currentUserId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    myEventsContainer.removeAllViews();
+
                     if (queryDocumentSnapshots.isEmpty()) {
                         Toast.makeText(getContext(), "no events created yet", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    myEventsContainer.removeAllViews();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String eventName = document.getString("eventName");
                         String location = document.getString("location");
                         String eventId = document.getId();
 
-                        Toast.makeText(getContext(), "loaded event: " + eventName, Toast.LENGTH_SHORT).show();
+                        addEventCard(eventId, eventName, location);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "failed to load events: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    /**
+     * adds an event card to the my events container
+     */
+    private void addEventCard(String eventId, String eventName, String location) {
+        View eventCard = LayoutInflater.from(getContext()).inflate(R.layout.item_organizer_event_card, myEventsContainer, false);
+
+        // find textviews in the card and set the event data
+        android.widget.TextView tvEventTitle = eventCard.findViewById(R.id.tv_event_title);
+        android.widget.TextView tvWaitlistCount = eventCard.findViewById(R.id.tv_waitlist_count);
+
+        if (tvEventTitle != null) {
+            tvEventTitle.setText(eventName);
+        }
+        if (tvWaitlistCount != null) {
+            tvWaitlistCount.setText(location);
+        }
+
+        // add click listener to view event details
+        eventCard.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "clicked on " + eventName, Toast.LENGTH_SHORT).show();
+        });
+
+        myEventsContainer.addView(eventCard);
     }
 
     /**
@@ -193,4 +222,3 @@ public class OrganizerDashboardFragment extends Fragment {
                 });
     }
 }
-

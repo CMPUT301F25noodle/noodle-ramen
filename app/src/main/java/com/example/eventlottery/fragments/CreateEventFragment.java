@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.R;
 import com.example.eventlottery.QrGenerator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
@@ -36,6 +37,8 @@ public class CreateEventFragment extends Fragment {
 
     // firebase
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private String currentUserId;
 
     @Nullable
     @Override
@@ -44,10 +47,14 @@ public class CreateEventFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_create_event, container, false);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        if (mAuth.getCurrentUser() != null) {
+            currentUserId = mAuth.getCurrentUser().getUid();
+        }
 
         initializeViews(view);
         setupListeners();
-        setupBottomNavigation();
 
         return view;
     }
@@ -127,7 +134,7 @@ public class CreateEventFragment extends Fragment {
 
         String eventName = etPreCreatedEvent.getText().toString().trim();
         String location = etLocation.getText().toString().trim();
-        String organizer = etOrganizerName.getText().toString().trim();
+        String organizerName = etOrganizerName.getText().toString().trim();
         String description = etEventDescription.getText().toString().trim();
         String eligibility = etEligibilityCriteria.getText().toString().trim();
         String startDate = etStartDate.getText().toString().trim();
@@ -139,7 +146,7 @@ public class CreateEventFragment extends Fragment {
 
         Toast.makeText(getContext(), "validating inputs", Toast.LENGTH_SHORT).show();
 
-        if (!validateInputs(eventName, organizer)) {
+        if (!validateInputs(eventName, organizerName)) {
             Toast.makeText(getContext(), "validation failed", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -148,7 +155,8 @@ public class CreateEventFragment extends Fragment {
 
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("eventName", eventName);
-        eventData.put("organizer", organizer);
+        eventData.put("organizer", currentUserId);
+        eventData.put("organizerName", organizerName);
         eventData.put("location", location);
         eventData.put("description", description);
         eventData.put("eligibility", eligibility);
@@ -167,7 +175,7 @@ public class CreateEventFragment extends Fragment {
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(getContext(), "event created successfully!", Toast.LENGTH_LONG).show();
                     clearForm();
-                    navigateToEventsPage();
+                    navigateToOrganizerDashboard();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -196,44 +204,13 @@ public class CreateEventFragment extends Fragment {
     }
 
     /**
-     * navigates to events page after successful creation
+     * navigates back to organizer dashboard after successful creation
      */
-    private void navigateToEventsPage() {
-        getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainer, new BrowseFragment())
-                .commit();
-    }
-
-    /**
-     * sets up bottom navigation from mainactivity
-     */
-    private void setupBottomNavigation() {
+    private void navigateToOrganizerDashboard() {
         if (getActivity() != null) {
-            View rootView = getActivity().findViewById(android.R.id.content);
-            LinearLayout mainLayout = (LinearLayout) rootView.getRootView().findViewById(R.id.fragmentContainer).getParent();
-
-            if (mainLayout != null && mainLayout.getChildCount() > 1) {
-                LinearLayout navBar = (LinearLayout) mainLayout.getChildAt(1);
-
-                View navBrowse = navBar.getChildAt(0);
-                View navMyEvents = navBar.getChildAt(1);
-                View navScan = navBar.getChildAt(2);
-
-                navBrowse.setOnClickListener(v -> {
-                    getParentFragmentManager().beginTransaction()
-                            .replace(R.id.fragmentContainer, new BrowseFragment())
-                            .commit();
-                });
-
-                navMyEvents.setOnClickListener(v -> {
-                    Toast.makeText(getContext(), "my events page not linked yet", Toast.LENGTH_SHORT).show();
-                });
-
-                navScan.setOnClickListener(v -> {
-                    Intent intent = new Intent(getActivity(), QrGenerator.class);
-                    startActivity(intent);
-                });
-            }
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new OrganizerDashboardFragment())
+                    .commit();
         }
     }
 
