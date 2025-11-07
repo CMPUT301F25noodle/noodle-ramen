@@ -4,6 +4,41 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- Top Bar with Notification and Profile Icons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#F3E5F5"
+        android:gravity="end"
+        android:elevation="4dp">
+
+        <!-- Notification Icon -->
+        <ImageView
+            android:id="@+id/notificationIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_notifications"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Notifications" />
+
+        <!-- Profile Icon -->
+        <ImageView
+            android:id="@+id/profileIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_profile"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Profile" />
+
+    </LinearLayout>
+
     <!-- Event Fragment Container -->
     <FrameLayout
         android:id="@+id/fragmentContainer"
@@ -71,4 +106,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
