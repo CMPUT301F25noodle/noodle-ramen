@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupBottomNavigation() {
         navBrowse.setOnClickListener(v-> {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new EventHistoryFragment())
+                    .replace(R.id.fragmentContainer, new BrowseFragment())
                     .commit();
         });
 
