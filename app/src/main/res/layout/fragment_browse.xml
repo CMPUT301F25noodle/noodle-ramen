@@ -75,18 +75,18 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Find Events"
-            android:textSize="28sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="16dp" />
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
         <!-- Search Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/searchEditText"
@@ -105,10 +105,10 @@
                 android:id="@+id/filterIcon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@android:drawable/ic_menu_sort_by_size"
                 android:background="@drawable/search_background"
-                android:contentDescription="Filter" />
+                android:contentDescription="Filter"
+                android:padding="12dp"
+                android:src="@android:drawable/ic_menu_sort_by_size" />
         </LinearLayout>
 
         <!-- Filter Bubbles (Right now its at ALL EVENTS to show that we are showing all events for now -->
@@ -116,30 +116,30 @@
             android:id="@+id/allEventsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="All Events"
-            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
             android:backgroundTint="#CE93D8"
-            android:textAllCaps="false"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:layout_marginBottom="16dp" />
+            android:text="All Events"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white" />
 
         <!-- All Events Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Events"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp" />
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:background="#E0E0E0" />
 
         <!-- RecyclerView for Events -->
         <androidx.recyclerview.widget.RecyclerView
