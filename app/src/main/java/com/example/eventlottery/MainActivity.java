@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.eventlottery.fragments.CreateEventFragment;
 import com.example.eventlottery.fragments.BrowseFragment;
 import com.example.eventlottery.fragments.EventHistoryFragment;
+import com.example.eventlottery.fragments.NotificationFragment;
 import com.example.eventlottery.fragments.OrganizerDashboardFragment;
 import com.example.eventlottery.fragments.ProfileFragment;
 
@@ -64,8 +65,10 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         });
         notificationIcon.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
-            startActivity(intent);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new NotificationFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
