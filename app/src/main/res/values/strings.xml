@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">EventLottery</string>
 
-    <!-- Login/Signup strings -->
     <string name="event">Event</string>
     <string name="lottery">Lottery</string>
     <string name="sign">Sign</string>
@@ -20,7 +19,6 @@
     <string name="what_is_your_role">What is your role?</string>
     <string name="creating_account">creating_account</string>
 
-    <!-- QR Code and Event Strings -->
     <string name="generate_qr">Generate QR</string>
     <string name="event_title">Event title</string>
     <string name="pre_created_event">Pre Created Event</string>
@@ -40,7 +38,6 @@
     <string name="todo8">TODO</string>
     <string name="todo09">TODO</string>
 
-    <!-- Event Dashboard / Organizer -->
     <string name="leave_waitlist">Leave Waitlist</string>
     <string name="waitlisted">Waitlisted</string>
     <string name="won">Won</string>
@@ -55,7 +52,6 @@
     <string name="_1">1</string>
     <string name="southgate_mall">📍 Southgate Mall</string>
 
-    <!-- Create Event Form specific -->
     <string name="scan">Scan</string>
     <string name="image_1">Image 1</string>
     <string name="image_2">Image 2</string>
@@ -83,5 +79,15 @@
     <string name="no1">No</string>
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
+
+    <string name="Eventlogo">⏰</string>
+    <string name="user_name">User name</string>
+    <string name="role">Role</string>
+    <string name="edit_account">Edit Account</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="info">Information</string>
+    <string name="phone_number1">Phone Number</string>
+    <string name="email1">Email</string>
+    <string name="change_password_from_security_screen">Change password from Security screen</string>
 
 </resources>

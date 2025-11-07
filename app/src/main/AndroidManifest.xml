@@ -13,9 +13,10 @@
         android:theme="@style/Theme.EventLottery">
 
         <activity android:name=".MainActivity" android:exported="true" />
+        <activity android:name=".EditProfileActivity" android:exported="false" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".LandingActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
