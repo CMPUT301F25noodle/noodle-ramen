@@ -26,7 +26,7 @@ import java.util.UUID;
  * Organizer creates a new event.
  * When saved, a unique QR code is generated and stored in Firestore.
  */
-public class CreateEventActivity extends AppCompatActivity {
+public class QrGenerator extends AppCompatActivity {
 
     private EditText eventTitleInput, eventDescriptionInput;
     private ImageView qrPreview;
