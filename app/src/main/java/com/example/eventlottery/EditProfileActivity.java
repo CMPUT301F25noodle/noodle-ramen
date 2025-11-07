@@ -41,6 +41,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
     // Top summary
     private TextView userNameText, userRoleText;
+    //back button
+    private ImageView backButton;
 
     // Info fields
     private EditText phoneEditText, emailEditText, passwordHintField;
@@ -67,6 +69,7 @@ public class EditProfileActivity extends AppCompatActivity {
         userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
         // Bind UI
+        backButton = findViewById(R.id.backButton3);
         userNameText      = findViewById(R.id.userNameText);
         userRoleText      = findViewById(R.id.userRoleText);
 
@@ -79,6 +82,8 @@ public class EditProfileActivity extends AppCompatActivity {
         passwordEditBtn   = findViewById(R.id.passwordEditBtn);
 
         doneButton        = findViewById(R.id.doneButton);
+
+        backButton.setOnClickListener(v-> finish());
 
         // Load current profile values
         loadProfile();

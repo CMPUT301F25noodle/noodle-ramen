@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * notificaitonactivity.  displayas the notifcaitons to user, allows to accept and decline
- * updats in firebas e
+ * updats in firebase, this code has been archived converted into notifciation fragment
  */
 public class NotificationActivity extends AppCompatActivity{
     private static final String TAG = "NotificationsActivity";
