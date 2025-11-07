@@ -1,6 +1,8 @@
 package com.example.eventlottery;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.eventlottery.fragments.BrowseFragment;
 
 public class MainActivity extends AppCompatActivity {
+    private ImageView profileIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

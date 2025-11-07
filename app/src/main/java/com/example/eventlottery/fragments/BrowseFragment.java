@@ -1,5 +1,6 @@
 package com.example.eventlottery.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.example.eventlottery.R;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.eventlottery.managers.WaitlistManager;
+import com.example.eventlottery.ProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class BrowseFragment extends Fragment implements EventAdapter.OnEventClickListener {
@@ -165,8 +167,12 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
         // Profile icon
         profileIcon.setOnClickListener(v -> {
-            // TODO: Go to profile
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new ProfileFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
+
     }
 
     private void performSearch(String query) {
@@ -275,6 +281,8 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         currentEventViewModels = updatedList;
         eventAdapter.updateEvents(updatedList);
     }
+
+
 
 
 }
