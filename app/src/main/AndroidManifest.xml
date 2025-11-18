@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
     <application
         android:allowBackup="true"
@@ -15,6 +18,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EventLottery">
+
+        <meta-data
+            android:name="com.google.android.geo.AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek"
+            android:value ="AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek"/>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
 
         <activity
             android:name=".CreateEventActivity" />
@@ -42,9 +60,7 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
-        <meta-data
-            android:name="com.google.android.geo.AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek"
-            android:value ="AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek"/>
+
 
     </application>
 
