@@ -475,7 +475,7 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Run Lottery Draw");
 
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_select_entrants, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_select, null);
         EditText etSampleSize = dialogView.findViewById(R.id.et_sample_size);
 
         if (poolSize > 0) {
