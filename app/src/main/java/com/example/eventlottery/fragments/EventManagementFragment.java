@@ -451,7 +451,7 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                 });
     }
 
-    rivate void fetchUserNamesAndDownload(List<String> userIds, String fileName) {
+    private void fetchUserNamesAndDownload(List<String> userIds, String fileName) {
         List<String> userNames = new ArrayList<>();
         final int[] fetchCount = {0};
 
@@ -465,7 +465,7 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                         fetchCount[0]++;
                         if (fetchCount[0] == userIds.size()) {
                             progressBar.setVisibility(View.GONE);
-                            CSVDownloadHelper.exportToCSV(getContext(), fileName, userNames);
+                            CSVDownloadManager.exportToCSV(getContext(), fileName, userNames);
                         }
                     });
         }
@@ -595,4 +595,4 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
 
 
 
-}
+
