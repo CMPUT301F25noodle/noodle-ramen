@@ -145,6 +145,59 @@ public class CreateEventFragment extends Fragment {
     }
 
     /**
+     * loads event data from Firestore for editing
+     */
+    private void loadEventData(String eventId) {
+        Toast.makeText(getContext(), "Loading event data...", Toast.LENGTH_SHORT).show();
+
+        db.collection("events").document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Populate form fields with existing data
+                        etPreCreatedEvent.setText(documentSnapshot.getString("eventName"));
+                        etLocation.setText(documentSnapshot.getString("location"));
+                        etOrganizerName.setText(documentSnapshot.getString("organizerName"));
+                        etEventDescription.setText(documentSnapshot.getString("description"));
+                        etEligibilityCriteria.setText(documentSnapshot.getString("eligibility"));
+                        etStartDate.setText(documentSnapshot.getString("startDate"));
+                        etEndDate.setText(documentSnapshot.getString("endDate"));
+
+                        String price = documentSnapshot.getString("price");
+                        if (price != null && !price.equals("0")) {
+                            etPrice.setText(price);
+                        }
+
+                        String waitlistLimit = documentSnapshot.getString("waitlistLimit");
+                        if (waitlistLimit != null && !waitlistLimit.equals("0")) {
+                            etWaitlistLimit.setText(waitlistLimit);
+                        }
+
+                        String entrantMax = documentSnapshot.getString("entrantMaxCapacity");
+                        if (entrantMax != null && !entrantMax.equals("0")) {
+                            etPoolSize.setText(entrantMax);
+                        }
+
+                        Boolean geolocationRequired = documentSnapshot.getBoolean("geolocationRequired");
+                        if (geolocationRequired != null && geolocationRequired) {
+                            rgGeolocation.check(R.id.rb_geo_yes);
+                        } else {
+                            rgGeolocation.check(R.id.rb_geo_no);
+                        }
+
+                        Toast.makeText(getContext(), "Event loaded successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
+                        navigateToOrganizerDashboard();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to load event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    navigateToOrganizerDashboard();
+                });
+    }
+
+    /**
      * handles event creation and saves to firestore
      */
     private void handleEventCreation() {

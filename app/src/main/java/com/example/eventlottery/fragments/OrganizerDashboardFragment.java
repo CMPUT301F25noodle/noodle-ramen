@@ -179,6 +179,44 @@ public class OrganizerDashboardFragment extends Fragment {
             tvWaitlistCount.setText(location);
         }
 
+        Button  btnManage = eventCard.findViewById(R.id.btn_manage);
+        Button btnEdit = eventCard.findViewById(R.id.btn_edit);
+
+        // button for the manage to go do the draw
+        if (btnManage != null) {
+            btnManage.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    EventManagementFragment fragment = EventManagementFragment.newInstance(eventId);
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, fragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
+        }
+    // button to edit the event
+        if (btnEdit != null) {
+            btnEdit.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    // Create CreateEventFragment and pass the event ID for editing
+                    CreateEventFragment fragment = new CreateEventFragment();
+                    Bundle args = new Bundle();
+                    args.putString("eventId", eventId);
+                    fragment.setArguments(args);
+
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, fragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
+        }
+
+
+
+
+
+
         // add click listener to view event details
         eventCard.setOnClickListener(v -> {
             Toast.makeText(getContext(), "clicked on " + eventName, Toast.LENGTH_SHORT).show();
