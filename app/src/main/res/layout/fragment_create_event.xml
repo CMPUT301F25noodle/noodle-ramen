@@ -285,7 +285,7 @@
                     android:id="@+id/et_price"
                     android:layout_width="0dp"
                     android:layout_height="31dp"
-                    android:layout_weight="0"
+                    android:layout_weight="1"
                     android:autofillHints=""
                     android:background="@android:color/transparent"
                     android:hint=""
