@@ -44,6 +44,9 @@ public class CreateEventFragment extends Fragment {
     private FirebaseAuth mAuth;
     private String currentUserId;
 
+    private String eventId = null;
+    private boolean isEditMode = false;
+
     /**
      * instanties the fragment in the user interface view
      * instializes the firebasses instances
@@ -74,8 +77,18 @@ public class CreateEventFragment extends Fragment {
         initializeViews(view);
         setupListeners();
 
+        if (getArguments() != null) {
+            eventId = getArguments().getString("eventId");
+            if (eventId != null && !eventId.isEmpty()) {
+                isEditMode = true;
+                btnDone.setText("Save Changes");
+                loadEventData(eventId);
+            }
+        }
+
         return view;
     }
+
 
     /**
      * connects xml elements with java
@@ -241,17 +254,35 @@ public class CreateEventFragment extends Fragment {
 
         Toast.makeText(getContext(), "saving to firestore", Toast.LENGTH_SHORT).show();
 
-        db.collection("events")
-                .add(eventData)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(), "event created successfully!", Toast.LENGTH_LONG).show();
-                    clearForm();
-                    navigateToOrganizerDashboard();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                });
+        if (!isEditMode) {
+            eventData.put("createdAt", System.currentTimeMillis());
+
+            db.collection("events")
+                    .add(eventData)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(getContext(), "event created successfully!", Toast.LENGTH_LONG).show();
+                        clearForm();
+                        navigateToOrganizerDashboard();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    });
+        } else {
+
+
+            db.collection("events")
+                    .add(eventData)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(getContext(), "event created successfully!", Toast.LENGTH_LONG).show();
+                        clearForm();
+                        navigateToOrganizerDashboard();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    });
+        }
     }
 
     /**
