@@ -31,6 +31,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public interface OnNotificationClickListener {
         void onAcceptClicked(Notification notification);
         void onDeclineClicked(Notification notification);
+        void onRetryClicked(Notification notification);
+
     }
 
     /**
@@ -88,7 +90,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             respondedTextView = itemView.findViewById(R.id.responded_text);
         }
         public void bind(Notification notification, OnNotificationClickListener listener) {
-            // Set title based on type
+            // sets the title based on if won orlost
             String title = getTitleForType(notification.getType());
             titleTextView.setText(title);
 
@@ -99,25 +101,38 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             String timeAgo = getTimeAgo(notification.getTimestamp());
             timestampTextView.setText(timeAgo);
 
-            // Show/hide buttons based on whether notification requires response
+
             if (notification.requiresResponse()) {
                 // Show Accept/Decline buttons
                 acceptButton.setVisibility(View.VISIBLE);
                 declineButton.setVisibility(View.VISIBLE);
                 respondedTextView.setVisibility(View.GONE);
 
-                // Set click listeners
-                acceptButton.setOnClickListener(v -> {
-                    if (listener != null) {
-                        listener.onAcceptClicked(notification);
-                    }
-                });
+                if (NotificationManager.TYPE_LOSS.equals(notification.getType())) {
+                    acceptButton.setText("Rtry");
+                    declineButton.setText("Dismiss");
 
-                declineButton.setOnClickListener(v -> {
-                    if (listener != null) {
-                        listener.onDeclineClicked(notification);
-                    }
-                });
+                    acceptButton.setOnClickListener(v -> {
+                        if (listener != null) listener.onRetryClicked(notification);
+
+                    });
+                    declineButton.setOnClickListener(v -> {
+                        if (listener != null) listener.onDeclineClicked(notification);
+
+                    });
+
+                } else {
+                    acceptButton.setText("Accept");
+                    declineButton.setText("Decline");
+
+                    acceptButton.setOnClickListener(v -> {
+                        if (listener != null) listener.onAcceptClicked(notification);
+
+                    });
+                    declineButton.setOnClickListener(v -> {
+                        if (listener != null) listener.onDeclineClicked(notification);
+                    });
+                }
             } else {
 
                 acceptButton.setVisibility(View.GONE);
@@ -126,7 +141,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 // show responded status
                 if (notification.isResponded()) {
                     respondedTextView.setVisibility(View.VISIBLE);
-                    respondedTextView.setText("✓ Responded");
+                    respondedTextView.setText("Responded");
                 } else {
                     respondedTextView.setVisibility(View.GONE);
                 }
