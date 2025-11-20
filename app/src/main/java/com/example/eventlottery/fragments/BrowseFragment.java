@@ -127,6 +127,9 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                             String id = document.getId();
                             String eventName = document.getString("eventName");
                             String organizer = document.getString("organizer");
+                            // Changed from organizer to organizationName which was causing
+                            // The display to show organizerId and not the organizationName
+                            String organizationName = document.getString("organizerName");
                             String description = document.getString("description");
                             String eligibility = document.getString("eligibility");
                             String locationStr = document.getString("location");
@@ -136,6 +139,13 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                             String waitlistLimitStr = document.getString("waitlistLimit");
                             String entrantMaxStr = document.getString("entrantMaxCapacity");
                             Boolean geolocationRequired = document.getBoolean("geolocationRequired");
+
+                            // Check if current user is on the waitlist for this event
+                            boolean isUserOnWaitlist = false;
+                            Object waitlistUsersObj = document.get("waitlistUsers");
+                            if (currentUserId != null && waitlistUsersObj instanceof java.util.List) {
+                                isUserOnWaitlist = ((java.util.List<?>) waitlistUsersObj).contains(currentUserId);
+                            }
 
                             // Convert to proper types with defaults
                             double price = 0.0;
@@ -153,11 +163,15 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                                 entrantMax = Integer.parseInt(entrantMaxStr);
                             }
 
+                            // Get actual waitlist count from Firestore
+                            Long waitlistCountLong = document.getLong("waitlistCount");
+                            int waitlistCount = waitlistCountLong != null ? waitlistCountLong.intValue() : 0;
+
                             // Create Event object
                             Event event = new Event(
                                     id,
                                     eventName != null ? eventName : "Untitled Event",
-                                    organizer != null ? organizer : "Unknown Organizer",
+                                    organizationName != null ? organizationName : "Unknown Organizer",
                                     description != null ? description : "",
                                     eligibility != null ? eligibility : "",
                                     new Location(locationStr != null ? locationStr : "TBD"),
@@ -166,14 +180,14 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                                             endDate != null ? endDate : ""
                                     ),
                                     "", // imageUrl - empty for now
-                                    new Waitlist(0, waitlistLimit, entrantMax), // currentCount starts at 0
+                                    new Waitlist(waitlistCount, waitlistLimit, entrantMax),
                                     new Money(price),
                                     EventStatus.OPEN, // All events are OPEN by default for MVP
                                     geolocationRequired != null ? geolocationRequired : false
                             );
 
-                            // TODO: Check if user is actually on waitlist for this event
-                            EventViewModel viewModel = new EventViewModel(event, false);
+                            // Create EventViewModel with actual waitlist status
+                            EventViewModel viewModel = new EventViewModel(event, isUserOnWaitlist);
                             eventViewModels.add(viewModel);
 
                         } catch (Exception e) {
