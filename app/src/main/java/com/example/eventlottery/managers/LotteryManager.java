@@ -376,6 +376,30 @@ public class LotteryManager {
         });
     }
 
+    /**
+     * Adds user to the retrry list
+     * @param eventId
+     * @param userId
+     * @param callback
+     */
+    public void joinRetryList (String eventId, String userId, StatusCallback callback) {
+        if ( eventId ==null || eventId.isEmpty()|| userId ==null || userId.isEmpty()){
+            callback.onError("Invalid event ID or user ID");
+            return;
+        }
+        Log.d(TAG, "User " + userId + " joining retry list for event " + eventId);
+        DocumentReference eventRef = db.collection("events").document(eventId);
+        eventRef.update("retryEntrants", FieldValue.arrayUnion(userId))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "User added to retry list successfully");
+                    callback.onSuccess("Joined retry pool");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error joining retry list", e);
+                    callback.onError("Failed to join retry list: " + e.getMessage());
+                });
+    }
+
     //call backs
 
     /**
