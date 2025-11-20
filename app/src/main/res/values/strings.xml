@@ -89,5 +89,16 @@
     <string name="phone_number1">Phone Number</string>
     <string name="email1">Email</string>
     <string name="change_password_from_security_screen">Change password from Security screen</string>
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="_56">56</string>
+    <string name="_7">7</string>
+    <string name="_3">3</string>
+    <string name="images">Images</string>
+    <string name="profiles">Profiles</string>
+    <string name="organizers">Organizers</string>
+    <string name="events">Events</string>
+    <string name="_14">14</string>
+    <string name="notifications">Notifications</string>
+    <string name="_28">28</string>
 
 </resources>

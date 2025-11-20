@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#FFFFFF">
 
     <LinearLayout
         android:orientation="vertical"
@@ -10,10 +11,13 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Admin Dashboard"
+            android:text="@string/admin_dashboard"
             android:textStyle="bold"
             android:textSize="22sp"
-            android:layout_marginBottom="24dp"/>
+            android:textColor="#000000"
+            android:layout_marginBottom="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
         <!-- Row 1 -->
         <LinearLayout
@@ -32,19 +36,27 @@
                 android:background="@drawable/card_bg">
 
                 <TextView
-                    android:text="Profiles"
-                    android:textStyle="bold"/>
+                    android:text="@string/profiles"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/countProfiles"
-                    android:text="0"
+                    android:text="@string/_14"
                     android:textSize="20sp"
-                    android:layout_marginTop="8dp"/>
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <Space
                 android:layout_width="16dp"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
 
             <!-- Organizers -->
             <LinearLayout
@@ -57,18 +69,28 @@
                 android:background="@drawable/card_bg">
 
                 <TextView
-                    android:text="Organizers"
-                    android:textStyle="bold"/>
+                    android:text="@string/organizers"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/countOrganizers"
-                    android:text="0"
+                    android:text="@string/_7"
                     android:textSize="20sp"
-                    android:layout_marginTop="8dp"/>
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </LinearLayout>
 
-        <Space android:layout_height="16dp"/>
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
 
         <!-- Row 2 -->
         <LinearLayout
@@ -87,19 +109,27 @@
                 android:background="@drawable/card_bg">
 
                 <TextView
-                    android:text="Events"
-                    android:textStyle="bold"/>
+                    android:text="@string/events"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/countEvents"
-                    android:text="0"
+                    android:text="@string/_3"
                     android:textSize="20sp"
-                    android:layout_marginTop="8dp"/>
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <Space
                 android:layout_width="16dp"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
 
             <!-- Notifications -->
             <LinearLayout
@@ -112,18 +142,28 @@
                 android:background="@drawable/card_bg">
 
                 <TextView
-                    android:text="Notifications"
-                    android:textStyle="bold"/>
+                    android:text="@string/notifications"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/countNotifications"
-                    android:text="0"
+                    android:text="@string/_56"
                     android:textSize="20sp"
-                    android:layout_marginTop="8dp"/>
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </LinearLayout>
 
-        <Space android:layout_height="16dp"/>
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
 
         <!-- Row 3 -->
         <LinearLayout
@@ -142,17 +182,33 @@
                 android:background="@drawable/card_bg">
 
                 <TextView
-                    android:text="Images"
-                    android:textStyle="bold"/>
+                    android:text="@string/images"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/countImages"
-                    android:text="0"
+                    android:text="@string/_28"
                     android:textSize="20sp"
-                    android:layout_marginTop="8dp"/>
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <Space android:layout_width="16dp"/>
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <!-- Empty space to keep layout balanced -->
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1" />
 
         </LinearLayout>
 
