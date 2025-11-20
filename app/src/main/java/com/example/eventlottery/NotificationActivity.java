@@ -27,6 +27,7 @@ import java.util.List;
  * notificaitonactivity.  displayas the notifcaitons to user, allows to accept and decline
  * updats in firebase, this code has been archived converted into notifciation fragment
  */
+/**
 public class NotificationActivity extends AppCompatActivity{
     private static final String TAG = "NotificationsActivity";
 
@@ -76,7 +77,7 @@ public class NotificationActivity extends AppCompatActivity{
     /**
      * initalize the views
      *
-     */
+
     private void initializeViews() {
         notificationsRecyclerView = findViewById(R.id.notifications_recycler_view);
         progressBar = findViewById(R.id.progress_bar);
@@ -91,7 +92,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * recycler view
-     */
+
 
     private void setupRecyclerView() {
         notificationsList = new ArrayList<>();
@@ -116,7 +117,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * load notiicaitons from firebase
-     */
+
     private void loadNotifications() {
         Log.d(TAG, "Loading notifications for user: " + userId);
 
@@ -170,7 +171,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * take the firebase and turn it into a notifciaiton object
-     */
+
     private Notification documentToNotification(DocumentSnapshot document) {
         try {
             Notification notification = new Notification();
@@ -191,7 +192,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * show if empty
-     */
+
 
     private void showEmptyState() {
         notificationsRecyclerView.setVisibility(View.GONE);
@@ -201,7 +202,6 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * handle the accept button
-     */
 
     private void handleAcceptClicked(Notification notification) {
         Log.d(TAG, "Accept clicked for notification: " + notification.getId());
@@ -229,7 +229,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * accept the invite logic,
-     */
+
     private void acceptInvitation(Notification notification) {
         // Show progress
         progressBar.setVisibility(View.VISIBLE);
@@ -268,7 +268,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * decline button click
-     */
+
     private void handleDeclineClicked(Notification notification) {
         Log.d(TAG, "Decline clicked for notification: " + notification.getId());
 
@@ -295,7 +295,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * decline button logic
-     */
+
     private void declineInvitation(Notification notification) {
 
         progressBar.setVisibility(View.VISIBLE);
@@ -334,7 +334,7 @@ public class NotificationActivity extends AppCompatActivity{
 
     /**
      * add tag to notificaiton if it has been reponsded to
-     */
+
     private void markNotificationAsResponded(String notificationId) {
         db.collection("notifications")
                 .document(userId)
@@ -353,7 +353,7 @@ public class NotificationActivity extends AppCompatActivity{
      * getrs current userid and their notifcaitons setttings
      *
      * @return
-     */
+
 
     private void getUserIdAndLoadNotifications() {
         SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -423,3 +423,4 @@ public class NotificationActivity extends AppCompatActivity{
 
 
 }
+*/
