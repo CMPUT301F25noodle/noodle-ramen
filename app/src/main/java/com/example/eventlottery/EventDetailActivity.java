@@ -1,22 +1,33 @@
 package com.example.eventlottery;
 
+import static android.content.ContentValues.TAG;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +46,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private Button joinWaitlistButton, shareButton;
 
     private FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private FusedLocationProviderClient fusedLocationClient;
+
 
     /**
      * called when activity is made, intializes the UI, firebase instance
@@ -64,6 +78,9 @@ public class EventDetailActivity extends AppCompatActivity {
         backButton = findViewById(R.id.back_button);
 
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
 
         // Setup back button
         backButton.setOnClickListener(v -> finish());
@@ -135,6 +152,8 @@ public class EventDetailActivity extends AppCompatActivity {
                         int entrantMax = entrantMaxStr != null ? Integer.parseInt(entrantMaxStr) : 0;
                         spotsText.setText(entrantMax + " spots");
 
+                        joinWaitlistButton.setOnClickListener(v-> joinWaitlistWithLocation(eventId));
+
                         // Join waitlist button (simple toast for MVP)
                         joinWaitlistButton.setOnClickListener(v -> {
                             Toast.makeText(this, "Join waitlist functionality coming soon", Toast.LENGTH_SHORT).show();
@@ -156,6 +175,77 @@ public class EventDetailActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+    private void joinWaitlistWithLocation(String eventId) {
+        String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+        if (userId == null) {
+            Toast.makeText(this, "Please sign in to join Waitlist( we shouldn't get this error since user device ID should authorize)", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Location permissins required to join evnet", Toast.LENGTH_LONG).show();
+            return;
+
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                        joinWaitlistAndStoreLocation(eventId, userId, geoPoint);
+                    } else {
+                        Toast.makeText(this, "Unable to get location. Please enable GPS.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting location", e);
+                    Toast.makeText(this, "Error getting location: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+    }
+
+        private void joinWaitlistAndStoreLocation(String eventId, String userId, GeoPoint location) {
+            // First get user's name
+            db.collection("users").document(userId)
+                    .get()
+                    .addOnSuccessListener(userDoc -> {
+                        String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+
+                        // Add to waitlist array
+                        db.collection("events").document(eventId)
+                                .update("waitlistUsers", FieldValue.arrayUnion(userId))
+                                .addOnSuccessListener(aVoid -> {
+                                    // Store location in subcollection
+                                    Map<String, Object> locationData = new HashMap<>();
+                                    locationData.put("location", location);
+                                    locationData.put("userName", userName);
+                                    locationData.put("timestamp", System.currentTimeMillis());
+
+                                    db.collection("events").document(eventId)
+                                            .collection("entrantLocations").document(userId)
+                                            .set(locationData)
+                                            .addOnSuccessListener(aVoid2 -> {
+                                                Toast.makeText(this, "Successfully joined waitlist!",
+                                                        Toast.LENGTH_SHORT).show();
+                                                joinWaitlistButton.setEnabled(false);
+                                                joinWaitlistButton.setText("Joined Waitlist");
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e(TAG, "Error storing location", e);
+                                                Toast.makeText(this, "Joined but location not saved",
+                                                        Toast.LENGTH_SHORT).show();
+                                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error joining waitlist", e);
+                                    Toast.makeText(this, "Error: " + e.getMessage(),
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error getting user data", e);
+                    });
     }
 
     /**
