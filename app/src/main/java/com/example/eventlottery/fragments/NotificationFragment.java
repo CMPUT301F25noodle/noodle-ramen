@@ -339,6 +339,13 @@ public class NotificationFragment extends Fragment {
      * gets the current user ID so user can be assigned to the correct evvent
      */
     private void getUserIdAndLoadNotifications() {
+
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+            Log.d(TAG, "Using FirebaseAuth userId: " + userId);
+            loadNotifications();
+            return;
+        }
         SharedPreferences prefs = getActivity().getSharedPreferences("AppPrefs", MODE_PRIVATE);
         String cachedUserId = prefs.getString("userId", null);
 

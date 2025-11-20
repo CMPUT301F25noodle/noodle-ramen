@@ -55,21 +55,24 @@ public class LotteryManager {
         Log.d(TAG, "Initializing lottery for event: " + eventId + " with sample size: " + sampleSize);
 
         // get entrants from waitingLists that are tied to an eventID
-        DocumentReference waitingListRef = db.collection("waitingLists").document(eventId);
+       // DocumentReference waitingListRef = db.collection("waitingLists").document(eventId);
 
-        waitingListRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (!documentSnapshot.exists()) {
-                callback.onError("Waiting list not found for event");
-                return;
-            }
 
-            // Get entrants array
-            List<String> entrants = (List<String>) documentSnapshot.get("entrants");
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventSnapshot -> {
+                    if (!eventSnapshot.exists()) {
+                        callback.onError("Event not found");
+                        return;
+                    }
 
-            if (entrants == null || entrants.isEmpty()) {
-                callback.onError("No entrants in waiting list");
-                return;
-            }
+                    List<String> entrants = (List<String>) eventSnapshot.get("waitlistUsers");
+
+                    if (entrants == null || entrants.isEmpty()) {
+                        callback.onError("No entrants in waiting list");
+                        return;
+                    }
+
+
 
             if (sampleSize > entrants.size()) {
                 callback.onError("Sample size (" + sampleSize + ") exceeds number of entrants (" + entrants.size() + ")");
@@ -87,6 +90,8 @@ public class LotteryManager {
             List<String> losers = shuffledEntrants.subList(sampleSize, shuffledEntrants.size());
 
             Log.d(TAG, "Winners: " + winners.size() + ", Losers: " + losers.size());
+
+                    DocumentReference waitingListRef = db.collection("waitingLists").document(eventId);
 
             // updats that into firebase so we can save this
             WriteBatch batch = db.batch();
@@ -117,7 +122,7 @@ public class LotteryManager {
                 // sends the notifications and gets the name of the event for the noticifcaiont
                 db.collection("events").document(eventId).get()
                         .addOnSuccessListener(eventDoc -> {
-                            String eventName = eventDoc.getString("name");
+                            String eventName = eventDoc.getString("eventName");
                             if (eventName == null) eventName = "Event";
 
                             // Send win notifications to winners
