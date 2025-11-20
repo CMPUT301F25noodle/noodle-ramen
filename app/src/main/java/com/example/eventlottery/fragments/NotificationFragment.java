@@ -111,6 +111,10 @@ public class NotificationFragment extends Fragment {
             public void onAcceptClicked(Notification notification) {
                 handleAcceptClicked(notification);
             }
+            @Override
+            public void onRetryClicked(Notification notification) {
+                handleRetryClicked(notification);
+            }
 
             @Override
             public void onDeclineClicked(Notification notification) {
@@ -292,6 +296,33 @@ public class NotificationFragment extends Fragment {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void handleRetryClicked(Notification notification) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Join Retry Pool")
+                .setMessage("Do you want to join the retry pool? If a winner declines, you might be selected in a redraw.")
+                .setPositiveButton("Join", (dialog, which) -> joinRetryPool(notification))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+    private void joinRetryPool (Notification notification) {
+        progressBar.setVisibility(View.VISIBLE);
+        lotteryManager.joinRetryList(notification.getEventId(), userId,
+        new LotteryManager.StatusCallback() {
+            @Override
+            public void onSuccess(String message) {
+                progressBar.setVisibility(View.GONE);
+                markNotificationAsResponded(notification.getId());
+                Toast.makeText(getContext(), "You have joined the retry pool!", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void markNotificationAsResponded(String notificationId) {
