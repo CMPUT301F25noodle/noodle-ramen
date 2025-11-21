@@ -62,7 +62,7 @@ public class ProfileActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         if (auth.getCurrentUser() != null) {
-            userId = auth.getCurrentUser().getUid();
+            userId = auth.getCurrentUser().getUid(); // save log in Uid from user
         }
 
         // Bind UI

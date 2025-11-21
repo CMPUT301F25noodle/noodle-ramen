@@ -37,7 +37,7 @@ public class QrScannerActivity extends AppCompatActivity {
             barcodeView.resume();
         }
 
-        barcodeView.decodeContinuous(callback);
+        barcodeView.decodeContinuous(callback); // if there are scan result, callback
     }
 
     private final BarcodeCallback callback = new BarcodeCallback() {
@@ -58,7 +58,8 @@ public class QrScannerActivity extends AppCompatActivity {
             }
         }
     };
-
+    //callback method
+    // decrease camera resource
     @Override
     protected void onResume() {
         super.onResume();
@@ -76,8 +77,10 @@ public class QrScannerActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST) {
+            // if user granted permission => scanner resumes
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 barcodeView.resume();
+            // denied permission
             else {
                 Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show();
                 finish();
