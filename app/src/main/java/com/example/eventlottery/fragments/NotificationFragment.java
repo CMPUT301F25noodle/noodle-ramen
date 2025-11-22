@@ -111,6 +111,10 @@ public class NotificationFragment extends Fragment {
             public void onAcceptClicked(Notification notification) {
                 handleAcceptClicked(notification);
             }
+            @Override
+            public void onRetryClicked(Notification notification) {
+                handleRetryClicked(notification);
+            }
 
             @Override
             public void onDeclineClicked(Notification notification) {
@@ -294,6 +298,33 @@ public class NotificationFragment extends Fragment {
                 });
     }
 
+    private void handleRetryClicked(Notification notification) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Join Retry Pool")
+                .setMessage("Do you want to join the retry pool? If a winner declines, you might be selected in a redraw.")
+                .setPositiveButton("Join", (dialog, which) -> joinRetryPool(notification))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+    private void joinRetryPool (Notification notification) {
+        progressBar.setVisibility(View.VISIBLE);
+        lotteryManager.joinRetryList(notification.getEventId(), userId,
+        new LotteryManager.StatusCallback() {
+            @Override
+            public void onSuccess(String message) {
+                progressBar.setVisibility(View.GONE);
+                markNotificationAsResponded(notification.getId());
+                Toast.makeText(getContext(), "You have joined the retry pool!", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void markNotificationAsResponded(String notificationId) {
         db.collection("notifications")
                 .document(userId)
@@ -307,28 +338,53 @@ public class NotificationFragment extends Fragment {
     /**
      * gets the current user ID so user can be assigned to the correct evvent
      */
-
     private void getUserIdAndLoadNotifications() {
-        // 1. Get the current user from Firebase Auth directly
-        // This matches the ID used in WaitlistManager and LotteryManager
-        com.google.firebase.auth.FirebaseUser currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
 
-        if (currentUser != null) {
-            userId = currentUser.getUid();
-            Log.d(TAG, "Using Auth userId: " + userId);
-
-            // 2. Load notifications for this specific Auth ID
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+            Log.d(TAG, "Using FirebaseAuth userId: " + userId);
             loadNotifications();
-        } else {
-            // Handle case where user is not logged in
-            Log.e(TAG, "User not logged in via Firebase Auth");
-            progressBar.setVisibility(View.GONE);
-            showEmptyState();
-            // Optional: You might want to redirect to LoginActivity here
-            // Intent intent = new Intent(getContext(), LoginActivity.class);
-            // startActivity(intent);
+            return;
         }
+        SharedPreferences prefs = getActivity().getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String cachedUserId = prefs.getString("userId", null);
+
+        if (cachedUserId != null && !cachedUserId.isEmpty()) {
+            userId = cachedUserId;
+            Log.d(TAG, "Using cached userId: " + userId);
+            loadNotifications();
+            return;
+        }
+
+        String deviceId = android.provider.Settings.Secure.getString(
+                getActivity().getContentResolver(),
+                android.provider.Settings.Secure.ANDROID_ID
+        );
+
+        Log.d(TAG, "Device ID: " + deviceId + ", querying Firebase for userId...");
+        progressBar.setVisibility(View.VISIBLE);
+
+        db.collection("users")
+                .whereEqualTo("deviceId", deviceId)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        DocumentSnapshot userDoc = querySnapshot.getDocuments().get(0);
+                        userId = userDoc.getId();
+                        Log.d(TAG, "Found userId: " + userId);
+                        prefs.edit().putString("userId", userId).apply();
+                        loadNotifications();
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        Log.e(TAG, "No user found with deviceId: " + deviceId);
+                        Toast.makeText(getContext(), "User not registered. Please register first.", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    Log.e(TAG, "Error querying user by deviceId", e);
+                    Toast.makeText(getContext(), "Error loading user data", Toast.LENGTH_SHORT).show();
+                });
     }
-
-
 }

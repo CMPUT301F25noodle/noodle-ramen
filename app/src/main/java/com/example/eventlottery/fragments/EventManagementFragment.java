@@ -1,4 +1,5 @@
 package com.example.eventlottery.fragments;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +22,6 @@ import androidx.fragment.app.Fragment;
 import com.example.eventlottery.R;
 import com.example.eventlottery.managers.CSVDownloadManager;
 import com.example.eventlottery.managers.LotteryManager;
-import com.example.eventlottery.managers.CSVDownloadManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,10 +35,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-public class EventManagementFragment extends Fragment implements OnMapReadyCallback{
+
+public class EventManagementFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "EventManagement";
     private static final String ARG_EVENT_ID = "eventId";
 
@@ -64,13 +64,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     private String lotteryStatus;
     private GoogleMap googleMap;
 
-    // Firestore field names for different entrant categories
+    //  Firestore field names to match LotteryManager
     private static final String FIELD_WAITLIST = "waitlistUsers";
-
-    private static final String FIELD_ACCEPTED = "acceptedEntrants";
-    private static final String FIELD_DECLINED = "declinedEntrants";
+    private static final String FIELD_ACCEPTED = "accepted";        // Fixed: matches LotteryManager
+    private static final String FIELD_DECLINED = "declined";        // Fixed: matches LotteryManager
     private static final String FIELD_RETRY = "retryEntrants";
-
+    private static final String FIELD_SELECTED = "selected";        // Fixed: matches LotteryManager
 
     public static EventManagementFragment newInstance(String eventId) {
         EventManagementFragment fragment = new EventManagementFragment();
@@ -83,11 +82,19 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         db = FirebaseFirestore.getInstance();
         lotteryManager = new LotteryManager();
 
         if (getArguments() != null) {
             eventId = getArguments().getString(ARG_EVENT_ID);
+        }
+
+        if (eventId == null || eventId.isEmpty()) {
+            Toast.makeText(getContext(), "Invalid event ID", Toast.LENGTH_SHORT).show();
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
         }
     }
 
@@ -109,20 +116,27 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     }
 
     private void initializeViews(View view) {
+        // Header
         tvEventName = view.findViewById(R.id.tv_event_name);
         tvWaitlistCount = view.findViewById(R.id.tv_waitlist_count);
         tvPoolSize = view.findViewById(R.id.tv_pool_size);
         tvLotteryStatus = view.findViewById(R.id.tv_lottery_status);
         btnBack = view.findViewById(R.id.btn_back);
 
+        // Waitlist Preview Section
         waitlistPreviewContainer = view.findViewById(R.id.waitlist_preview_container);
         btnViewAllWaitlist = view.findViewById(R.id.btn_view_all_waitlist);
         btnDownloadAllWaitlist = view.findViewById(R.id.btn_download_all_waitlist);
 
+        // Map
         mapCard = view.findViewById(R.id.map_card);
+
+        // Lottery Actions
         btnDrawLottery = view.findViewById(R.id.btn_draw_lottery);
 
+        // Post-Draw Actions
         postDrawActionsContainer = view.findViewById(R.id.post_draw_actions_container);
+
         btnViewAccepted = view.findViewById(R.id.btn_view_accepted);
         btnDownloadAccepted = view.findViewById(R.id.btn_download_accepted);
         btnViewDeclined = view.findViewById(R.id.btn_view_declined);
@@ -146,8 +160,6 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         this.googleMap = map;
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         googleMap.getUiSettings().setScrollGesturesEnabled(true);
-
-
         loadEntrantLocations();
     }
 
@@ -173,28 +185,23 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     List<String> waitlistUsers = (List<String>) documentSnapshot.get(FIELD_WAITLIST);
                     int waitlistCount = waitlistUsers != null ? waitlistUsers.size() : 0;
 
-                    lotteryStatus = documentSnapshot.getString("lotteryStatus");
-                    if (lotteryStatus == null || lotteryStatus.isEmpty()) {
-                        lotteryStatus = "not_run";
-                    }
+                    // Check if lottery has run by looking for the 'selected' map
+                    Map<String, Object> selected = (Map<String, Object>) documentSnapshot.get(FIELD_SELECTED);
+                    boolean isLotteryRun = selected != null && !selected.isEmpty();
 
-                    // Parse pool size
                     if (poolSizeStr != null && !poolSizeStr.isEmpty()) {
                         try {
                             poolSize = Integer.parseInt(poolSizeStr);
                         } catch (NumberFormatException e) {
                             poolSize = 0;
                         }
-                    } else {
-                        poolSize = 0;
                     }
 
-                    // updates UI
                     tvEventName.setText(eventName != null ? eventName : "Unknown Event");
                     tvWaitlistCount.setText("Total Entrants: " + waitlistCount);
                     tvPoolSize.setText("Sample Size: " + poolSize);
 
-                    updateLotteryStatusUI();
+                    updateLotteryStatusUI(isLotteryRun);
                     loadWaitlistPreview();
                 })
                 .addOnFailureListener(e -> {
@@ -204,8 +211,8 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                 });
     }
 
-    private void updateLotteryStatusUI() {
-        if ("completed".equals(lotteryStatus)) {
+    private void updateLotteryStatusUI(boolean isCompleted) {
+        if (isCompleted) {
             tvLotteryStatus.setText("Lottery: COMPLETED");
             tvLotteryStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
             btnDrawLottery.setEnabled(false);
@@ -219,6 +226,7 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
             postDrawActionsContainer.setVisibility(View.GONE);
         }
     }
+
     private void loadWaitlistPreview() {
         db.collection("events").document(eventId)
                 .get()
@@ -236,12 +244,9 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     }
 
                     waitlistPreviewContainer.removeAllViews();
-
-                    // Show first 10
                     int limit = Math.min(10, waitlistUsers.size());
                     for (int i = 0; i < limit; i++) {
-                        String userId = waitlistUsers.get(i);
-                        addEntrantPreviewItem(userId);
+                        addEntrantPreviewItem(waitlistUsers.get(i));
                     }
                 });
     }
@@ -250,67 +255,16 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(userDoc -> {
-                    String name = userDoc.exists() ? userDoc.getString("name") : "Unknown User";
+                    if (getContext() == null) return;
 
+                    String name = userDoc.exists() ? userDoc.getString("name") : "Unknown User";
                     TextView nameView = new TextView(getContext());
                     nameView.setText("• " + name);
                     nameView.setTextSize(14);
                     nameView.setTextColor(Color.BLACK);
                     nameView.setPadding(16, 8, 16, 8);
-
                     waitlistPreviewContainer.addView(nameView);
                 });
-    }
-    private void loadEntrantLocations() {
-        if (googleMap == null) return;
-
-        db.collection("events").document(eventId)
-                .collection("entrantLocations")
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (querySnapshot.isEmpty()) {
-                        Log.d(TAG, "No location data available");
-                        return;
-                    }
-
-                    LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-                    boolean hasLocations = false;
-
-                    for (DocumentSnapshot locDoc : querySnapshot.getDocuments()) {
-                        GeoPoint geoPoint = locDoc.getGeoPoint("location");
-                        String userName = locDoc.getString("userName");
-                        String userId = locDoc.getId();
-
-                        if (geoPoint != null) {
-                            LatLng position = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-
-                            // Determine marker color based on status
-                            float markerColor = getMarkerColorForUser(userId);
-
-                            googleMap.addMarker(new MarkerOptions()
-                                    .position(position)
-                                    .title(userName != null ? userName : "Entrant")
-                                    .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
-
-                            boundsBuilder.include(position);
-                            hasLocations = true;
-                        }
-                    }
-
-                    // Zoom to show all markers
-                    if (hasLocations) {
-                        LatLngBounds bounds = boundsBuilder.build();
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading locations", e);
-                });
-    }
-    private float getMarkerColorForUser(String userId) {
-        // This will be checked against event document arrays
-        // For now, return default blue (will update after implementing status checks)
-        return BitmapDescriptorFactory.HUE_AZURE;
     }
 
     private void setupListeners() {
@@ -321,12 +275,10 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         });
 
         btnViewAllWaitlist.setOnClickListener(v -> viewEntrantList(FIELD_WAITLIST, "All Waitlist Entrants"));
-
         btnDownloadAllWaitlist.setOnClickListener(v -> downloadEntrantList(FIELD_WAITLIST, "waitlist_entrants"));
 
         btnDrawLottery.setOnClickListener(v -> showDrawLotteryDialog());
 
-        // Post-draw buttons
         btnViewAccepted.setOnClickListener(v -> viewEntrantList(FIELD_ACCEPTED, "Accepted Entrants"));
         btnDownloadAccepted.setOnClickListener(v -> downloadEntrantList(FIELD_ACCEPTED, "accepted_entrants"));
 
@@ -340,57 +292,35 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     private void viewEntrantList(String fieldName, String title) {
         progressBar.setVisibility(View.VISIBLE);
 
-        // 1. ACCEPTED (Subcollection)
-        if (fieldName.equals(FIELD_ACCEPTED)) {
-            db.collection("events").document(eventId).collection("accepted").get()
-                    .addOnSuccessListener(snapshot -> {
-                        List<String> userIds = new ArrayList<>();
-                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
-                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-        // 2. DECLINED (Subcollection)
-        else if (fieldName.equals(FIELD_DECLINED)) {
-            db.collection("events").document(eventId).collection("declined").get()
-                    .addOnSuccessListener(snapshot -> {
-                        List<String> userIds = new ArrayList<>();
-                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
-                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-        // 3. RETRY (WaitingLists Collection -> Array)
-        else if (fieldName.equals(FIELD_RETRY)) {
-            db.collection("waitingLists").document(eventId).get()
-                    .addOnSuccessListener(doc -> {
-                        List<String> userIds = (List<String>) doc.get("retryParticipants");
-                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-        // 4. WAITLIST (Events Collection -> Array)
-        else {
-            db.collection("events").document(eventId).get()
-                    .addOnSuccessListener(doc -> {
-                        List<String> userIds = (List<String>) doc.get(FIELD_WAITLIST);
-                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
+        db.collection("events").document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    progressBar.setVisibility(View.GONE);
+                    List<String> userIds = (List<String>) doc.get(fieldName);
+
+                    if (userIds == null || userIds.isEmpty()) {
+                        Toast.makeText(getContext(), "No entrants in this category", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    fetchUserNamesAndShowDialog(userIds, title, fieldName);
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void fetchUserNamesAndShowDialog(List<String> userIds, String title, String fieldName) {
         List<String> userNames = new ArrayList<>();
         final int[] fetchCount = {0};
 
+        if (userIds.isEmpty()) return;
+
         for (String userId : userIds) {
-            db.collection("users").document(userId)
-                    .get()
+            db.collection("users").document(userId).get()
                     .addOnSuccessListener(userDoc -> {
                         String name = userDoc.exists() ? userDoc.getString("name") : "Unknown";
                         userNames.add(name);
-
                         fetchCount[0]++;
                         if (fetchCount[0] == userIds.size()) {
                             showEntrantListDialog(userNames, title, fieldName);
@@ -405,80 +335,52 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     });
         }
     }
+
     private void showEntrantListDialog(List<String> userNames, String title, String fieldName) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(title + " (" + userNames.size() + ")");
 
-        // Create scrollable list
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(32, 16, 32, 16);
+
+        android.widget.ScrollView scrollView = new android.widget.ScrollView(getContext());
+        LinearLayout listContainer = new LinearLayout(getContext());
+        listContainer.setOrientation(LinearLayout.VERTICAL);
 
         for (String name : userNames) {
             TextView nameView = new TextView(getContext());
             nameView.setText("• " + name);
             nameView.setTextSize(16);
             nameView.setPadding(8, 12, 8, 12);
-            layout.addView(nameView);
+            listContainer.addView(nameView);
         }
 
+        scrollView.addView(listContainer);
+        layout.addView(scrollView);
         builder.setView(layout);
 
         builder.setPositiveButton("Download CSV", (dialog, which) -> {
-            String fileName = fieldName.replace("Entrants", "").toLowerCase();
+            String fileName = fieldName.toLowerCase();
             CSVDownloadManager.exportToCSV(getContext(), fileName, userNames);
         });
 
         builder.setNegativeButton("Close", null);
         builder.show();
     }
+
     private void downloadEntrantList(String fieldName, String fileName) {
         progressBar.setVisibility(View.VISIBLE);
-
-        // 1. ACCEPTED
-        if (fieldName.equals(FIELD_ACCEPTED)) {
-            db.collection("events").document(eventId).collection("accepted").get()
-                    .addOnSuccessListener(snapshot -> {
-                        List<String> userIds = new ArrayList<>();
-                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
-                        fetchUserNamesAndDownload(userIds, fileName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-        // 2. DECLINED
-        else if (fieldName.equals(FIELD_DECLINED)) {
-            db.collection("events").document(eventId).collection("declined").get()
-                    .addOnSuccessListener(snapshot -> {
-                        List<String> userIds = new ArrayList<>();
-                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
-                        fetchUserNamesAndDownload(userIds, fileName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-        // 3. RETRY
-        else if (fieldName.equals(FIELD_RETRY)) {
-            db.collection("waitingLists").document(eventId).get()
-                    .addOnSuccessListener(doc -> {
-                        List<String> userIds = (List<String>) doc.get("retryParticipants");
-                        fetchUserNamesAndDownload(userIds, fileName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-        // 4. WAITLIST
-        else {
-            db.collection("events").document(eventId).get()
-                    .addOnSuccessListener(doc -> {
-                        List<String> userIds = (List<String>) doc.get(FIELD_WAITLIST);
-                        fetchUserNamesAndDownload(userIds, fileName);
-                    })
-                    .addOnFailureListener(this::handleError);
-        }
-    }
-
-    private void handleError(Exception e) {
-        progressBar.setVisibility(View.GONE);
-        Log.e(TAG, "Error fetching list", e);
-        Toast.makeText(getContext(), "Error loading list", Toast.LENGTH_SHORT).show();
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(doc -> {
+                    List<String> userIds = (List<String>) doc.get(fieldName);
+                    if (userIds == null || userIds.isEmpty()) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(getContext(), "No entrants to download", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    fetchUserNamesAndDownload(userIds, fileName);
+                });
     }
 
     private void fetchUserNamesAndDownload(List<String> userIds, String fileName) {
@@ -486,12 +388,10 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         final int[] fetchCount = {0};
 
         for (String userId : userIds) {
-            db.collection("users").document(userId)
-                    .get()
+            db.collection("users").document(userId).get()
                     .addOnSuccessListener(userDoc -> {
                         String name = userDoc.exists() ? userDoc.getString("name") : "Unknown";
                         userNames.add(name);
-
                         fetchCount[0]++;
                         if (fetchCount[0] == userIds.size()) {
                             progressBar.setVisibility(View.GONE);
@@ -513,26 +413,16 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         }
 
         builder.setView(dialogView);
-        builder.setMessage("This will randomly select entrants from the waitlist and send them notifications. This can only be done once.");
+        builder.setMessage("This will randomly select entrants from the waitlist.");
 
         builder.setPositiveButton("Run Lottery", (dialog, which) -> {
             String sampleSizeStr = etSampleSize.getText().toString().trim();
-
-            if (sampleSizeStr.isEmpty()) {
-                Toast.makeText(getContext(), "Please enter sample size", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
             try {
                 int sampleSize = Integer.parseInt(sampleSizeStr);
-                if (sampleSize <= 0) {
-                    Toast.makeText(getContext(), "Sample size must be greater than 0", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
+                if (sampleSize <= 0) throw new NumberFormatException();
                 runLottery(sampleSize);
             } catch (NumberFormatException e) {
-                Toast.makeText(getContext(), "Invalid number", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Invalid sample size", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -544,33 +434,14 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         progressBar.setVisibility(View.VISIBLE);
         btnDrawLottery.setEnabled(false);
 
-        prepareEventForLottery(eventId, new PrepareCallback() {
+        //  Directly call LotteryManager which now writes to 'events' correctly
+        lotteryManager.initializeLottery(eventId, sampleSize, new LotteryManager.LotteryCallback() {
             @Override
-            public void onSuccess() {
-                lotteryManager.initializeLottery(eventId, sampleSize, new LotteryManager.LotteryCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        db.collection("events").document(eventId)
-                                .update("lotteryStatus", "completed")
-                                .addOnSuccessListener(aVoid -> {
-                                    progressBar.setVisibility(View.GONE);
-                                    lotteryStatus = "completed";
-                                    updateLotteryStatusUI();
-                                    loadEntrantLocations(); // Refresh map with new colors
-
-                                    Toast.makeText(getContext(),
-                                            "Lottery completed! " + message,
-                                            Toast.LENGTH_LONG).show();
-                                });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        progressBar.setVisibility(View.GONE);
-                        btnDrawLottery.setEnabled(true);
-                        Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_LONG).show();
-                    }
-                });
+            public void onSuccess(String message) {
+                progressBar.setVisibility(View.GONE);
+                updateLotteryStatusUI(true);
+                loadEntrantLocations(); // Refresh map
+                Toast.makeText(getContext(), "Lottery completed!", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -582,47 +453,46 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         });
     }
 
-    private void prepareEventForLottery(String eventId, PrepareCallback callback) {
+    private void loadEntrantLocations() {
+        if (googleMap == null) return;
+
         db.collection("events").document(eventId)
+                .collection("entrantLocations")
                 .get()
-                .addOnSuccessListener(eventDoc -> {
-                    if (!eventDoc.exists()) {
-                        callback.onError("Event not found");
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        Log.d(TAG, "No location data available");
                         return;
                     }
 
-                    List<String> waitlistUsers = (List<String>) eventDoc.get(FIELD_WAITLIST);
+                    LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+                    boolean hasLocations = false;
 
-                    if (waitlistUsers == null || waitlistUsers.isEmpty()) {
-                        callback.onError("No entrants in waitlist");
-                        return;
+                    for (DocumentSnapshot locDoc : querySnapshot.getDocuments()) {
+                        GeoPoint geoPoint = locDoc.getGeoPoint("location");
+                        String userName = locDoc.getString("userName");
+
+                        if (geoPoint != null) {
+                            LatLng position = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+
+                            // Default color for now
+                            float markerColor = BitmapDescriptorFactory.HUE_AZURE;
+
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(position)
+                                    .title(userName != null ? userName : "Entrant")
+                                    .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
+                            boundsBuilder.include(position);
+                            hasLocations = true;
+                        }
                     }
 
-                    Map<String, Object> waitingListData = new HashMap<>();
-                    waitingListData.put("entrants", waitlistUsers);
-                    waitingListData.put("eventId", eventId);
-                    waitingListData.put("createdAt", System.currentTimeMillis());
-
-                    db.collection("waitingLists").document(eventId)
-                            .set(waitingListData)
-                            .addOnSuccessListener(aVoid -> callback.onSuccess())
-                            .addOnFailureListener(e -> callback.onError("Failed: " + e.getMessage()));
+                    if (hasLocations) {
+                        LatLngBounds bounds = boundsBuilder.build();
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+                    }
                 })
-                .addOnFailureListener(e -> callback.onError("Failed: " + e.getMessage()));
-    }
-
-    private interface PrepareCallback {
-        void onSuccess();
-        void onError(String error);
+                .addOnFailureListener(e -> Log.e(TAG, "Error loading locations", e));
     }
 }
-
-
-
-
-
-
-
-
-
-

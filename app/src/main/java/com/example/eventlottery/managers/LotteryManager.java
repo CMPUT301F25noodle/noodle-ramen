@@ -1,22 +1,21 @@
 package com.example.eventlottery.managers;
 
 import android.util.Log;
-
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Lottery manager - handles lottery logic for events
- * Aligning with: events/{id}/waitlist -> Winners | Losers -> (Losers click Retry) -> events/{id}/retry list
+ * Stores all lists (accepted, declined, retry, selected) directly in the 'events' collection.
  */
 public class LotteryManager {
 
@@ -30,9 +29,8 @@ public class LotteryManager {
     }
 
     /**
-     * 1. Access the waitlist from the Event
-     * 2. Shuffle and Select Winners
-     * 3. Save state (including an empty retry list for Option B)
+     * Fetches entrants from the event's waitlistUsers field, shuffles them, and selects winners.
+     * Saves the results back to the 'events' document.
      */
     public void initializeLottery(String eventId, int sampleSize, LotteryCallback callback) {
         if (eventId == null || eventId.isEmpty()) {
@@ -40,6 +38,14 @@ public class LotteryManager {
             return;
         }
 
+        if (sampleSize <= 0) {
+            callback.onError("Sample size must be greater than 0");
+            return;
+        }
+
+        Log.d(TAG, "Initializing lottery for event: " + eventId);
+
+        // Reference  event document
         DocumentReference eventRef = db.collection("events").document(eventId);
 
         eventRef.get().addOnSuccessListener(eventSnapshot -> {
@@ -48,6 +54,7 @@ public class LotteryManager {
                 return;
             }
 
+            // gets users from wiatlist
             List<String> entrants = (List<String>) eventSnapshot.get("waitlistUsers");
 
             if (entrants == null || entrants.isEmpty()) {
@@ -55,169 +62,167 @@ public class LotteryManager {
                 return;
             }
 
-            // --- FIX FOR RED LINE ---
-            // Create a final variable for the lambda to use
-            int calculatedSize = sampleSize;
-            if (calculatedSize > entrants.size()) {
-                calculatedSize = entrants.size();
+            if (sampleSize > entrants.size()) {
+                callback.onError("Sample size (" + sampleSize + ") exceeds number of entrants");
+                return;
             }
-            final int finalSampleSize = calculatedSize;
-            // ------------------------
 
-            // Shuffle
+            // does the shuffle and sperates winners and lsoers
             List<String> shuffledEntrants = new ArrayList<>(entrants);
             Collections.shuffle(shuffledEntrants);
 
-            // Split
-            List<String> winners = shuffledEntrants.subList(0, finalSampleSize);
-            List<String> losers = shuffledEntrants.subList(finalSampleSize, shuffledEntrants.size());
+            List<String> winners = shuffledEntrants.subList(0, sampleSize);
+            List<String> losers = shuffledEntrants.subList(sampleSize, shuffledEntrants.size());
 
-            // Save State
-            Map<String, Object> lotteryState = new HashMap<>();
+            Log.d(TAG, "Winners: " + winners.size() + ", Losers: " + losers.size());
 
-            // OPTION B CHANGE: We don't rely on 'lotteryOrder' for replacements anymore.
-            // We verify 'retryParticipants' exists for people to join later.
-            lotteryState.put("retryParticipants", new ArrayList<String>());
+            // updates for the event
+            WriteBatch batch = db.batch();
 
+            // Store lottery order and index
+            batch.update(eventRef, "lotteryOrder", shuffledEntrants);
+            batch.update(eventRef, "currentDrawIndex", sampleSize);
+
+            // Initialize accepted list as empty
+            batch.update(eventRef, "accepted", new ArrayList<String>());
+            // Initialize declined list as empty
+            batch.update(eventRef, "declined", new ArrayList<String>());
+
+            // Create 'selected' map to track status of winners
             Map<String, Object> selectedMap = new HashMap<>();
             for (String userId : winners) {
                 Map<String, String> userStatus = new HashMap<>();
                 userStatus.put("status", "pending");
+                userStatus.put("timestamp", String.valueOf(System.currentTimeMillis()));
                 selectedMap.put(userId, userStatus);
             }
-            lotteryState.put("selected", selectedMap);
+            batch.update(eventRef, "selected", selectedMap);
 
-            db.collection("waitingLists").document(eventId)
-                    .set(lotteryState)
-                    .addOnSuccessListener(aVoid -> {
-                        String eventName = eventSnapshot.getString("name");
-                        if (eventName == null) eventName = "Event";
-
-                        // Notify Winners
-                        for (String winnerId : winners) {
-                            notificationManager.sendWinNotification(winnerId, eventId, eventName);
-                        }
-
-                        // Notify Losers (Prompting them to Retry)
-                        notificationManager.notifyAllLosers(eventId, losers);
-
-                        callback.onSuccess("Lottery completed: " + winners.size() + " winners selected");
-                    })
-                    .addOnFailureListener(e -> callback.onError("Failed to save lottery results"));
-
-        }).addOnFailureListener(e -> callback.onError("Failed to fetch event"));
-    }
-
-    /**
-     * OPTION B NEW METHOD:
-     * Call this when a user clicks "Join Retry Pool" / "Retry" on their loss notification.
-     */
-    public void joinRetryList(String eventId, String userId, StatusCallback callback) {
-        DocumentReference waitingListRef = db.collection("waitingLists").document(eventId);
-
-        // Add user to the explicit retry list
-        waitingListRef.update("retryParticipants", FieldValue.arrayUnion(userId))
-                .addOnSuccessListener(aVoid -> callback.onSuccess("Joined retry list"))
-                .addOnFailureListener(e -> callback.onError("Failed to join retry list"));
-    }
-
-    /**
-     * OPTION B UPDATE:
-     * Picks a replacement specifically from the 'retryParticipants' list.
-     */
-    public void drawReplacement(String eventId, ReplacementCallback callback) {
-        DocumentReference waitingListRef = db.collection("waitingLists").document(eventId);
-
-        waitingListRef.get().addOnSuccessListener(documentSnapshot -> {
-            // Get the list of people who explicitly asked to retry
-            List<String> retryCandidates = (List<String>) documentSnapshot.get("retryParticipants");
-
-            if (retryCandidates == null || retryCandidates.isEmpty()) {
-                callback.onNoMoreEntrants("No users currently in retry list");
-                return;
-            }
-
-            // Pick a random person from the retry list (Fairness)
-            int randomIndex = new Random().nextInt(retryCandidates.size());
-            String replacementUserId = retryCandidates.get(randomIndex);
-
-            WriteBatch batch = db.batch();
-
-            // 1. Move them to 'selected' status
-            Map<String, String> userStatus = new HashMap<>();
-            userStatus.put("status", "pending");
-            batch.update(waitingListRef, "selected." + replacementUserId, userStatus);
-
-            // 2. Remove them from the retry list so they aren't picked again
-            batch.update(waitingListRef, "retryParticipants", FieldValue.arrayRemove(replacementUserId));
 
             batch.commit().addOnSuccessListener(aVoid -> {
-                // Send Notification
-                db.collection("events").document(eventId).get().addOnSuccessListener(eventDoc -> {
-                    String name = eventDoc.getString("name");
-                    notificationManager.sendReplacementNotification(replacementUserId, eventId, name);
-                    callback.onSuccess(replacementUserId);
-                });
-            }).addOnFailureListener(e -> callback.onError("Failed to draw replacement"));
+                Log.d(TAG, "Lottery initialization successful");
+
+
+                String eventName = eventSnapshot.getString("eventName");
+                if (eventName == null) eventName = "Event";
+
+                // send noticaitons to the winners
+                for (String winnerId : winners) {
+                    notificationManager.sendWinNotification(winnerId, eventId, eventName);
+                }
+                notificationManager.notifyAllLosers(eventId, losers);
+
+                callback.onSuccess("Lottery completed: " + winners.size() + " winners selected");
+
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "Error committing lottery batch", e);
+                callback.onError("Failed to save lottery results: " + e.getMessage());
+            });
+
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Error fetching event", e);
+            callback.onError("Failed to fetch event: " + e.getMessage());
+        });
+    }
+
+    /**
+     * Draws the next person from lotteryOrder ONLY IF they are in the 'retryEntrants' list.
+     * Skips users who did not opt-in to the retry pool.
+     */
+    public void drawReplacement(String eventId, ReplacementCallback callback) {
+        if (eventId == null || eventId.isEmpty()) {
+            callback.onError("Invalid event ID");
+            return;
+        }
+
+        DocumentReference eventRef = db.collection("events").document(eventId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(eventRef);
+
+            if (!snapshot.exists()) {
+                throw new RuntimeException("Event not found");
+            }
+
+
+            List<String> lotteryOrder = (List<String>) snapshot.get("lotteryOrder");
+            List<String> retryEntrants = (List<String>) snapshot.get("retryEntrants"); // Fetch the retry list
+            Long currentIndexLong = snapshot.getLong("currentDrawIndex");
+
+            if (lotteryOrder == null || currentIndexLong == null) {
+                throw new RuntimeException("Lottery data missing");
+            }
+
+            int index = currentIndexLong.intValue();
+            String replacementUserId = null;
+            int newIndex = index;
+
+            //  Loop through lotteryOrder to find the next candidate who IS in retryEntrants
+            // If retryEntrants is null (no one joined), we can't pick anyone
+            if (retryEntrants != null) {
+                while (newIndex < lotteryOrder.size()) {
+                    String candidateId = lotteryOrder.get(newIndex);
+
+                    // Check if this candidate joined the retry pool
+                    if (retryEntrants.contains(candidateId)) {
+                        replacementUserId = candidateId;
+                        break; // Found a match!
+                    }
+
+                    // If not in retry pool, skip them and keep looking
+                    newIndex++;
+                }
+            }
+
+            if (replacementUserId == null) {
+                throw new RuntimeException("NO_REPLACEMENTS_AVAILABLE");
+            }
+
+            //  Update the found user to pending
+            Map<String, Object> selectedMap = (Map<String, Object>) snapshot.get("selected");
+            if (selectedMap == null) selectedMap = new HashMap<>();
+
+            Map<String, String> userStatus = new HashMap<>();
+            userStatus.put("status", "pending");
+            userStatus.put("timestamp", String.valueOf(System.currentTimeMillis()));
+
+            selectedMap.put(replacementUserId, userStatus);
+
+            //  Write changes back
+            transaction.update(eventRef, "selected", selectedMap);
+            transaction.update(eventRef, "currentDrawIndex", newIndex + 1); // Update index to after this user
+
+            // Return the userId and eventName for the callback
+            String eventName = snapshot.getString("eventName");
+            return new String[]{replacementUserId, eventName};
+
+        }).addOnSuccessListener(result -> {
+
+            String userId = result[0];
+            String eventName = result[1] != null ? result[1] : "Event";
+
+            notificationManager.sendReplacementNotification(userId, eventId, eventName);
+            callback.onSuccess(userId);
+
+        }).addOnFailureListener(e -> {
+            if (e.getMessage() != null && e.getMessage().contains("NO_REPLACEMENTS_AVAILABLE")) {
+                callback.onNoMoreEntrants("No valid entrants in retry pool");
+            } else {
+                callback.onError("Failed to draw replacement: " + e.getMessage());
+            }
         });
     }
 
     public void acceptInvitation(String eventId, String userId, StatusCallback callback) {
-        DocumentReference waitingListStateRef = db.collection("waitingLists").document(eventId);
-
-        waitingListStateRef.get().addOnSuccessListener(snapshot -> {
-            Map<String, Object> selected = (Map<String, Object>) snapshot.get("selected");
-            if (selected == null || !selected.containsKey(userId)) {
-                callback.onError("User not pending acceptance");
-                return;
-            }
-
-            WriteBatch batch = db.batch();
-
-            // Mark as accepted in lottery state
-            batch.update(waitingListStateRef, "selected." + userId + ".status", "accepted");
-            batch.update(waitingListStateRef, "accepted", FieldValue.arrayUnion(userId));
-
-            // Remove from Waitlist
-            DocumentReference waitlistEntryRef = db.collection("events").document(eventId).collection("waitlist").document(userId);
-            batch.delete(waitlistEntryRef);
-
-            DocumentReference eventRef = db.collection("events").document(eventId);
-            batch.update(eventRef, "waitlistUsers", FieldValue.arrayRemove(userId));
-            batch.update(eventRef, "waitlistCount", FieldValue.increment(-1));
-
-            // Add to Accepted Collection
-            DocumentReference acceptedEntryRef = db.collection("events").document(eventId).collection("accepted").document(userId);
-            Map<String, Object> acceptedData = new HashMap<>();
-            acceptedData.put("uid", userId);
-            acceptedData.put("timestamp", System.currentTimeMillis());
-            acceptedData.put("status", "accepted");
-            batch.set(acceptedEntryRef, acceptedData);
-
-            batch.commit()
-                    .addOnSuccessListener(aVoid -> callback.onSuccess("Accepted and moved to accepted list"))
-                    .addOnFailureListener(e -> callback.onError("Failed to accept"));
-        });
+        updateUserStatus(eventId, userId, "accepted", callback);
     }
 
     public void declineInvitation(String eventId, String userId, StatusCallback callback) {
-        DocumentReference waitingListStateRef = db.collection("waitingLists").document(eventId);
 
-        waitingListStateRef.get().addOnSuccessListener(snapshot -> {
-            WriteBatch batch = db.batch();
-
-            batch.update(waitingListStateRef, "selected." + userId + ".status", "declined");
-
-            // Remove from Event Waitlist
-            DocumentReference waitlistEntryRef = db.collection("events").document(eventId).collection("waitlist").document(userId);
-            batch.delete(waitlistEntryRef);
-
-            DocumentReference eventRef = db.collection("events").document(eventId);
-            batch.update(eventRef, "waitlistUsers", FieldValue.arrayRemove(userId));
-            batch.update(eventRef, "waitlistCount", FieldValue.increment(-1));
-
-            batch.commit().addOnSuccessListener(aVoid -> {
-                // Trigger replacement from the Retry List
+        updateUserStatus(eventId, userId, "declined", new StatusCallback() {
+            @Override
+            public void onSuccess(String message) {
+                // send notifcaton to rreplacement
                 drawReplacement(eventId, new ReplacementCallback() {
                     @Override
                     public void onSuccess(String replacementUserId) {
@@ -225,21 +230,83 @@ public class LotteryManager {
                     }
 
                     @Override
-                    public void onNoMoreEntrants(String message) {
-                        // This is valid in Option B: You declined, but nobody has clicked 'Retry' yet.
-                        callback.onSuccess("Declined. No retry candidates available yet.");
+                    public void onNoMoreEntrants(String msg) {
+                        callback.onSuccess("Declined (no replacement available)");
                     }
 
                     @Override
                     public void onError(String error) {
-                        callback.onSuccess("Declined, but replacement error: " + error);
+                        // User was successfully declined, even if replacement failed
+                        callback.onSuccess("Declined (replacement error: " + error + ")");
                     }
                 });
-            });
+            }
+
+            @Override
+            public void onError(String error) {
+                callback.onError(error);
+            }
         });
     }
 
-    public interface LotteryCallback { void onSuccess(String msg); void onError(String err); }
-    public interface StatusCallback { void onSuccess(String msg); void onError(String err); }
-    public interface ReplacementCallback { void onSuccess(String uid); void onNoMoreEntrants(String msg); void onError(String err); }
+    private void updateUserStatus(String eventId, String userId, String newStatus, StatusCallback callback) {
+        DocumentReference eventRef = db.collection("events").document(eventId);
+
+        db.runTransaction(transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(eventRef);
+                    if (!snapshot.exists()) throw new RuntimeException("Event not found");
+
+                    Map<String, Object> selected = (Map<String, Object>) snapshot.get("selected");
+                    if (selected == null || !selected.containsKey(userId)) {
+                        throw new RuntimeException("User not in selected list");
+                    }
+
+                    Map<String, Object> userStatusMap = (Map<String, Object>) selected.get(userId);
+                    String currentStatus = (String) userStatusMap.get("status");
+
+                    if (!"pending".equals(currentStatus)) {
+                        throw new RuntimeException("User already responded");
+                    }
+
+                    // Update status in the map
+                    userStatusMap.put("status", newStatus);
+                    userStatusMap.put("timestamp", String.valueOf(System.currentTimeMillis()));
+                    transaction.update(eventRef, "selected." + userId, userStatusMap);
+
+                    // Add to specific list (accepted or declined)
+                    transaction.update(eventRef, newStatus, FieldValue.arrayUnion(userId));
+
+                    return null;
+                }).addOnSuccessListener(result -> callback.onSuccess("Status updated to " + newStatus))
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+    }
+
+    public void joinRetryList(String eventId, String userId, StatusCallback callback) {
+        if (eventId == null || userId == null) {
+            callback.onError("Invalid ID");
+            return;
+        }
+        // retryEntrants is stored on the event document
+        db.collection("events").document(eventId)
+                .update("retryEntrants", FieldValue.arrayUnion(userId))
+                .addOnSuccessListener(a -> callback.onSuccess("Joined retry pool"))
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+    }
+
+    // Interfaces
+    public interface LotteryCallback {
+        void onSuccess(String message);
+        void onError(String error);
+    }
+
+    public interface ReplacementCallback {
+        void onSuccess(String replacementUserId);
+        void onNoMoreEntrants(String message);
+        void onError(String error);
+    }
+
+    public interface StatusCallback {
+        void onSuccess(String message);
+        void onError(String error);
+    }
 }
