@@ -66,11 +66,11 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
 
     // Firestore field names for different entrant categories
     private static final String FIELD_WAITLIST = "waitlistUsers";
-    private static final String FIELD_SELECTED = "selectedEntrants";
+
     private static final String FIELD_ACCEPTED = "acceptedEntrants";
     private static final String FIELD_DECLINED = "declinedEntrants";
     private static final String FIELD_RETRY = "retryEntrants";
-    private static final String FIELD_LOST = "lostEntrants";
+
 
     public static EventManagementFragment newInstance(String eventId) {
         EventManagementFragment fragment = new EventManagementFragment();
@@ -83,19 +83,11 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         db = FirebaseFirestore.getInstance();
         lotteryManager = new LotteryManager();
 
         if (getArguments() != null) {
             eventId = getArguments().getString(ARG_EVENT_ID);
-        }
-
-        if (eventId == null || eventId.isEmpty()) {
-            Toast.makeText(getContext(), "Invalid event ID", Toast.LENGTH_SHORT).show();
-            if (getActivity() != null) {
-                getActivity().getSupportFragmentManager().popBackStack();
-            }
         }
     }
 
@@ -117,25 +109,19 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     }
 
     private void initializeViews(View view) {
-        // Header
         tvEventName = view.findViewById(R.id.tv_event_name);
         tvWaitlistCount = view.findViewById(R.id.tv_waitlist_count);
         tvPoolSize = view.findViewById(R.id.tv_pool_size);
         tvLotteryStatus = view.findViewById(R.id.tv_lottery_status);
         btnBack = view.findViewById(R.id.btn_back);
 
-        // Waitlist Preview Section
         waitlistPreviewContainer = view.findViewById(R.id.waitlist_preview_container);
         btnViewAllWaitlist = view.findViewById(R.id.btn_view_all_waitlist);
         btnDownloadAllWaitlist = view.findViewById(R.id.btn_download_all_waitlist);
 
-        // Map
         mapCard = view.findViewById(R.id.map_card);
-
-        // Lottery Actions
         btnDrawLottery = view.findViewById(R.id.btn_draw_lottery);
 
-        // Post-Draw Actions (hidden until lottery runs)
         postDrawActionsContainer = view.findViewById(R.id.post_draw_actions_container);
         btnViewAccepted = view.findViewById(R.id.btn_view_accepted);
         btnDownloadAccepted = view.findViewById(R.id.btn_download_accepted);
@@ -354,26 +340,44 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     private void viewEntrantList(String fieldName, String title) {
         progressBar.setVisibility(View.VISIBLE);
 
-        db.collection("events").document(eventId)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    progressBar.setVisibility(View.GONE);
-
-                    List<String> userIds = (List<String>) doc.get(fieldName);
-
-                    if (userIds == null || userIds.isEmpty()) {
-                        Toast.makeText(getContext(), "No entrants in this category", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Fetch user names
-                    fetchUserNamesAndShowDialog(userIds, title, fieldName);
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Error fetching entrants", e);
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        // 1. ACCEPTED (Subcollection)
+        if (fieldName.equals(FIELD_ACCEPTED)) {
+            db.collection("events").document(eventId).collection("accepted").get()
+                    .addOnSuccessListener(snapshot -> {
+                        List<String> userIds = new ArrayList<>();
+                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
+                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+        // 2. DECLINED (Subcollection)
+        else if (fieldName.equals(FIELD_DECLINED)) {
+            db.collection("events").document(eventId).collection("declined").get()
+                    .addOnSuccessListener(snapshot -> {
+                        List<String> userIds = new ArrayList<>();
+                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
+                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+        // 3. RETRY (WaitingLists Collection -> Array)
+        else if (fieldName.equals(FIELD_RETRY)) {
+            db.collection("waitingLists").document(eventId).get()
+                    .addOnSuccessListener(doc -> {
+                        List<String> userIds = (List<String>) doc.get("retryParticipants");
+                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+        // 4. WAITLIST (Events Collection -> Array)
+        else {
+            db.collection("events").document(eventId).get()
+                    .addOnSuccessListener(doc -> {
+                        List<String> userIds = (List<String>) doc.get(FIELD_WAITLIST);
+                        fetchUserNamesAndShowDialog(userIds, title, fieldName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
     }
 
     private void fetchUserNamesAndShowDialog(List<String> userIds, String title, String fieldName) {
@@ -431,24 +435,50 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     private void downloadEntrantList(String fieldName, String fileName) {
         progressBar.setVisibility(View.VISIBLE);
 
-        db.collection("events").document(eventId)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    List<String> userIds = (List<String>) doc.get(fieldName);
+        // 1. ACCEPTED
+        if (fieldName.equals(FIELD_ACCEPTED)) {
+            db.collection("events").document(eventId).collection("accepted").get()
+                    .addOnSuccessListener(snapshot -> {
+                        List<String> userIds = new ArrayList<>();
+                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
+                        fetchUserNamesAndDownload(userIds, fileName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+        // 2. DECLINED
+        else if (fieldName.equals(FIELD_DECLINED)) {
+            db.collection("events").document(eventId).collection("declined").get()
+                    .addOnSuccessListener(snapshot -> {
+                        List<String> userIds = new ArrayList<>();
+                        for(DocumentSnapshot d : snapshot.getDocuments()) userIds.add(d.getId());
+                        fetchUserNamesAndDownload(userIds, fileName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+        // 3. RETRY
+        else if (fieldName.equals(FIELD_RETRY)) {
+            db.collection("waitingLists").document(eventId).get()
+                    .addOnSuccessListener(doc -> {
+                        List<String> userIds = (List<String>) doc.get("retryParticipants");
+                        fetchUserNamesAndDownload(userIds, fileName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+        // 4. WAITLIST
+        else {
+            db.collection("events").document(eventId).get()
+                    .addOnSuccessListener(doc -> {
+                        List<String> userIds = (List<String>) doc.get(FIELD_WAITLIST);
+                        fetchUserNamesAndDownload(userIds, fileName);
+                    })
+                    .addOnFailureListener(this::handleError);
+        }
+    }
 
-                    if (userIds == null || userIds.isEmpty()) {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(getContext(), "No entrants to download", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Fetch names and download
-                    fetchUserNamesAndDownload(userIds, fileName);
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Error downloading list", e);
-                });
+    private void handleError(Exception e) {
+        progressBar.setVisibility(View.GONE);
+        Log.e(TAG, "Error fetching list", e);
+        Toast.makeText(getContext(), "Error loading list", Toast.LENGTH_SHORT).show();
     }
 
     private void fetchUserNamesAndDownload(List<String> userIds, String fileName) {
