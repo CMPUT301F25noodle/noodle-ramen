@@ -79,7 +79,7 @@ public class NotificationManager {
 
         // Create notification message
         String message = "Unfortunately, you were not selected for \"" + eventName + "\". " +
-                "You may still have a chance if selected participants decline.";
+                "You can join the retry pool for a chance to be selected if spots open up.";
 
         // Create notification document
         Map<String, Object> notification = createNotificationData(
@@ -87,7 +87,7 @@ public class NotificationManager {
                 eventId,
                 eventName,
                 message,
-                true  // responded = true (no response needed)
+                false  // responded = false for interactions
         );
 
         // send loss notificaiton to the person for not being selected
