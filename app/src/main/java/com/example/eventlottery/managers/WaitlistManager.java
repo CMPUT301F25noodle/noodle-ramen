@@ -10,6 +10,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
+import  com.google.firebase.firestore.GeoPoint;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +39,18 @@ public class WaitlistManager {
      * @param eventId the even we want to join
      * @param callback Result callback
      */
-
     public void joinWaitlist(String eventId, WaitlistCallback callback) {
+        joinWaitlist(eventId, null, null, callback);
+    }
+
+    /**
+     * join waitlist for an event with optional location data
+     * @param eventId the event we want to join
+     * @param location optional GeoPoint for user's location
+     * @param userName optional user name for location tracking
+     * @param callback Result callback
+     */
+    public void joinWaitlist(String eventId, GeoPoint location, String userName, WaitlistCallback callback) {
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
             callback.onFailure("User not logged in");
@@ -48,14 +59,14 @@ public class WaitlistManager {
 
         String userId = currentUser.getUid();
 
-        // First, check if user is already on waitlist
+        // check if on waitlsit
         isUserOnWaitlist(eventId, userId, isOnWaitlist -> {
             if (isOnWaitlist) {
                 callback.onFailure("Already on waitlist");
                 return;
             }
 
-            // Check event capacity
+            // check capacityy
             checkWaitlistCapacity(eventId, hasCapacity -> {
                 if (!hasCapacity) {
                     callback.onFailure("Waitlist is full");
@@ -63,7 +74,7 @@ public class WaitlistManager {
                 }
 
                 // Perform the join operation
-                performJoinWaitlist(eventId, userId, callback);
+                performJoinWaitlist(eventId, userId, location, userName, callback);
             });
         });
     }
@@ -132,7 +143,7 @@ public class WaitlistManager {
                 });
     }
 
-    private void performJoinWaitlist(String eventId, String userId, WaitlistCallback callback) {
+    private void performJoinWaitlist(String eventId, String userId, GeoPoint location, String userName, WaitlistCallback callback) {
 
         WaitlistEntry entry = new WaitlistEntry(
                 userId,
@@ -163,6 +174,20 @@ public class WaitlistManager {
         waitlistData.put("joinedAt", System.currentTimeMillis());
         waitlistData.put("status", "waiting");
         batch.update(userRef, "waitingLists." + eventId, waitlistData);
+
+        if (location != null) {
+            DocumentReference locationRef = db.collection("events")
+                    .document(eventId)
+                    .collection("entrantLocations")
+                    .document(userId);
+
+            Map<String, Object> locationData = new HashMap<>();
+            locationData.put("location", location);
+            locationData.put("userName", userName != null ? userName : "Unknown");
+            locationData.put("timestamp", System.currentTimeMillis());
+
+            batch.set(locationRef, locationData);
+        }
 
         batch.commit()
                 .addOnSuccessListener(aVoid -> {

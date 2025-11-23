@@ -30,6 +30,8 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.google.firebase.firestore.FieldValue;
+import com.example.eventlottery.managers.WaitlistManager;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +54,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private boolean isGeolocationRequired = false; // Track if this specific event needs location
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private WaitlistManager waitlistManager;
+    private String currentEventId = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,8 @@ public class EventDetailActivity extends AppCompatActivity {
             finish();
             return;
         }
+        waitlistManager = WaitlistManager.getInstance();
+
 
         loadEvent(eventId);
     }
@@ -164,6 +171,8 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
+        currentEventId = eventId; // Store for permission callback
+
         if (isGeolocationRequired) {
             // Check if we already have permission
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -178,7 +187,7 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         } else {
             // Geolocation NOT required, join without it
-            joinWaitlistAndStoreLocation(eventId, auth.getCurrentUser().getUid(), null);
+            performJoinWaitlist(eventId, null, null);
         }
     }
 
@@ -191,16 +200,14 @@ public class EventDetailActivity extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted, proceed to join
-                String eventId = getIntent().getStringExtra("eventId");
-                if (eventId != null) {
-                    joinWithLocation(eventId);
+                if (currentEventId != null) {
+                    joinWithLocation(currentEventId);
                 }
             } else {
-                Toast.makeText(this, "Location is required to join this event.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Location permission is required to join this event.", Toast.LENGTH_LONG).show();
             }
         }
     }
-
     private void joinWithLocation(String eventId) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -211,7 +218,18 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                        joinWaitlistAndStoreLocation(eventId, auth.getCurrentUser().getUid(), geoPoint);
+
+                        // Get user name for location tracking
+                        db.collection("users").document(auth.getCurrentUser().getUid())
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+                                    performJoinWaitlist(eventId, geoPoint, userName);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error getting user data", e);
+                                    performJoinWaitlist(eventId, geoPoint, "Unknown");
+                                });
                     } else {
                         Toast.makeText(this, "Unable to determine location. Ensure GPS is on.",
                                 Toast.LENGTH_SHORT).show();
@@ -223,42 +241,27 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
-    private void joinWaitlistAndStoreLocation(String eventId, String userId, GeoPoint location) {
-        // First get user's name
-        db.collection("users").document(userId)
-                .get()
-                .addOnSuccessListener(userDoc -> {
-                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+    /**
+     * Actually perform the join operation using WaitlistManager
+     */
+    private void performJoinWaitlist(String eventId, GeoPoint location, String userName) {
+        waitlistManager.joinWaitlist(eventId, location, userName, new WaitlistManager.WaitlistCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(EventDetailActivity.this, "Successfully joined waitlist!", Toast.LENGTH_SHORT).show();
+                joinWaitlistButton.setEnabled(false);
+                joinWaitlistButton.setText("Joined Waitlist");
+            }
 
-                    // Add to waitlist array
-                    db.collection("events").document(eventId)
-                            .update("waitlistUsers", FieldValue.arrayUnion(userId))
-                            .addOnSuccessListener(aVoid -> {
-
-                                // Only save location if we actually have one (it might be null if not required)
-                                if (location != null) {
-                                    Map<String, Object> locationData = new HashMap<>();
-                                    locationData.put("location", location);
-                                    locationData.put("userName", userName);
-                                    locationData.put("timestamp", System.currentTimeMillis());
-
-                                    db.collection("events").document(eventId)
-                                            .collection("entrantLocations").document(userId)
-                                            .set(locationData)
-                                            .addOnSuccessListener(v -> Log.d(TAG, "Location saved"));
-                                }
-
-                                Toast.makeText(this, "Successfully joined waitlist!", Toast.LENGTH_SHORT).show();
-                                joinWaitlistButton.setEnabled(false);
-                                joinWaitlistButton.setText("Joined Waitlist");
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e(TAG, "Error joining waitlist", e);
-                                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Error getting user data", e));
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Error joining waitlist" + error);
+                Toast.makeText(EventDetailActivity.this, "Failed to join: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+
 
     private Bitmap createQrBitmap(String content, int sizePx) {
         try {
