@@ -272,14 +272,15 @@ public class CreateEventFragment extends Fragment {
 
 
             db.collection("events")
-                    .add(eventData)
-                    .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(getContext(), "event created successfully!", Toast.LENGTH_LONG).show();
+                    .document(eventId)
+                    .update(eventData)  // ✅ Updates existing event
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "event updated successfully!", Toast.LENGTH_LONG).show();
                         clearForm();
                         navigateToOrganizerDashboard();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "failed to update event: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         e.printStackTrace();
                     });
         }
