@@ -7,13 +7,13 @@ import com.example.eventlottery.managers.NotificationManager;
  * models the data strcuture of the notication document that is stored in db
  */
 public class Notification {
-    private String id;              // Document ID
-    private String type;            // "win", "loss", or "replacement"
-    private String eventId;         // Event this notification is about
-    private String eventName;       // Human-readable event name
-    private String message;         // Notification message
-    private Long timestamp;         // When notification was sent
-    private Boolean read;           // Whether user has viewed it
+    private String id;
+    private String type;
+    private String eventId;
+    private String eventName;
+    private String message;
+    private Long timestamp;
+    private Boolean read;
     private Boolean responded;
 
     public Notification() {
@@ -121,9 +121,8 @@ public class Notification {
      * Check if this notification requires a response (Accept/Decline buttons)
      */
     public boolean requiresResponse() {
-        return (isWin() || isReplacement()) && !isResponded();
+        return (isWin() || isReplacement() || isLoss()) && !isResponded();
     }
-
 
 
 }
