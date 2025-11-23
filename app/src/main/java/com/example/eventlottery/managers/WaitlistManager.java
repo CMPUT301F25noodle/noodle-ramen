@@ -143,7 +143,7 @@ public class WaitlistManager {
                 });
     }
 
-    private void performJoinWaitlist(String eventId, String userId, WaitlistCallback callback) {
+    private void performJoinWaitlist(String eventId, String userId, GeoPoint location, String userName, WaitlistCallback callback) {
 
         WaitlistEntry entry = new WaitlistEntry(
                 userId,
