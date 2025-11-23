@@ -14,6 +14,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.util.Log;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.GeoPoint;
 
 import com.example.eventlottery.EventDetailActivity;
 import com.example.eventlottery.event_classes.Event;
@@ -51,6 +60,15 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private String currentUserId;
     private List<EventViewModel> currentEventViewModels = new ArrayList<>();
 
+    private  static final String TAG = "BrowseFragment";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+
+    private FusedLocationProviderClient fusedLocationClient;
+
+    private EventViewModel pendingJoinEvent = null;
+
+
+
     /**
      * fragment instantiates the interface
      * @param inflater The LayoutInflater object that can be used to inflate
@@ -77,15 +95,17 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
             currentUserId = auth.getCurrentUser().getUid();
         }
 
-        // Initialize views and Setup Recycler View
+
         initViews(view);
         setupRecyclerView();
 
-        // Load events from Firestore
+
         loadEventsFromFirebase();
 
-        // Set up click listeners
+
         setupClickListeners();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
 
         return view;
     }
@@ -280,10 +300,77 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
      * @param eventViewModel
      */
 
+    /**
+     * join event waitlist for specified event
+     *
+     * @param eventViewModel
+     */
     private void joinWaitlist(EventViewModel eventViewModel) {
         String eventId = eventViewModel.getId();
 
-        waitlistManager.joinWaitlist(eventId, new WaitlistManager.WaitlistCallback() {
+        // Check if geolocation is required
+        if (eventViewModel.isGeolocationRequired()) {
+            // Check if we already have permission
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Store the event for later and request permission
+                pendingJoinEvent = eventViewModel;
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        LOCATION_PERMISSION_REQUEST_CODE);
+            } else {
+                // Permission already granted, get location and join
+                joinWithLocation(eventViewModel);
+            }
+        } else {
+            // Geolocation NOT required, join without it
+            performJoinWaitlist(eventViewModel, null, null);
+        }
+    }
+
+    /**
+     * Join waitlist with location tracking
+     */
+    private void joinWithLocation(EventViewModel eventViewModel) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                        // Get user name for location tracking
+                        db.collection("users").document(currentUserId)
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+                                    performJoinWaitlist(eventViewModel, geoPoint, userName);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error getting user data", e);
+                                    performJoinWaitlist(eventViewModel, geoPoint, "Unknown");
+                                });
+                    } else {
+                        Toast.makeText(getContext(), "Unable to determine location. Ensure GPS is on.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting location", e);
+                    Toast.makeText(getContext(), "Error getting location: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    /**
+     * Actually perform the join operation with optional location data
+     */
+    private void performJoinWaitlist(EventViewModel eventViewModel, GeoPoint location, String userName) {
+        String eventId = eventViewModel.getId();
+
+        waitlistManager.joinWaitlist(eventId, location, userName, new WaitlistManager.WaitlistCallback() {
             @Override
             public void onSuccess() {
                 // Create new ViewModel with updated waitlist status
@@ -305,6 +392,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
             }
         });
     }
+
 
     /**
      * leave event wait list
@@ -334,6 +422,27 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                         Toast.LENGTH_LONG).show();
             }
         });
+    }
+    /**
+     * Handle the result of the permission request
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed to join with location
+                if (pendingJoinEvent != null) {
+                    joinWithLocation(pendingJoinEvent);
+                    pendingJoinEvent = null;
+                }
+            } else {
+                // Permission denied
+                Toast.makeText(getContext(), "Location permission is required to join this event.",
+                        Toast.LENGTH_LONG).show();
+                pendingJoinEvent = null;
+            }
+        }
     }
 
     private void updateEventViewModel(String eventId, EventViewModel updatedViewModel) {

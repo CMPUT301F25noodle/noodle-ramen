@@ -109,7 +109,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 respondedTextView.setVisibility(View.GONE);
 
                 if (NotificationManager.TYPE_LOSS.equals(notification.getType())) {
-                    acceptButton.setText("Rtry");
+                    acceptButton.setText("Retry");
                     declineButton.setText("Dismiss");
 
                     acceptButton.setOnClickListener(v -> {
