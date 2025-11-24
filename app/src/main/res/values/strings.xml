@@ -153,5 +153,26 @@
     <string name="view_image_details432234">View Image Details</string>
     <string name="search_for_a_images423">Search for a Images</string>
     <string name="view_image_details543">View Image Details</string>
+    <string name="the_registration_date_has_arrived_for_this_event_and_the_entrants_will_be_drawn_soon_keep_an_eye_our_for_an_update">The Registration date has arrived for this event and the entrants will be drawn soon! Keep an eye our for an update!</string>
+    <string name="you_weren_t_drawn_to_participate_in_event_name_however_you_can_opt_in_to_be_put_into_another_waitlist_in_case_a_an_accepted_user_fails_to_accept_their_invite_or_declines_their_invitation">You weren’t drawn to participate in `event name`. However, you can opt in to be put into another waitlist in case a an accepted user fails to accept their invite or declines their invitation</string>
+    <string name="by_event_2_organizers">by Event 2 organizers</string>
+    <string name="drawing_has_begun">Drawing has begun!</string>
+    <string name="by_event_3_organizers">by Event 3 organizers</string>
+    <string name="i_m_sorry">I\'m sorry!</string>
+    <string name="by_event_1_organizers">by Event 1 organizers</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="you_ve_been_drawn_and_is_allowed_to_participate_in_the_event_please_accept_your_invite_to_proceed_and_save_your_spot_please_go_to_your_my_events_list_to_accept_your_invite">You’ve been drawn and is allowed to participate in the event! Please Accept your invite to proceed and save your spot. Please go to your “My Events” list to accept your invite</string>
+    <string name="admin_dashboard87">Admin Dashboard</string>
+    <string name="you_ve_been_drawn_and_is_allowed_to_part7icipate_in_the_event_please_accept_your_invite_to_proceed_and_save_your_spot_please_go_to_your_my_events_list_to_accept_your_invite">You\'ve been drawn and is allowed to participate in the event! Please Accept your invite to proceed and save your spot. Please go to your My Events list to accept your invite</string>
+    <string name="the_registration_date_has_arrived_for_this_event_and_the_entrants_will_be_drawn_soon_keep_an_eye_our_for_an_update7">The Registration date has arrived for this event and the entrants will be drawn soon! Keep an eye our for an update!</string>
+    <string name="by_event_2_organizers7">by Event 2 organizers</string>
+    <string name="you_weren_t_drawn_to_participate_in_event_name_however_you_can_opt_in_to_be_put_into_another_waitlist_in_case_a_an_accepted_user_fails_to_accept_their_invite_or778_declines_their_invitation">You weren\'t drawn to participate in event name. However, you can opt in to be put into another waitlist in case a an accepted user fails to accept their invite or declines their invitation</string>
+    <string name="by_event_1_organizers78">by Event 1 organizers</string>
+    <string name="drawing_has_begun78">Drawing has begun!</string>
+    <string name="_5687">56</string>
+    <string name="i_m_sorry98">I\'m sorry!</string>
+    <string name="congratulations89">Congratulations!</string>
+    <string name="by_event_3_organizers989">by Event 3 organizers</string>
+    <string name="notification8">Notifications</string>
 
 </resources>
