@@ -34,6 +34,7 @@ public class CreateEventFragment extends Fragment {
     // ui elements
     private EditText etPreCreatedEvent, etLocation, etOrganizerName, etEventDescription,
             etEligibilityCriteria, etStartDate, etEndDate, etPrice, etWaitlistLimit, etPoolSize;
+    private Spinner spinnerCategory;
     private RadioGroup rgGeolocation;
     private Button btnAddImage, btnDone, btnCancel;
     private ImageView btnDeleteImage1, btnDeleteImage2, btnDeleteImage3;
@@ -104,7 +105,17 @@ public class CreateEventFragment extends Fragment {
         etPrice = view.findViewById(R.id.et_price);
         etWaitlistLimit = view.findViewById(R.id.et_waitlist_limit);
         etPoolSize = view.findViewById(R.id.et_pool_size);
+        spinnerCategory = view.findViewById(R.id.spinner_category);
         rgGeolocation = view.findViewById(R.id.rg_geolocation);
+
+        // Setup category spinner
+        ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(
+                getContext(),
+                R.array.event_categories,
+                android.R.layout.simple_spinner_item
+        );
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
 
         btnAddImage = view.findViewById(R.id.btn_add_image);
         btnDone = view.findViewById(R.id.btn_done);
@@ -237,6 +248,8 @@ public class CreateEventFragment extends Fragment {
 
         Toast.makeText(getContext(), "creating event data", Toast.LENGTH_SHORT).show();
 
+        String category = spinnerCategory.getSelectedItem().toString();
+
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("eventName", eventName);
         eventData.put("organizer", currentUserId);
@@ -250,6 +263,7 @@ public class CreateEventFragment extends Fragment {
         eventData.put("waitlistLimit", waitlistLimit.isEmpty() ? "0" : waitlistLimit);
         eventData.put("entrantMaxCapacity", entrantMax.isEmpty() ? "0" : entrantMax);
         eventData.put("geolocationRequired", geolocationRequired);
+        eventData.put("category", category);
         eventData.put("createdAt", System.currentTimeMillis());
 
         Toast.makeText(getContext(), "saving to firestore", Toast.LENGTH_SHORT).show();

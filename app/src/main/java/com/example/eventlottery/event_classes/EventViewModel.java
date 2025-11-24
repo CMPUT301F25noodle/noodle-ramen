@@ -81,6 +81,26 @@ public class EventViewModel {
         return event.getPrice().toDisplayString();
     }
 
+    /** @return raw price value for filtering */
+    public double getPrice() {
+        return event.getPrice().getAmount();
+    }
+
+    /** @return category for filtering */
+    public String getCategory() {
+        return event.getCategory();
+    }
+
+    /** @return start date for filtering */
+    public String getStartDate() {
+        return event.getDates().getStartDate();
+    }
+
+    /** @return end date for filtering */
+    public String getEndDate() {
+        return event.getDates().getEndDate();
+    }
+
     /** @return status text */
     public String getStatusText() {
         return event.getStatus().getDisplayText();

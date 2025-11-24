@@ -18,6 +18,7 @@ public class Event {
     private final Money price;
     private final EventStatus status;
     private final boolean geolocationRequired;
+    private final String category; // Sports, Music, Arts, Educational, Workshops, Other
 
     /**
      * Creates an Event with all required information.
@@ -34,11 +35,13 @@ public class Event {
      * @param price event price
      * @param status event status
      * @param geolocationRequired whether geolocation is required for this event
+     * @param category event category (Sports, Music, Arts, Educational, Workshops, Other)
      * @throws IllegalArgumentException if any parameter is null or invalid
      */
     public Event(String id, String title, String organizationName, String description,
                  String eligibility, Location location, EventDates dates, String imageUrl,
-                 Waitlist waitlist, Money price, EventStatus status, boolean geolocationRequired) {
+                 Waitlist waitlist, Money price, EventStatus status, boolean geolocationRequired,
+                 String category) {
         // Validate all inputs
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("Event ID cannot be null or empty");
@@ -84,6 +87,7 @@ public class Event {
         this.price = price;
         this.status = status;
         this.geolocationRequired = geolocationRequired;
+        this.category = category != null ? category : "Other"; // Default to "Other" if not specified
     }
 
     public String getId() { return id; }
@@ -109,6 +113,8 @@ public class Event {
     public EventStatus getStatus() { return status; }
 
     public boolean isGeolocationRequired() { return geolocationRequired; }
+
+    public String getCategory() { return category; }
 
     /**
      * Checks if event is accepting new signups.
