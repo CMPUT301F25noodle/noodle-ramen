@@ -100,5 +100,23 @@
     <string name="_14">14</string>
     <string name="notifications">Notifications</string>
     <string name="_28">28</string>
+    <string name="search">Search</string>
+    <string name="participants_3">Participants: 3</string>
+    <string name="event_3">Event 3</string>
+    <string name="view_event_details">View Event Details</string>
+    <string name="by_organizer_name">By Organizer Name</string>
+    <string name="participants_0">Participants: 0</string>
+    <string name="view_event_detail">View Event Details</string>
+    <string name="event1">Event 1</string>
+    <string name="delete_event">Delete Event</string>
+    <string name="search_for_an_event">Search for an Event</string>
+    <string name="event_123">View Event Details</string>
+    <string name="by_organizer_name1">By Organizer Name</string>
+    <string name="participants_2">Participants: 2</string>
+    <string name="by_organizer_name34">By Organizer Name</string>
+    <string name="delete_event123">Delete Event</string>
+    <string name="event_256">Event 2</string>
+    <string name="delete46">Delete Event</string>
+    <string name="find_events">Find Events</string>
 
 </resources>
