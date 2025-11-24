@@ -135,5 +135,23 @@
     <string name="joined_october_21_2025">Joined: October 21, 2025</string>
     <string name="search78">Search</string>
     <string name="delete_profile78">Delete Profile</string>
+    <string name="search12">Search</string>
+    <string name="uploaded_by_organizer_name">Uploaded by Organizer Name</string>
+    <string name="participants_023">Participants: 0</string>
+    <string name="participants_232">Participants: 2</string>
+    <string name="find_images32">Find Images</string>
+    <string name="event_332">Event 3</string>
+    <string name="event_432">Event 4</string>
+    <string name="uploaded_by_organizer_name32">Uploaded by Organizer Name</string>
+    <string name="uploaded_by_organizer_name3232">Uploaded by Organizer Name</string>
+    <string name="participants_33232">Participants: 3</string>
+    <string name="event_12332">Event 1</string>
+    <string name="delete_image322">Delete Image</string>
+    <string name="delete_image324">Delete Image</string>
+    <string name="delete_image43324">Delete Image</string>
+    <string name="view_image_details432">View Image Details</string>
+    <string name="view_image_details432234">View Image Details</string>
+    <string name="search_for_a_images423">Search for a Images</string>
+    <string name="view_image_details543">View Image Details</string>
 
 </resources>
