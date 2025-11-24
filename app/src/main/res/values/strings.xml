@@ -118,5 +118,22 @@
     <string name="event_256">Event 2</string>
     <string name="delete46">Delete Event</string>
     <string name="find_events">Find Events</string>
+    <string name="joined_december_25_2024">Joined: December 25, 2024</string>
+    <string name="lorcan_jerillo">Lorcan Jerillo</string>
+    <string name="delete_profile">Delete Profile</string>
+    <string name="delete_profile123">Delete Profile</string>
+    <string name="joined_october_20_2025">Joined: October 20, 2025</string>
+    <string name="jordan_kal_gmail_com">jordan.kal@gmail.com</string>
+    <string name="view_profile_details">View Profile Details</string>
+    <string name="view_profile_details43">View Profile Details</string>
+    <string name="view_profile_details654">View Profile Details</string>
+    <string name="search_for_a_profile">Search for a Profile</string>
+    <string name="find_profiles">Find Profiles</string>
+    <string name="janica_smith_gmail_com">janica.smith@gmail.com</string>
+    <string name="lorcan_jerillo_gmail_com">lorcan.jerillo@gmail.com</string>
+    <string name="jordan_kalogeras">Jordan Kalogeras</string>
+    <string name="joined_october_21_2025">Joined: October 21, 2025</string>
+    <string name="search78">Search</string>
+    <string name="delete_profile78">Delete Profile</string>
 
 </resources>
