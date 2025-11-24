@@ -2,6 +2,10 @@ package com.example.eventlottery.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +29,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.GeoPoint;
 
 import com.example.eventlottery.EventDetailActivity;
+import com.example.eventlottery.EventFilter;
+import com.example.eventlottery.FilterDialogFragment;
 import com.example.eventlottery.event_classes.Event;
 import com.example.eventlottery.event_classes.EventAdapter;
 import com.example.eventlottery.event_classes.EventViewModel;
@@ -59,11 +65,16 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private FirebaseFirestore db;
     private String currentUserId;
     private List<EventViewModel> currentEventViewModels = new ArrayList<>();
+    private List<EventViewModel> allEventViewModels = new ArrayList<>(); // Store all events for filtering
+    private EventFilter currentFilter = new EventFilter(); // Current filter criteria
 
     private  static final String TAG = "BrowseFragment";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int SEARCH_DEBOUNCE_DELAY_MS = 300; // 300ms debounce delay
 
     private FusedLocationProviderClient fusedLocationClient;
+    private Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     private EventViewModel pendingJoinEvent = null;
 
@@ -108,6 +119,15 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove any pending search callbacks to prevent memory leaks
+        if (searchHandler != null && searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
     }
 
     /**
@@ -159,6 +179,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                             String waitlistLimitStr = document.getString("waitlistLimit");
                             String entrantMaxStr = document.getString("entrantMaxCapacity");
                             Boolean geolocationRequired = document.getBoolean("geolocationRequired");
+                            String category = document.getString("category");
 
                             // Check if current user is on the waitlist for this event
                             boolean isUserOnWaitlist = false;
@@ -203,7 +224,8 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                                     new Waitlist(waitlistCount, waitlistLimit, entrantMax),
                                     new Money(price),
                                     EventStatus.OPEN, // All events are OPEN by default for MVP
-                                    geolocationRequired != null ? geolocationRequired : false
+                                    geolocationRequired != null ? geolocationRequired : false,
+                                    category != null ? category : "Other" // Default to "Other" if not set
                             );
 
                             // Create EventViewModel with actual waitlist status
@@ -217,6 +239,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                     });
 
                     // Update UI with loaded events
+                    allEventViewModels = new ArrayList<>(eventViewModels); // Store all events
                     currentEventViewModels = eventViewModels;
                     eventAdapter.updateEvents(eventViewModels);
 
@@ -232,31 +255,57 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     /**
-     * sets up cluck listeners for the search bar and filter buttons
+     * sets up click listeners for the search bar and filter buttons
      */
     private void setupClickListeners() {
-        // Search functionality
-        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            String query = searchEditText.getText().toString();
-            performSearch(query);
-            return true;
+        // Search functionality with debouncing
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Remove any pending search callbacks
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+
+                // Create a new runnable for the search
+                searchRunnable = () -> performSearch(s.toString());
+
+                // Post the search with a delay (debounce)
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY_MS);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed
+            }
         });
 
         // Filter button
         allEventsButton.setOnClickListener(v -> {
-            // TODO: Implement filter logic
+            openFilterDialog();
         });
 
         // Filter icon
         filterIcon.setOnClickListener(v -> {
-            // TODO: Open filter dialog/bottom sheet
+            openFilterDialog();
         });
 
     }
 
+    /**
+     * Performs search/filtering on events based on the search query.
+     * Works in combination with other filters.
+     *
+     * @param query the search query string
+     */
     private void performSearch(String query) {
-        // TODO: Implement search functionality
-        // Filter events based on query
+        // Use the combined filter and search method
+        applyFiltersAndSearch();
     }
 
     // EventAdapter.OnEventClickListener implementation
@@ -460,6 +509,100 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         eventAdapter.updateEvents(updatedList);
     }
 
+    /**
+     * Opens the filter dialog
+     */
+    private void openFilterDialog() {
+        FilterDialogFragment filterDialog = FilterDialogFragment.newInstance(currentFilter);
+        filterDialog.setFilterAppliedListener(filter -> {
+            currentFilter = filter;
+            applyFiltersAndSearch();
+        });
+        filterDialog.show(getParentFragmentManager(), "FilterDialog");
+    }
+
+    /**
+     * Applies both search query and filters to the event list
+     */
+    private void applyFiltersAndSearch() {
+        String searchQuery = searchEditText != null ? searchEditText.getText().toString() : "";
+
+        // Start with all events
+        List<EventViewModel> filteredEvents = new ArrayList<>(allEventViewModels);
+
+        // Apply search filter first
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            String lowerCaseQuery = searchQuery.toLowerCase().trim();
+            List<EventViewModel> searchFiltered = new ArrayList<>();
+            for (EventViewModel event : filteredEvents) {
+                if (event.getTitle().toLowerCase().contains(lowerCaseQuery)) {
+                    searchFiltered.add(event);
+                }
+            }
+            filteredEvents = searchFiltered;
+        }
+
+        // Apply category filter
+        if (currentFilter.getActivityType() != null) {
+            List<EventViewModel> categoryFiltered = new ArrayList<>();
+            for (EventViewModel eventVM : filteredEvents) {
+                if (eventVM.getCategory() != null &&
+                    eventVM.getCategory().equals(currentFilter.getActivityType())) {
+                    categoryFiltered.add(eventVM);
+                }
+            }
+            filteredEvents = categoryFiltered;
+        }
+
+        // Apply price filter
+        if (currentFilter.getMinPrice() != null || currentFilter.getMaxPrice() != null) {
+            List<EventViewModel> priceFiltered = new ArrayList<>();
+            for (EventViewModel eventVM : filteredEvents) {
+                double price = eventVM.getPrice();
+                boolean matchesMin = currentFilter.getMinPrice() == null || price >= currentFilter.getMinPrice();
+                boolean matchesMax = currentFilter.getMaxPrice() == null || price <= currentFilter.getMaxPrice();
+                if (matchesMin && matchesMax) {
+                    priceFiltered.add(eventVM);
+                }
+            }
+            filteredEvents = priceFiltered;
+        }
+
+        // Apply date filter
+        if (currentFilter.getStartDate() != null || currentFilter.getEndDate() != null) {
+            List<EventViewModel> dateFiltered = new ArrayList<>();
+            for (EventViewModel eventVM : filteredEvents) {
+                String eventStartDate = eventVM.getStartDate();
+                String eventEndDate = eventVM.getEndDate();
+
+                boolean matchesStartDate = currentFilter.getStartDate() == null ||
+                    (eventStartDate != null && eventStartDate.compareTo(currentFilter.getStartDate()) >= 0);
+                boolean matchesEndDate = currentFilter.getEndDate() == null ||
+                    (eventEndDate != null && eventEndDate.compareTo(currentFilter.getEndDate()) <= 0);
+
+                if (matchesStartDate && matchesEndDate) {
+                    dateFiltered.add(eventVM);
+                }
+            }
+            filteredEvents = dateFiltered;
+        }
+
+        // Apply location filter
+        if (currentFilter.getLocation() != null && !currentFilter.getLocation().trim().isEmpty()) {
+            String locationQuery = currentFilter.getLocation().toLowerCase().trim();
+            List<EventViewModel> locationFiltered = new ArrayList<>();
+            for (EventViewModel eventVM : filteredEvents) {
+                if (eventVM.getLocationText().toLowerCase().contains(locationQuery)) {
+                    locationFiltered.add(eventVM);
+                }
+            }
+            filteredEvents = locationFiltered;
+        }
+
+        // Update the current list and adapter
+        currentEventViewModels = filteredEvents;
+        eventAdapter.updateEvents(filteredEvents);
+    }
 
 
 
