@@ -67,8 +67,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-
-                <include layout="@layout/item_organizer_event_card" />
+                <!-- Events will be added here dynamically -->
 
             </LinearLayout>
 
@@ -149,87 +148,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <!-- Event history will be added here dynamically -->
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="#FFFFFF"
-                android:elevation="4dp"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/event_1"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:text="@string/go_to_event_pagess"
-                        android:textColor="#666666"
-                        android:textSize="12sp"
-                        tools:ignore="TouchTargetSizeCheck" />
-                </LinearLayout>
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text="@string/southgate_mall"
-                    android:textColor="#666666"
-                    android:textSize="12sp" />
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="36dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:background="@android:drawable/dialog_holo_light_frame"
-                        android:backgroundTint="#F3E5F5"
-                        android:gravity="center"
-                        android:text="@string/waitlisted"
-                        android:textColor="#9C27B0"
-                        android:textSize="13sp" />
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:backgroundTint="#F5F5F5"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/leave_waitlist"
-                        android:textAllCaps="false"
-                        android:textColor="#666666"
-                        android:textSize="12sp"
-                        tools:ignore="TouchTargetSizeCheck" />
-                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
