@@ -2,6 +2,10 @@ package com.example.eventlottery.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,11 +63,15 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     private FirebaseFirestore db;
     private String currentUserId;
     private List<EventViewModel> currentEventViewModels = new ArrayList<>();
+    private List<EventViewModel> allEventViewModels = new ArrayList<>(); // Store all events for filtering
 
     private  static final String TAG = "BrowseFragment";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int SEARCH_DEBOUNCE_DELAY_MS = 300; // 300ms debounce delay
 
     private FusedLocationProviderClient fusedLocationClient;
+    private Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     private EventViewModel pendingJoinEvent = null;
 
@@ -108,6 +116,15 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove any pending search callbacks to prevent memory leaks
+        if (searchHandler != null && searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
     }
 
     /**
@@ -217,6 +234,7 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                     });
 
                     // Update UI with loaded events
+                    allEventViewModels = new ArrayList<>(eventViewModels); // Store all events
                     currentEventViewModels = eventViewModels;
                     eventAdapter.updateEvents(eventViewModels);
 
@@ -232,14 +250,34 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     /**
-     * sets up cluck listeners for the search bar and filter buttons
+     * sets up click listeners for the search bar and filter buttons
      */
     private void setupClickListeners() {
-        // Search functionality
-        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            String query = searchEditText.getText().toString();
-            performSearch(query);
-            return true;
+        // Search functionality with debouncing
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Remove any pending search callbacks
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+
+                // Create a new runnable for the search
+                searchRunnable = () -> performSearch(s.toString());
+
+                // Post the search with a delay (debounce)
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY_MS);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed
+            }
         });
 
         // Filter button
@@ -254,9 +292,34 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
     }
 
+    /**
+     * Performs search/filtering on events based on the search query.
+     * Filters events by event name (case-insensitive).
+     * If query is empty, shows all events.
+     *
+     * @param query the search query string
+     */
     private void performSearch(String query) {
-        // TODO: Implement search functionality
-        // Filter events based on query
+        // If query is empty or null, show all events
+        if (query == null || query.trim().isEmpty()) {
+            currentEventViewModels = new ArrayList<>(allEventViewModels);
+            eventAdapter.updateEvents(currentEventViewModels);
+            return;
+        }
+
+        // Filter events by title (case-insensitive)
+        String lowerCaseQuery = query.toLowerCase().trim();
+        List<EventViewModel> filteredEvents = new ArrayList<>();
+
+        for (EventViewModel event : allEventViewModels) {
+            if (event.getTitle().toLowerCase().contains(lowerCaseQuery)) {
+                filteredEvents.add(event);
+            }
+        }
+
+        // Update the current list and adapter
+        currentEventViewModels = filteredEvents;
+        eventAdapter.updateEvents(filteredEvents);
     }
 
     // EventAdapter.OnEventClickListener implementation
