@@ -179,5 +179,26 @@
     <string name="participants_03">Participants: 0</string>
     <string name="delete_event23">Delete Event</string>
     <string name="event_name2323">Event Name</string>
+    <string name="admin_dashboard32">Admin Dashboard</string>
+    <string name="find_events32">Find Events</string>
+    <string name="no_events_found3232">No events found</string>
+    <string name="search_for_an_event23">Search for an Event</string>
+    <string name="_032">0</string>
+    <string name="search32">Search</string>
+    <string name="events32">Events</string>
+    <string name="email_example_com">email@example.com</string>
+    <string name="joined_january_1_2025">Joined: January 1, 2025</string>
+    <string name="view_profile_details32">View Profile Details</string>
+    <string name="delete_profile23">Delete Profile</string>
+    <string name="profile_name3223">Profile Name</string>
+    <string name="event_name23232">Event Name</string>
+    <string name="uploaded_by_organizer_name322">Uploaded by Organizer Name</string>
+    <string name="view_image_details">View Image Details</string>
+    <string name="image_uploaded_on_date23">Image uploaded on: Date</string>
+    <string name="delete_image233">Delete Image</string>
+    <string name="no_profiles_found">No profiles found</string>
+    <string name="_02">0</string>
+    <string name="_0324">0</string>
+    <string name="no_images_found2">No images found</string>
 
 </resources>

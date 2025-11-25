@@ -40,7 +40,7 @@
                 android:id="@+id/profilesCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/_14"
+                android:text="@string/_02"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#000000"
@@ -81,11 +81,34 @@
                 android:autofillHints=""
                 android:background="@android:color/transparent"
                 android:hint="@string/search_for_a_profile"
+                android:inputType="text"
                 android:padding="4dp"
                 android:textColorHint="#757575"
                 android:textSize="14sp"
                 tools:ignore="TextFields,TouchTargetSizeCheck,VisualLintTextFieldSize" />
         </LinearLayout>
+
+
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:visibility="gone" />
+
+
+        <TextView
+            android:id="@+id/emptyMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_profiles_found"
+            android:textSize="16sp"
+            android:textColor="#999999"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone" />
+
 
         <LinearLayout
             android:id="@+id/profilesList"
@@ -93,214 +116,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp"
-                android:background="@drawable/card_bg"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Janica Smith"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000"
-                    tools:ignore="HardcodedText" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/janica_smith_gmail_com"
-                    android:textColor="#757575"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/joined_december_25_2024"
-                    android:textColor="#757575"
-                    android:textSize="11sp" />
-
-                <LinearLayout
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <Button
-                        android:id="@+id/viewProfileBtn1"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#E8E8E8"
-                        android:text="@string/view_profile_details654"
-                        android:textAllCaps="false"
-                        android:textColor="#666666"
-                        android:textSize="11sp"
-                        tools:ignore="DuplicateSpeakableTextCheck,VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/deleteProfileBtn1"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#F19A9A"
-                        android:text="@string/delete_profile78"
-                        android:textAllCaps="false"
-                        android:textColor="#37474F"
-                        android:textSize="11sp"
-                        tools:ignore="VisualLintButtonSize,DuplicateSpeakableTextCheck" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp"
-                android:background="@drawable/card_bg"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/jordan_kalogeras"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/jordan_kal_gmail_com"
-                    android:textColor="#757575"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/joined_october_20_2025"
-                    android:textColor="#757575"
-                    android:textSize="11sp" />
-
-                <LinearLayout
-                    style="?android:attr/buttonBarStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <Button
-                        android:id="@+id/viewProfileBtn2"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#E8E8E8"
-                        android:text="@string/view_profile_details43"
-                        android:textAllCaps="false"
-                        android:textColor="#666666"
-                        android:textSize="11sp"
-                        tools:ignore="VisualLintButtonSize,TouchTargetSizeCheck" />
-
-                    <Button
-                        android:id="@+id/deleteProfileBtn2"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#F19A9A"
-                        android:text="@string/delete_profile123"
-                        android:textAllCaps="false"
-                        android:textColor="#37474F"
-                        android:textSize="11sp"
-                        tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp"
-                android:background="@drawable/card_bg"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/lorcan_jerillo"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/lorcan_jerillo_gmail_com"
-                    android:textColor="#757575"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/joined_october_21_2025"
-                    android:textColor="#757575"
-                    android:textSize="11sp" />
-
-                <LinearLayout
-                    style="?android:attr/buttonBarStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <Button
-                        android:id="@+id/viewProfileBtn3"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#E8E8E8"
-                        android:text="@string/view_profile_details"
-                        android:textAllCaps="false"
-                        android:textColor="#666666"
-                        android:textSize="11sp"
-                        tools:ignore="VisualLintButtonSize,TouchTargetSizeCheck" />
-
-                    <Button
-                        android:id="@+id/deleteProfileBtn3"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#F19A9A"
-                        android:text="@string/delete_profile"
-                        android:textAllCaps="false"
-                        android:textColor="@color/black"
-                        android:textSize="11sp"
-                        tools:ignore="VisualLintButtonSize,TouchTargetSizeCheck" />
-                </LinearLayout>
-            </LinearLayout>
-
         </LinearLayout>
+
     </LinearLayout>
 </ScrollView>
