@@ -4,6 +4,13 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
+import com.example.eventlottery.fragments.AdminDashboardFragment;
+import com.example.eventlottery.fragments.AdminEventsFragment;
+import com.example.eventlottery.fragments.AdminProfilesFragment;
+import com.example.eventlottery.fragments.AdminImagesFragment;
+import com.example.eventlottery.fragments.AdminLogsFragment;
 
 public class AdminMainActivity extends AppCompatActivity {
 
@@ -24,10 +31,10 @@ public class AdminMainActivity extends AppCompatActivity {
         loadFragment(new AdminDashboardFragment());
 
         navStats.setOnClickListener(v -> loadFragment(new AdminDashboardFragment()));
-        navEvents.setOnClickListener(v -> loadFragment(new EventsFragment()));
-        navProfiles.setOnClickListener(v -> loadFragment(new ProfilesFragment()));
-        navUsers.setOnClickListener(v -> loadFragment(new UsersFragment()));
-        navLogs.setOnClickListener(v -> loadFragment(new LogsFragment()));
+        navEvents.setOnClickListener(v -> loadFragment(new AdminEventsFragment()));
+        navProfiles.setOnClickListener(v -> loadFragment(new AdminProfilesFragment()));
+        navUsers.setOnClickListener(v -> loadFragment(new AdminImagesFragment()));
+        navLogs.setOnClickListener(v -> loadFragment(new AdminLogsFragment()));
     }
 
     private void loadFragment(Fragment fragment) {

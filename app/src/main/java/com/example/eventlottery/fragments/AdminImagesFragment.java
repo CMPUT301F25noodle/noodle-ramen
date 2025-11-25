@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.eventlottery.R;
+
 public class AdminImagesFragment extends Fragment {
 
     @Nullable

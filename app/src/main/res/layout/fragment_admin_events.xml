@@ -78,7 +78,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="@string/search_for_an_event"
-                android:inputType="TODO"
                 android:textSize="14sp"
                 android:background="@android:color/transparent"
                 android:layout_marginStart="8dp"
