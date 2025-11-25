@@ -174,5 +174,10 @@
     <string name="congratulations89">Congratulations!</string>
     <string name="by_event_3_organizers989">by Event 3 organizers</string>
     <string name="notification8">Notifications</string>
+    <string name="by_organizer_name23">By Organizer Name</string>
+    <string name="view_event_details23">View Event Details</string>
+    <string name="participants_03">Participants: 0</string>
+    <string name="delete_event23">Delete Event</string>
+    <string name="event_name2323">Event Name</string>
 
 </resources>
