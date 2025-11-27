@@ -44,8 +44,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.eventlottery.managers.WaitlistManager;
+import com.example.eventlottery.managers.ImageManager;
+import com.example.eventlottery.models.Image;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Fragment for browse functionaltiy, shows on main page
@@ -122,6 +125,13 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Reload events when fragment becomes visible to catch newly created events
+        loadEventsFromFirebase();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         // Remove any pending search callbacks to prevent memory leaks
@@ -159,16 +169,19 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         db.collection("events")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(getContext(), "No events found.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
                     List<EventViewModel> eventViewModels = new ArrayList<>();
 
+                    // Loop through all documents
                     queryDocumentSnapshots.forEach(document -> {
                         try {
-                            // Extract fields from Firestore document
+                            // 1. Extract fields (Same logic as before)
                             String id = document.getId();
                             String eventName = document.getString("eventName");
-                            String organizer = document.getString("organizer");
-                            // Changed from organizer to organizationName which was causing
-                            // The display to show organizerId and not the organizationName
                             String organizationName = document.getString("organizerName");
                             String description = document.getString("description");
                             String eligibility = document.getString("eligibility");
@@ -181,34 +194,21 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                             Boolean geolocationRequired = document.getBoolean("geolocationRequired");
                             String category = document.getString("category");
 
-                            // Check if current user is on the waitlist for this event
+                            // 2. Check Waitlist Status
                             boolean isUserOnWaitlist = false;
                             Object waitlistUsersObj = document.get("waitlistUsers");
                             if (currentUserId != null && waitlistUsersObj instanceof java.util.List) {
                                 isUserOnWaitlist = ((java.util.List<?>) waitlistUsersObj).contains(currentUserId);
                             }
 
-                            // Convert to proper types with defaults
-                            double price = 0.0;
-                            if (priceStr != null && !priceStr.isEmpty()) {
-                                price = Double.parseDouble(priceStr);
-                            }
-
-                            int waitlistLimit = 0;
-                            if (waitlistLimitStr != null && !waitlistLimitStr.isEmpty()) {
-                                waitlistLimit = Integer.parseInt(waitlistLimitStr);
-                            }
-
-                            int entrantMax = 0;
-                            if (entrantMaxStr != null && !entrantMaxStr.isEmpty()) {
-                                entrantMax = Integer.parseInt(entrantMaxStr);
-                            }
-
-                            // Get actual waitlist count from Firestore
+                            // 3. Parse Numbers
+                            double price = (priceStr != null && !priceStr.isEmpty()) ? Double.parseDouble(priceStr) : 0.0;
+                            int waitlistLimit = (waitlistLimitStr != null && !waitlistLimitStr.isEmpty()) ? Integer.parseInt(waitlistLimitStr) : 0;
+                            int entrantMax = (entrantMaxStr != null && !entrantMaxStr.isEmpty()) ? Integer.parseInt(entrantMaxStr) : 0;
                             Long waitlistCountLong = document.getLong("waitlistCount");
                             int waitlistCount = waitlistCountLong != null ? waitlistCountLong.intValue() : 0;
 
-                            // Create Event object
+                            // 4. Create Event Object
                             Event event = new Event(
                                     id,
                                     eventName != null ? eventName : "Untitled Event",
@@ -216,42 +216,41 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                                     description != null ? description : "",
                                     eligibility != null ? eligibility : "",
                                     new Location(locationStr != null ? locationStr : "TBD"),
-                                    new EventDates(
-                                            startDate != null ? startDate : "",
-                                            endDate != null ? endDate : ""
-                                    ),
-                                    "", // imageUrl - empty for now
+                                    new EventDates(startDate != null ? startDate : "", endDate != null ? endDate : ""),
+                                    "", // Image URL is empty/unused here
                                     new Waitlist(waitlistCount, waitlistLimit, entrantMax),
                                     new Money(price),
-                                    EventStatus.OPEN, // All events are OPEN by default for MVP
+                                    EventStatus.OPEN,
                                     geolocationRequired != null ? geolocationRequired : false,
-                                    category != null ? category : "Other" // Default to "Other" if not set
+                                    category != null ? category : "Other"
                             );
 
-                            // Create EventViewModel with actual waitlist status
+                            // 5. Create ViewModel without waiting for image
+                            // Pass 'null' for image data implicitly by using this constructor
                             EventViewModel viewModel = new EventViewModel(event, isUserOnWaitlist);
+
                             eventViewModels.add(viewModel);
 
                         } catch (Exception e) {
-                            // exception to log
-
+                            Log.e(TAG, "Error processing event document", e);
                         }
                     });
 
-                    // Update UI with loaded events
-                    allEventViewModels = new ArrayList<>(eventViewModels); // Store all events
-                    currentEventViewModels = eventViewModels;
-                    eventAdapter.updateEvents(eventViewModels);
-
-                    if (eventViewModels.isEmpty()) {
-                        Toast.makeText(getContext(), "No events found. Long press profile icon to seed data.",
-                                Toast.LENGTH_LONG).show();
-                    }
+                    // 6. Update the list immediately after parsing is done
+                    updateEventsList(eventViewModels);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to load events: " + e.getMessage(),
                             Toast.LENGTH_LONG).show();
                 });
+    }
+    /**
+     * Updates the events list and adapter with loaded events
+     */
+    private void updateEventsList(List<EventViewModel> eventViewModels) {
+        allEventViewModels = new ArrayList<>(eventViewModels);
+        currentEventViewModels = eventViewModels;
+        eventAdapter.updateEvents(eventViewModels);
     }
 
     /**

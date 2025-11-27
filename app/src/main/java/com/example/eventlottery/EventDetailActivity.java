@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,6 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
+import com.example.eventlottery.managers.ImageManager;
+import com.example.eventlottery.models.Image;
+import com.example.eventlottery.utils.ImageCompressionHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,8 +37,8 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.google.firebase.firestore.FieldValue;
 import com.example.eventlottery.managers.WaitlistManager;
 
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,11 +51,14 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView statusBadge, priceText, locationText, dateText;
     private TextView waitlistInfo, spotsText;
     private ImageView qrCodeImage, backButton;
+    private ImageView eventMainImage;
+    private TextView imagePlaceholder;
     private Button joinWaitlistButton, shareButton;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private FusedLocationProviderClient fusedLocationClient;
+    private ImageManager imageManager;
 
     private boolean isGeolocationRequired = false; // Track if this specific event needs location
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
@@ -68,6 +76,7 @@ public class EventDetailActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        imageManager = ImageManager.getInstance();
 
         // Setup back button
         backButton.setOnClickListener(v -> finish());
@@ -79,9 +88,10 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
         waitlistManager = WaitlistManager.getInstance();
-
+        currentEventId = eventId;
 
         loadEvent(eventId);
+        loadEventImages(eventId);
     }
 
     private void initializeViews() {
@@ -98,6 +108,8 @@ public class EventDetailActivity extends AppCompatActivity {
         joinWaitlistButton = findViewById(R.id.join_waitlist_button);
         shareButton = findViewById(R.id.share_button);
         backButton = findViewById(R.id.back_button);
+        eventMainImage = findViewById(R.id.eventMainImage);
+        imagePlaceholder = findViewById(R.id.imagePlaceholder);
     }
 
     private void loadEvent(String eventId) {
@@ -282,5 +294,49 @@ public class EventDetailActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Load and display event images
+     */
+    private void loadEventImages(String eventId) {
+        imageManager.getImagesForEvent(eventId, new ImageManager.ImageListCallback() {
+            @Override
+            public void onSuccess(List<Image> images) {
+                if (!images.isEmpty()) {
+                    // Get the first image's data
+                    String imageData = images.get(0).getImageData();
+
+                    if (imageData != null && !imageData.isEmpty()) {
+                        // Decode Base64 to Bitmap
+                        Bitmap bitmap = ImageCompressionHelper.decodeFromBase64(imageData);
+
+                        if (bitmap != null) {
+                            // Show image, hide placeholder
+                            eventMainImage.setVisibility(View.VISIBLE);
+                            imagePlaceholder.setVisibility(View.GONE);
+
+                            // Load with Glide
+                            Glide.with(EventDetailActivity.this)
+                                    .load(bitmap)
+                                    .centerCrop()
+                                    .into(eventMainImage);
+                        }
+                    }
+                } else {
+                    // No images, keep placeholder visible
+                    eventMainImage.setVisibility(View.GONE);
+                    imagePlaceholder.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to load event images: " + error);
+                // Keep placeholder visible on error
+                eventMainImage.setVisibility(View.GONE);
+                imagePlaceholder.setVisibility(View.VISIBLE);
+            }
+        });
     }
 }
