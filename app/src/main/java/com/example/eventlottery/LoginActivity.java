@@ -180,10 +180,21 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         Toast.makeText(this, "login successful", Toast.LENGTH_SHORT).show();
 
-                        // Navigate to MainActivity
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                        // Navigate to MainActivity when role is user or organizer or
+                        // Navigate to AdminMainActivity when role is admin
+                        if ("admin".equals(role)) {
+
+                            Intent intent = new Intent(LoginActivity.this, AdminMainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+
+                        } else {
+
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        }
+
                         finish();
                     } else {
                         Toast.makeText(this, "user data not found", Toast.LENGTH_SHORT).show();
