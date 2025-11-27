@@ -2,22 +2,32 @@ package com.example.eventlottery.fragments;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.eventlottery.R;
 import com.example.eventlottery.QrGenerator;
+import com.example.eventlottery.managers.ImageManager;
+import com.example.eventlottery.models.Image;
+import com.example.eventlottery.utils.ImageCompressionHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,12 +48,20 @@ public class CreateEventFragment extends Fragment {
     private RadioGroup rgGeolocation;
     private Button btnAddImage, btnDone, btnCancel;
     private ImageView btnDeleteImage1, btnDeleteImage2, btnDeleteImage3;
+    private ImageView ivEventImage1, ivEventImage2, ivEventImage3;
+    private LinearLayout llImageSlot1, llImageSlot2, llImageSlot3;
     private ImageButton btnLocation;
 
     // firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String currentUserId;
+    private ImageManager imageManager;
+
+    // image management
+    private ActivityResultLauncher<String[]> imagePickerLauncher;
+    private List<Image> uploadedImages = new ArrayList<>();
+    private List<Uri> selectedImageUris = new ArrayList<>(); // Store URIs before upload
 
     private String eventId = null;
     private boolean isEditMode = false;
@@ -70,10 +88,29 @@ public class CreateEventFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        imageManager = ImageManager.getInstance();
 
         if (mAuth.getCurrentUser() != null) {
             currentUserId = mAuth.getCurrentUser().getUid();
         }
+
+        // Initialize image picker launcher with OpenDocument (supports persistable permissions)
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri != null) {
+                        // Take persistable URI permission for long-term access
+                        try {
+                            requireContext().getContentResolver().takePersistableUriPermission(
+                                    uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            );
+                        } catch (SecurityException e) {
+                            Log.e("CreateEventFragment", "Failed to take persistable permission", e);
+                        }
+                        handleImageSelected(uri);
+                    }
+                });
 
         initializeViews(view);
         setupListeners();
@@ -84,6 +121,7 @@ public class CreateEventFragment extends Fragment {
                 isEditMode = true;
                 btnDone.setText("Save Changes");
                 loadEventData(eventId);
+                loadEventImages(eventId);
             }
         }
 
@@ -124,6 +162,14 @@ public class CreateEventFragment extends Fragment {
         btnDeleteImage2 = view.findViewById(R.id.btn_delete_image2);
         btnDeleteImage3 = view.findViewById(R.id.btn_delete_image3);
         btnLocation = view.findViewById(R.id.btn_location);
+
+        // Initialize image views and containers
+        ivEventImage1 = view.findViewById(R.id.iv_event_image_1);
+        ivEventImage2 = view.findViewById(R.id.iv_event_image_2);
+        ivEventImage3 = view.findViewById(R.id.iv_event_image_3);
+        llImageSlot1 = view.findViewById(R.id.ll_image_slot_1);
+        llImageSlot2 = view.findViewById(R.id.ll_image_slot_2);
+        llImageSlot3 = view.findViewById(R.id.ll_image_slot_3);
     }
 
     /**
@@ -138,16 +184,19 @@ public class CreateEventFragment extends Fragment {
             startActivity(intent);
         });
 
-        btnAddImage.setOnClickListener(v ->
-                Toast.makeText(getContext(), "image upload feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        btnAddImage.setOnClickListener(v -> {
+            int totalImages = isEditMode ? uploadedImages.size() : selectedImageUris.size();
+            if (totalImages >= 3) {
+                Toast.makeText(getContext(), "Maximum of 3 images allowed", Toast.LENGTH_SHORT).show();
+            } else {
+                // OpenDocument requires an array of MIME types
+                imagePickerLauncher.launch(new String[]{"image/*"});
+            }
+        });
 
-        btnDeleteImage1.setOnClickListener(v ->
-                Toast.makeText(getContext(), "deleted image 1", Toast.LENGTH_SHORT).show());
-        btnDeleteImage2.setOnClickListener(v ->
-                Toast.makeText(getContext(), "deleted image 2", Toast.LENGTH_SHORT).show());
-        btnDeleteImage3.setOnClickListener(v ->
-                Toast.makeText(getContext(), "deleted image 3", Toast.LENGTH_SHORT).show());
+        btnDeleteImage1.setOnClickListener(v -> deleteImageAtIndex(0));
+        btnDeleteImage2.setOnClickListener(v -> deleteImageAtIndex(1));
+        btnDeleteImage3.setOnClickListener(v -> deleteImageAtIndex(2));
 
         btnDone.setOnClickListener(v -> handleEventCreation());
         btnCancel.setOnClickListener(v -> {
@@ -274,9 +323,17 @@ public class CreateEventFragment extends Fragment {
             db.collection("events")
                     .add(eventData)
                     .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(getContext(), "event created successfully!", Toast.LENGTH_LONG).show();
-                        clearForm();
-                        navigateToOrganizerDashboard();
+                        String newEventId = documentReference.getId();
+
+                        // Check if there are images to upload
+                        if (!selectedImageUris.isEmpty()) {
+                            Toast.makeText(getContext(), "Event created! Uploading images...", Toast.LENGTH_SHORT).show();
+                            uploadSelectedImages(newEventId, organizerName);
+                        } else {
+                            Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_LONG).show();
+                            clearForm();
+                            navigateToOrganizerDashboard();
+                        }
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -287,7 +344,7 @@ public class CreateEventFragment extends Fragment {
 
             db.collection("events")
                     .document(eventId)
-                    .update(eventData)  // ✅ Updates existing event
+                    .update(eventData)  // Updates existing event
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(getContext(), "event updated successfully!", Toast.LENGTH_LONG).show();
                         clearForm();
@@ -346,5 +403,227 @@ public class CreateEventFragment extends Fragment {
         etWaitlistLimit.setText("");
         etPoolSize.setText("");
         rgGeolocation.check(R.id.rb_geo_yes);
+        uploadedImages.clear();
+        selectedImageUris.clear();
+        displayImages();
+    }
+
+    /**
+     * Handles image selection from gallery
+     */
+    private void handleImageSelected(Uri imageUri) {
+        if (isEditMode && eventId != null && !eventId.isEmpty()) {
+            // Edit mode: Upload immediately
+            String organizerName = etOrganizerName.getText().toString().trim();
+            if (organizerName.isEmpty()) {
+                organizerName = "Organizer";
+            }
+
+            Toast.makeText(getContext(), "Compressing and uploading image...", Toast.LENGTH_SHORT).show();
+
+            imageManager.uploadImage(requireContext(), eventId, imageUri, organizerName, new ImageManager.ImageUploadCallback() {
+                @Override
+                public void onSuccess(Image image) {
+                    uploadedImages.add(image);
+                    displayImages();
+                    Toast.makeText(getContext(), "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    Toast.makeText(getContext(), "Upload failed: " + error, Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            // Create mode: Store URI for later upload
+            selectedImageUris.add(imageUri);
+            displaySelectedImages();
+            Toast.makeText(getContext(), "Image added (will upload when event is created)", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Load existing images for an event when editing
+     */
+    private void loadEventImages(String eventId) {
+        imageManager.getImagesForEvent(eventId, new ImageManager.ImageListCallback() {
+            @Override
+            public void onSuccess(List<Image> images) {
+                uploadedImages.clear();
+                uploadedImages.addAll(images);
+                displayImages();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(getContext(), "Failed to load images: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Display uploaded images in the UI
+     */
+    private void displayImages() {
+        // Hide all slots first
+        llImageSlot1.setVisibility(View.GONE);
+        llImageSlot2.setVisibility(View.GONE);
+        llImageSlot3.setVisibility(View.GONE);
+
+        // Display images based on how many we have
+        for (int i = 0; i < uploadedImages.size() && i < 3; i++) {
+            Image image = uploadedImages.get(i);
+            ImageView imageView;
+            LinearLayout slot;
+
+            switch (i) {
+                case 0:
+                    imageView = ivEventImage1;
+                    slot = llImageSlot1;
+                    break;
+                case 1:
+                    imageView = ivEventImage2;
+                    slot = llImageSlot2;
+                    break;
+                case 2:
+                    imageView = ivEventImage3;
+                    slot = llImageSlot3;
+                    break;
+                default:
+                    continue;
+            }
+
+            // Decode and load image using Glide
+            if (getContext() != null && image.getImageData() != null) {
+                android.graphics.Bitmap bitmap = ImageCompressionHelper.decodeFromBase64(image.getImageData());
+                if (bitmap != null) {
+                    Glide.with(getContext())
+                            .load(bitmap)
+                            .centerCrop()
+                            .into(imageView);
+                }
+            }
+            slot.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Delete image at specified index
+     */
+    private void deleteImageAtIndex(int index) {
+        if (isEditMode) {
+            // Edit mode: Delete from Firebase
+            if (index >= uploadedImages.size()) {
+                return;
+            }
+
+            Image imageToDelete = uploadedImages.get(index);
+            Toast.makeText(getContext(), "Deleting image...", Toast.LENGTH_SHORT).show();
+
+            imageManager.deleteImage(imageToDelete, new ImageManager.ImageDeleteCallback() {
+                @Override
+                public void onSuccess() {
+                    uploadedImages.remove(index);
+                    displayImages();
+                    Toast.makeText(getContext(), "Image deleted successfully", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    Toast.makeText(getContext(), "Delete failed: " + error, Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            // Create mode: Remove from selected URIs
+            if (index >= selectedImageUris.size()) {
+                return;
+            }
+            selectedImageUris.remove(index);
+            displaySelectedImages();
+            Toast.makeText(getContext(), "Image removed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Display selected images (before upload) in create mode
+     */
+    private void displaySelectedImages() {
+        // Hide all slots first
+        llImageSlot1.setVisibility(View.GONE);
+        llImageSlot2.setVisibility(View.GONE);
+        llImageSlot3.setVisibility(View.GONE);
+
+        // Display selected URIs
+        for (int i = 0; i < selectedImageUris.size() && i < 3; i++) {
+            Uri imageUri = selectedImageUris.get(i);
+            ImageView imageView;
+            LinearLayout slot;
+
+            switch (i) {
+                case 0:
+                    imageView = ivEventImage1;
+                    slot = llImageSlot1;
+                    break;
+                case 1:
+                    imageView = ivEventImage2;
+                    slot = llImageSlot2;
+                    break;
+                case 2:
+                    imageView = ivEventImage3;
+                    slot = llImageSlot3;
+                    break;
+                default:
+                    continue;
+            }
+
+            // Load image using Glide from URI
+            if (getContext() != null) {
+                Glide.with(getContext())
+                        .load(imageUri)
+                        .centerCrop()
+                        .into(imageView);
+            }
+            slot.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Upload all selected images after event creation
+     */
+    private void uploadSelectedImages(String newEventId, String organizerName) {
+        final int totalImages = selectedImageUris.size();
+        final int[] uploadedCount = {0};
+        final int[] failedCount = {0};
+
+        for (Uri imageUri : selectedImageUris) {
+            imageManager.uploadImage(requireContext(), newEventId, imageUri, organizerName, new ImageManager.ImageUploadCallback() {
+                @Override
+                public void onSuccess(Image image) {
+                    uploadedCount[0]++;
+                    checkUploadComplete(uploadedCount[0], failedCount[0], totalImages);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    failedCount[0]++;
+                    checkUploadComplete(uploadedCount[0], failedCount[0], totalImages);
+                }
+            });
+        }
+    }
+
+    /**
+     * Check if all images have been uploaded and show result
+     */
+    private void checkUploadComplete(int uploaded, int failed, int total) {
+        if (uploaded + failed == total) {
+            if (failed == 0) {
+                Toast.makeText(getContext(), "Event and images created successfully!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(), "Event created. " + failed + " image(s) failed to upload.", Toast.LENGTH_LONG).show();
+            }
+            clearForm();
+            navigateToOrganizerDashboard();
+        }
     }
 }

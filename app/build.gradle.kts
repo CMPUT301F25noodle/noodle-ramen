@@ -45,8 +45,12 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    // Image loading library
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation("androidx.fragment:fragment:1.8.9")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
@@ -58,6 +62,7 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0") // ready-to-use camera scanner
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.android.material:material:1.9.0")
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     testImplementation("org.robolectric:robolectric:4.11.1")
     androidTestImplementation(libs.ext.junit)
