@@ -1,0 +1,263 @@
+package com.example.eventlottery.fragments;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.example.eventlottery.EventDetailActivity;
+import com.example.eventlottery.R;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AdminEventsFragment extends Fragment {
+
+    private TextView eventsCount;
+    private EditText searchEvents;
+    private LinearLayout eventsList;
+    private ProgressBar loadingSpinner;
+    private TextView emptyMessage;
+    private FirebaseFirestore db;
+    private ListenerRegistration eventsListener;
+
+    private final List<EventData> allEvents = new ArrayList<>();
+    private final List<EventData> filteredEvents = new ArrayList<>();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_admin_events, container, false);
+
+        db = FirebaseFirestore.getInstance();
+
+        eventsCount = view.findViewById(R.id.eventsCount);
+        searchEvents = view.findViewById(R.id.searchEvents);
+        eventsList = view.findViewById(R.id.eventsList);
+        loadingSpinner = view.findViewById(R.id.loadingSpinner);
+        emptyMessage = view.findViewById(R.id.emptyMessage);
+
+        setupSearchListener();
+        loadEventsFromFirestore();
+
+        return view;
+    }
+
+    private void setupSearchListener() {
+        searchEvents.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterEvents(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+    }
+
+    private void loadEventsFromFirestore() {
+
+        showLoading(true);
+
+
+        eventsListener = db.collection("events")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        showLoading(false);
+                        showError("Failed to load events: " + error.getMessage());
+                        return;
+                    }
+
+                    if (value != null) {
+                        allEvents.clear();
+
+                        for (QueryDocumentSnapshot document : value) {
+                            String eventId = document.getId();
+                            String eventName = document.getString("eventName");
+                            String organizerName = document.getString("organizerName");
+                            Long participantsCount = document.getLong("participantsCount");
+
+                            EventData event = new EventData(
+                                    eventId,
+                                    eventName != null ? eventName : "Untitled Event",
+                                    organizerName != null ? organizerName : "Unknown",
+                                    participantsCount != null ? participantsCount.intValue() : 0
+                            );
+
+                            allEvents.add(event);
+                        }
+
+
+                        eventsCount.setText(String.valueOf(allEvents.size()));
+
+
+                        filterEvents(searchEvents.getText().toString());
+
+                        showLoading(false);
+                    }
+                });
+    }
+
+    private void filterEvents(String query) {
+        filteredEvents.clear();
+
+        if (query.isEmpty()) {
+            filteredEvents.addAll(allEvents);
+        } else {
+            String lowerQuery = query.toLowerCase();
+            for (EventData event : allEvents) {
+                if (event.eventName.toLowerCase().contains(lowerQuery) ||
+                        event.organizerName.toLowerCase().contains(lowerQuery)) {
+                    filteredEvents.add(event);
+                }
+            }
+        }
+
+        displayEvents();
+    }
+
+    private void displayEvents() {
+
+        eventsList.removeAllViews();
+
+
+        if (filteredEvents.isEmpty()) {
+            showEmptyMessage();
+            return;
+        }
+
+        for (EventData event : filteredEvents) {
+            addEventCard(event);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void addEventCard(EventData event) {
+
+        View eventCard = LayoutInflater.from(getContext()).inflate(R.layout.item_admin_event_card, eventsList, false);
+
+        TextView eventNameText = eventCard.findViewById(R.id.eventName);
+        TextView organizerText = eventCard.findViewById(R.id.organizerName);
+        TextView participantsText = eventCard.findViewById(R.id.participantsCount);
+        Button viewDetailsBtn = eventCard.findViewById(R.id.viewDetailsBtn);
+        Button deleteBtn = eventCard.findViewById(R.id.deleteEventBtn);
+
+
+        eventNameText.setText(event.eventName);
+        organizerText.setText("By " + event.organizerName);
+        participantsText.setText("Participants: " + event.participantsCount);
+
+
+        viewDetailsBtn.setOnClickListener(v -> viewEventDetails(event.eventId, event.eventName));
+
+
+        deleteBtn.setOnClickListener(v -> deleteEvent(event.eventId, event.eventName));
+
+
+        eventsList.addView(eventCard);
+    }
+
+    private void viewEventDetails(String eventId, String eventName) {
+
+        Intent intent = new Intent(getContext(), EventDetailActivity.class);
+        intent.putExtra("eventId", eventId);
+        intent.putExtra("eventName", eventName);
+        startActivity(intent);
+
+    }
+
+    private void deleteEvent(String eventId, String eventName) {
+
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Delete Event")
+                .setMessage("Are you sure you want to delete '" + eventName + "'?\n\nThis action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+
+                    Toast.makeText(getContext(), "Deleting event...", Toast.LENGTH_SHORT).show();
+
+                    db.collection("events").document(eventId)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Event deleted successfully", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to delete event: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showLoading(boolean show) {
+        if (loadingSpinner != null) {
+            loadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        eventsList.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    private void showEmptyMessage() {
+        if (emptyMessage != null) {
+            emptyMessage.setVisibility(View.VISIBLE);
+            emptyMessage.setText(searchEvents.getText().toString().isEmpty()
+                    ? "No events found in database"
+                    : "No events match your search");
+        } else {
+
+            TextView emptyText = new TextView(getContext());
+            emptyText.setText(searchEvents.getText().toString().isEmpty()
+                    ? "No events found in database"
+                    : "No events match your search");
+            emptyText.setTextSize(16);
+            emptyText.setTextColor(0xFF999999);
+            emptyText.setPadding(16, 32, 16, 32);
+            emptyText.setGravity(android.view.Gravity.CENTER);
+            eventsList.addView(emptyText);
+        }
+    }
+
+    private void showError(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (eventsListener != null) {
+            eventsListener.remove();
+        }
+    }
+
+
+    private static class EventData {
+        String eventId;
+        String eventName;
+        String organizerName;
+        int participantsCount;
+
+        EventData(String eventId, String eventName, String organizerName, int participantsCount) {
+            this.eventId = eventId;
+            this.eventName = eventName;
+            this.organizerName = organizerName;
+            this.participantsCount = participantsCount;
+        }
+    }
+}

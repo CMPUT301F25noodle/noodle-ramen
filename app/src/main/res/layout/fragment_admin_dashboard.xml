@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="@string/admin_dashboard"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Row 1 -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Profiles -->
+            <LinearLayout
+                android:id="@+id/cardProfiles"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/card_bg">
+
+                <TextView
+                    android:text="@string/profiles"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/countProfiles"
+                    android:text="@string/_14"
+                    android:textSize="20sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <!-- Organizers -->
+            <LinearLayout
+                android:id="@+id/cardOrganizers"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/card_bg">
+
+                <TextView
+                    android:text="@string/organizers"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/countOrganizers"
+                    android:text="@string/_7"
+                    android:textSize="20sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
+
+        <!-- Row 2 -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Events -->
+            <LinearLayout
+                android:id="@+id/cardEvents"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/card_bg">
+
+                <TextView
+                    android:text="@string/events"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/countEvents"
+                    android:text="@string/_3"
+                    android:textSize="20sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <!-- Notifications -->
+            <LinearLayout
+                android:id="@+id/cardNotifications"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/card_bg">
+
+                <TextView
+                    android:text="@string/notifications"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/countNotifications"
+                    android:text="@string/_56"
+                    android:textSize="20sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
+
+        <!-- Row 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Images -->
+            <LinearLayout
+                android:id="@+id/cardImages"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:background="@drawable/card_bg">
+
+                <TextView
+                    android:text="@string/images"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/countImages"
+                    android:text="@string/_28"
+                    android:textSize="20sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <!-- Empty space to keep layout balanced -->
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
