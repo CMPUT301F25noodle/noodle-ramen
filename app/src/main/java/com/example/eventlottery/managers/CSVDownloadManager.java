@@ -1,56 +1,91 @@
 package com.example.eventlottery.managers;
+
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.widget.Toast;
-import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import androidx.annotation.RequiresApi;
 
 
 public class CSVDownloadManager {
 
     public static void exportToCSV(Context context, String fileName, List<String> userNames) {
+        String finalFileName = fileName + "_" + getTimestamp() + ".csv";
+
+        // Method 1: For Modern Android (API 29+) - The standard for new apps
+        // This saves directly to the user's "Downloads" folder
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            saveToDownloadsMediaStore(context, finalFileName, userNames);
+        } else {
+            // Method 2: Fallback for older Android versions (Before Android 10)
+            saveToDownloadsLegacy(context, finalFileName, userNames);
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private static void saveToDownloadsMediaStore(Context context, String fileName, List<String> userNames) {
         try {
-            File csvFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
-                    fileName + "_" + getTimestamp() + ".csv");
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+            values.put(MediaStore.MediaColumns.MIME_TYPE, "text/csv");
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
 
-            FileWriter writer = new FileWriter(csvFile);
+            // This inserts a new file record into the system
+            Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 
-            // Write CSV header
-            writer.append("Name\n");
+            if (uri != null) {
+                OutputStream outputStream = context.getContentResolver().openOutputStream(uri);
+                if (outputStream != null) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Name\n"); // Header
+                    for (String name : userNames) {
+                        sb.append(name.replace(",", " ")).append("\n");
+                    }
 
-            // Write data rows
-            for (String name : userNames) {
-                writer.append(name.replace(",", " ")); // Remove commas to prevent CSV issues
-                writer.append("\n");
+                    outputStream.write(sb.toString().getBytes());
+                    outputStream.close();
+
+                    Toast.makeText(context, "Saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error saving CSV: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    // Legacy support (Before Android 10) - unlikely to be used on your emulator but good practice
+    private static void saveToDownloadsLegacy(Context context, String fileName, List<String> userNames) {
+        try {
+            File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (!downloadsDir.exists()) downloadsDir.mkdirs();
+
+            File file = new File(downloadsDir, fileName);
+
+            FileWriter writer = new FileWriter(file);
+            writer.append("Name\n");
+            for (String name : userNames) {
+                writer.append(name.replace(",", " ")).append("\n");
+            }
             writer.flush();
             writer.close();
 
-            // Open share dialog to let user save/share the file
-            Uri fileUri = FileProvider.getUriForFile(context,
-                    context.getPackageName() + ".provider", csvFile);
-
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("text/csv");
-            shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
-            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            context.startActivity(Intent.createChooser(shareIntent, "Save CSV File"));
+            Toast.makeText(context, "Saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error creating CSV: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error saving CSV: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -58,6 +93,3 @@ public class CSVDownloadManager {
         return new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
     }
 }
-
-
-
