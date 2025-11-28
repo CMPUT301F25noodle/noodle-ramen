@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class LandingActivity extends AppCompatActivity {
 
-    private Button loginButton, signupButton;
+    private Button signupButton;
     private TextView titleEvent, titleLottery, subtitle, readyText;
 
     @Override
@@ -24,18 +24,11 @@ public class LandingActivity extends AppCompatActivity {
         setContentView(R.layout.landing_page);
 
         // Initialize layout components
-        loginButton = findViewById(R.id.login_button);
         signupButton = findViewById(R.id.signup_button);
         titleEvent = findViewById(R.id.textEvent);
         titleLottery = findViewById(R.id.textLottery);
         subtitle = findViewById(R.id.textSubtitle);
         readyText = findViewById(R.id.textReady);
-
-        // Set up navigation to LoginActivity
-        loginButton.setOnClickListener(v -> {
-            Intent intent = new Intent(LandingActivity.this, LoginActivity.class);
-            startActivity(intent);
-        });
 
         // Set up navigation to SignUpActivity
         signupButton.setOnClickListener(v -> {

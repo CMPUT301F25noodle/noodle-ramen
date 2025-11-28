@@ -186,7 +186,7 @@ public class OrganizerDashboardFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     myEventsContainer.removeAllViews();
                     myEventsContainer.addView(emptyMyEventsText);
-                    Toast.makeText(getContext(), "failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Failed to load events", Toast.LENGTH_SHORT).show();
                 });
     }
 

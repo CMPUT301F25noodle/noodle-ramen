@@ -15,9 +15,11 @@ import android.widget.ProgressBar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.eventlottery.LoginActivity;
+import com.example.eventlottery.MainActivity;
+import com.example.eventlottery.AdminMainActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,7 +37,7 @@ import java.util.Map;
  */
 
 public class SignUpFragment extends Fragment {
-    private EditText nameField, phoneField, emailField, passwordField;
+    private EditText nameField, phoneField, emailField;
     private Button organizerButton, entrantButton, signUpButton;
     private RadioGroup notificationsGroup;
     private ProgressBar progressBar;
@@ -75,7 +77,6 @@ public class SignUpFragment extends Fragment {
         nameField = view.findViewById(R.id.et_name);
         phoneField = view.findViewById(R.id.et_phone);
         emailField = view.findViewById(R.id.et_email);
-        passwordField = view.findViewById(R.id.et_password);
         //notificaitons prefernce at sign up, will need one for the profile page
         notificationsGroup = view.findViewById(R.id.rg_notifications);
 
@@ -94,13 +95,11 @@ public class SignUpFragment extends Fragment {
         organizerButton.setOnClickListener( v-> {
             selectedRole = "organizer";
             updateRoleButtonStyles();
-            Toast.makeText(getContext(), "Organizer role selected", Toast.LENGTH_SHORT).show();
         });
 
         entrantButton.setOnClickListener(v-> {
             selectedRole = "entrant";
             updateRoleButtonStyles();
-            Toast.makeText(getContext(), "Entrant role selected", Toast.LENGTH_SHORT).show();
         });
 
         notificationsGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -135,10 +134,9 @@ public class SignUpFragment extends Fragment {
         String name = nameField.getText().toString().trim();
         String phone = phoneField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
-        String password = passwordField.getText().toString().trim();
 
         // Validate inputs
-        if (!validateInputs(name, email, password)) {
+        if (!validateInputs(name, email)) {
             return;
         }
 
@@ -152,9 +150,9 @@ public class SignUpFragment extends Fragment {
                 signUpButton.setEnabled(true);
                 showLoading(false);
                 emailField.setError("An account with this email already exists");
-                Toast.makeText(getContext(), "Email already registered. Please login instead.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Email already registered.", Toast.LENGTH_LONG).show();
             } else {
-                createUserAccount(name, email, password, phone);
+                createUserAccount(name, email, phone);
             }
         });
     }
@@ -162,7 +160,7 @@ public class SignUpFragment extends Fragment {
     /**
      * validaitng user inputs
      */
-    private boolean validateInputs(String name, String email, String password) {
+    private boolean validateInputs(String name, String email) {
         boolean isValid = true;
 
         if (name.isEmpty()) {
@@ -178,15 +176,6 @@ public class SignUpFragment extends Fragment {
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailField.setError("Please enter a valid email address");
             emailField.requestFocus();
-            isValid = false;
-        }
-        if (password.isEmpty()) {
-            passwordField.setError("Please enter a password");
-            passwordField.requestFocus();
-            isValid = false;
-        } else if (password.length() < 6) {
-            passwordField.setError("Password must be at least 6 characters");
-            passwordField.requestFocus();
             isValid = false;
         }
 
@@ -214,14 +203,14 @@ public class SignUpFragment extends Fragment {
     }
 
     /**
-     * create user account in firebase
+     * create user account in firebase using anonymous authentication
      */
 
-    private void createUserAccount(String name, String email, String password, String phone) {
-        mAuth.createUserWithEmailAndPassword(email, password)
+    private void createUserAccount(String name, String email, String phone) {
+        mAuth.signInAnonymously()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Sign up success
+                        // Anonymous sign in success
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             // Create user profile in Firestore
@@ -266,15 +255,11 @@ public class SignUpFragment extends Fragment {
             userProfile.put("eventsCreated", new HashMap<>());
         }
 
-
         db.collection("users").document(userId)
                 .set(userProfile)
                 .addOnSuccessListener(aVoid -> {
                     signUpButton.setEnabled(true);
                     showLoading(false);
-
-                    Toast.makeText(getContext(), "Account created successfully!", Toast.LENGTH_SHORT).show();
-
 
                     navigateToHomePage();
                 })
@@ -307,8 +292,19 @@ public class SignUpFragment extends Fragment {
     }
 
     private void navigateToHomePage() {
-        Toast.makeText(getContext(), "Account created successfully! Please login.", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        // Save user role to SharedPreferences
+        SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", requireContext().MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("userRole", selectedRole);
+        editor.apply();
+
+        // Navigate based on role
+        Intent intent;
+        if ("admin".equals(selectedRole)) {
+            intent = new Intent(getActivity(), AdminMainActivity.class);
+        } else {
+            intent = new Intent(getActivity(), MainActivity.class);
+        }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
