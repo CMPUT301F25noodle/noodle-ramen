@@ -112,15 +112,6 @@
                 android:layout_height="wrap_content"
                 android:hint="Email"
                 android:enabled="false"
-                android:layout_marginBottom="8dp"
-                android:backgroundTint="#E0E0E0" />
-
-            <EditText
-                android:id="@+id/passwordHintField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="*********************"
-                android:enabled="false"
                 android:backgroundTint="#E0E0E0" />
         </LinearLayout>
     </LinearLayout>
