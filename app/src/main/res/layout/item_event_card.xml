@@ -1,127 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="16dp"
     app:cardElevation="4dp"
     app:cardBackgroundColor="@android:color/white">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingBottom="16dp">
 
-        <!-- Top Row: Status Badge and Price -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
-
-            <!-- Status Badge -->
-            <TextView
-                android:id="@+id/status_badge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:background="@drawable/status_badge_background"
-                android:paddingStart="12dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="4dp"
-                android:text="Closed"
-                android:textColor="@android:color/black"
-                android:textSize="12sp" />
-
-            <!-- Price -->
-            <TextView
-                android:id="@+id/price_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="$65"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <!-- Event Image Placeholder -->
+        <!-- 1. IMAGE CONTAINER (Top Section) -->
         <FrameLayout
             android:id="@+id/image_container"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginBottom="12dp"
-            android:background="#F0F0F0">
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:background="#F0F0F0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
+            <!-- Placeholder Text -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="IMG here"
-                android:textColor="#999999"
-                android:textSize="16sp" />
+                android:text="No Image Available"
+                android:textColor="#999999" />
 
+            <!-- The Actual Image (Hidden by default, shown by Adapter) -->
             <ImageView
                 android:id="@+id/eventImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:visibility="gone" />
+
+            <!-- Gradient protection for text overlay (Optional) -->
         </FrameLayout>
 
-        <!-- Event Title -->
+        <!-- 2. PRICE BADGE (Overlaying the Image Top-Right) -->
+        <TextView
+            android:id="@+id/price_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$15"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:background="@drawable/bg_price_badge"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 3. TITLE (Below Image, Left) -->
         <TextView
             android:id="@+id/event_title"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Event 1"
+            android:text="Dev Edmonton Tech Meetup"
             android:textColor="@android:color/black"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/image_container"
+            app:layout_constraintEnd_toStartOf="@+id/status_badge" />
 
-        <!-- Organization Name -->
+        <!-- 4. STATUS BADGE (Below Image, Right - Green pill in screenshot) -->
         <TextView
-            android:id="@+id/organization_name"
-            android:layout_width="match_parent"
+            android:id="@+id/status_badge"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="by Organization Name"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:layout_marginBottom="8dp" />
+            android:text="Open"
+            android:textColor="#2E7D32"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_status_pill"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/event_title"
+            app:layout_constraintBottom_toBottomOf="@id/event_title" />
 
-        <!-- Location -->
+        <!-- 5. LOCATION & DATE ROW -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/info_row"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="4dp">
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/event_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📍"
-                android:textSize="14sp"
-                android:layout_marginEnd="4dp" />
+            <!-- Location -->
 
             <TextView
                 android:id="@+id/location_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Southgate Mall"
+                android:text="Edmonton"
                 android:textColor="#666666"
-                android:textSize="14sp" />
-        </LinearLayout>
+                android:textSize="14sp"
+                android:layout_marginEnd="16dp"/>
 
-        <!-- Date Range -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
-
+            <!-- Date -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -133,83 +130,93 @@
                 android:id="@+id/date_range_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10/15/2025 - 10/21/2025"
+                android:text="29/11/2025"
                 android:textColor="#666666"
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Bottom Section: Waitlist Info and Buttons -->
+        <!-- 6. SPOTS / WAITLIST INFO -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/spots_row"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#F3E5F5"
-            android:padding="12dp">
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/info_row"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Waitlist Info and Spots -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/spots_text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:text="25 spots"
+                android:textColor="#666666"
+                android:textSize="14sp" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/waitlist_info"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="25/45 on the waitlist"
-                        android:textColor="#666666"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/spots_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="15 spots"
-                    android:textColor="#666666"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:text=" • "
+                android:textColor="#666666" />
 
-                <!-- "Join Waitlist" Button -->
-                <Button
-                    android:id="@+id/join_waitlist_button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="Join Waitlist"
-                    android:textColor="@android:color/white"
-                    android:backgroundTint="#CE93D8"
-                    android:textAllCaps="false" />
+            <TextView
+                android:id="@+id/waitlist_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 waitlist"
+                android:textColor="#666666"
+                android:textSize="14sp" />
 
-                <!-- "Go to Event Page" Button -->
-                <Button
-                    android:id="@+id/go_to_event_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Go to Event Page >"
-                    android:textColor="#666666"
-                    android:backgroundTint="@android:color/transparent"
-                    android:textAllCaps="false"
-                    style="?attr/materialButtonOutlinedStyle" />
-            </LinearLayout>
+            <!-- Organization Name (Adding it here or below spots if needed) -->
+            <TextView
+                android:id="@+id/organization_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
         </LinearLayout>
 
-    </LinearLayout>
+        <!-- 7. JOIN BUTTON (Bottom Black Button) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/join_waitlist_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:text="Join"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:backgroundTint="#F2AFD3"
+            app:cornerRadius="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/go_to_event_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/spots_row" />
+
+        <!-- 8. ARROW BUTTON (Replacing "Go To Event" Text Button with an Icon) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/go_to_event_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            app:icon="@android:drawable/ic_media_play"
+            app:iconTint="#1A1A1A"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            app:backgroundTint="#00FFFFFF"
+            app:strokeColor="#DDDDDD"
+            app:strokeWidth="1dp"
+            app:cornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/join_waitlist_button"
+            app:layout_constraintTop_toTopOf="@+id/join_waitlist_button"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

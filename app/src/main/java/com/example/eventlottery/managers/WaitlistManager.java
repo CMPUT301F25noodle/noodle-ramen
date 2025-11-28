@@ -173,7 +173,11 @@ public class WaitlistManager {
         Map<String, Object> waitlistData = new HashMap<>();
         waitlistData.put("joinedAt", System.currentTimeMillis());
         waitlistData.put("status", "waiting");
-        batch.update(userRef, "waitingLists." + eventId, waitlistData);
+
+        // Use dot notation to update nested field without overwriting entire waitingLists map
+        Map<String, Object> userUpdate = new HashMap<>();
+        userUpdate.put("waitingLists." + eventId, waitlistData);
+        batch.set(userRef, userUpdate, com.google.firebase.firestore.SetOptions.merge());
 
         if (location != null) {
             DocumentReference locationRef = db.collection("events")
@@ -218,7 +222,11 @@ public class WaitlistManager {
 
 
         DocumentReference userRef = db.collection("users").document(userId);
-        batch.update(userRef, "waitingLists." + eventId, FieldValue.delete());
+
+        // Use dot notation to delete nested field without affecting other waitlist entries
+        Map<String, Object> userUpdate = new HashMap<>();
+        userUpdate.put("waitingLists." + eventId, FieldValue.delete());
+        batch.set(userRef, userUpdate, com.google.firebase.firestore.SetOptions.merge());
 
 
         batch.commit()
