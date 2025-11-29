@@ -37,7 +37,11 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * EventManagementFragment handles the management interface for a specific event.
+ * It allows organizers to view entrant lists (waitlist, accepted, declined), run the lottery,
+ * download entrant data as CSV, and view entrant locations on a map.
+ */
 public class EventManagementFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "EventManagement";
     private static final String ARG_EVENT_ID = "eventId";
@@ -70,7 +74,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
     private static final String FIELD_DECLINED = "declined";        // Fixed: matches LotteryManager
     private static final String FIELD_RETRY = "retryEntrants";
     private static final String FIELD_SELECTED = "selected";        // Fixed: matches LotteryManager
-
+    /**
+     * Creates a new instance of EventManagementFragment with the specified event ID.
+     *
+     * @param eventId The unique identifier of the event to manage.
+     * @return A new instance of fragment EventManagementFragment.
+     */
     public static EventManagementFragment newInstance(String eventId) {
         EventManagementFragment fragment = new EventManagementFragment();
         Bundle args = new Bundle();
@@ -78,7 +87,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         fragment.setArguments(args);
         return fragment;
     }
-
+    /**
+     * Initializes the fragment, Firestore instance, and LotteryManager.
+     * Retrieves the event ID from the arguments.
+     *
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,14 +111,26 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
             }
         }
     }
-
+    /**
+     * Inflates the layout for the event management screen.
+     *
+     * @param inflater           The LayoutInflater object.
+     * @param container          The parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_event_management, container, false);
     }
-
+    /**
+     * Sets up views, initializes the map, loads event data, and configures button listeners after the view is created.
+     *
+     * @param view               The View returned by onCreateView.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -114,7 +140,11 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         loadEventData();
         setupListeners();
     }
-
+    /**
+     * Initializes UI components by finding them in the view layout.
+     *
+     * @param view The root view of the fragment.
+     */
     private void initializeViews(View view) {
         // Header
         tvEventName = view.findViewById(R.id.tv_event_name);
@@ -146,7 +176,9 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
 
         progressBar = view.findViewById(R.id.progress_bar);
     }
-
+    /**
+     * Initializes the Google Map fragment asynchronously.
+     */
     private void setupMap() {
         SupportMapFragment mapFragment = (SupportMapFragment)
                 getChildFragmentManager().findFragmentById(R.id.map_fragment);
@@ -154,7 +186,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
             mapFragment.getMapAsync(this);
         }
     }
-
+    /**
+     * Callback triggered when the Google Map is ready to be used.
+     * Configures map settings and loads entrant locations.
+     *
+     * @param map The GoogleMap instance.
+     */
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         this.googleMap = map;
@@ -162,7 +199,10 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         googleMap.getUiSettings().setScrollGesturesEnabled(true);
         loadEntrantLocations();
     }
-
+    /**
+     * Fetches event details from Firestore, including name, capacity, waitlist size, and lottery status.
+     * Updates the UI accordingly.
+     */
     private void loadEventData() {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -210,7 +250,11 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-
+    /**
+     * Updates the UI buttons and text based on whether the lottery has been completed.
+     *
+     * @param isCompleted True if the lottery has been run, false otherwise.
+     */
     private void updateLotteryStatusUI(boolean isCompleted) {
         if (isCompleted) {
             tvLotteryStatus.setText("Lottery: COMPLETED");
@@ -226,7 +270,9 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
             postDrawActionsContainer.setVisibility(View.GONE);
         }
     }
-
+    /**
+     * Loads a preview list of the first few entrants on the waitlist.
+     */
     private void loadWaitlistPreview() {
         db.collection("events").document(eventId)
                 .get()
@@ -250,7 +296,11 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     }
                 });
     }
-
+    /**
+     * Fetches a user's name by ID and adds it to the waitlist preview container.
+     *
+     * @param userId The ID of the user to display.
+     */
     private void addEntrantPreviewItem(String userId) {
         db.collection("users").document(userId)
                 .get()
@@ -266,7 +316,9 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     waitlistPreviewContainer.addView(nameView);
                 });
     }
-
+    /**
+     * Sets up click listeners for all interactive buttons in the fragment.
+     */
     private void setupListeners() {
         btnBack.setOnClickListener(v -> {
             if (getActivity() != null) {
@@ -288,7 +340,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         btnViewRetry.setOnClickListener(v -> viewEntrantList(FIELD_RETRY, "Retry Entrants"));
         btnDownloadRetry.setOnClickListener(v -> downloadEntrantList(FIELD_RETRY, "retry_entrants"));
     }
-
+    /**
+     * Fetches user IDs from a specific Firestore field and displays them in a dialog.
+     *
+     * @param fieldName The Firestore field name containing the list of user IDs.
+     * @param title     The title to display on the dialog.
+     */
     private void viewEntrantList(String fieldName, String title) {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -309,7 +366,13 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-
+    /**
+     * Resolves a list of user IDs to user names and shows them in a list dialog.
+     *
+     * @param userIds   The list of user IDs to resolve.
+     * @param title     The title for the dialog.
+     * @param fieldName The original field name (used for CSV export context).
+     */
     private void fetchUserNamesAndShowDialog(List<String> userIds, String title, String fieldName) {
         List<String> userNames = new ArrayList<>();
         final int[] fetchCount = {0};
@@ -335,7 +398,13 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     });
         }
     }
-
+    /**
+     * Displays a dialog containing the list of user names and an option to download as CSV.
+     *
+     * @param userNames The list of user names to display.
+     * @param title     The title of the dialog.
+     * @param fieldName The name of the list being displayed.
+     */
     private void showEntrantListDialog(List<String> userNames, String title, String fieldName) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(title + " (" + userNames.size() + ")");
@@ -368,7 +437,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         builder.setNegativeButton("Close", null);
         builder.show();
     }
-
+    /**
+     * Downloads the list of users from a specific field as a CSV file.
+     *
+     * @param fieldName The Firestore field name containing the user IDs.
+     * @param fileName  The base name for the downloaded file.
+     */
     private void downloadEntrantList(String fieldName, String fileName) {
         progressBar.setVisibility(View.VISIBLE);
         db.collection("events").document(eventId).get()
@@ -382,7 +456,12 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     fetchUserNamesAndDownload(userIds, fileName);
                 });
     }
-
+    /**
+     * Resolves user IDs to names and triggers the CSV download.
+     *
+     * @param userIds  The list of user IDs to export.
+     * @param fileName The filename for the export.
+     */
     private void fetchUserNamesAndDownload(List<String> userIds, String fileName) {
         List<String> userNames = new ArrayList<>();
         final int[] fetchCount = {0};
@@ -400,7 +479,9 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
                     });
         }
     }
-
+    /**
+     * Displays a dialog prompting the user to confirm the lottery draw and set the sample size.
+     */
     private void showDrawLotteryDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Run Lottery Draw");
@@ -429,7 +510,11 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
-
+    /**
+     * Executes the lottery draw using the LotteryManager and updates the UI on completion.
+     *
+     * @param sampleSize The number of winners to select.
+     */
     private void runLottery(int sampleSize) {
         progressBar.setVisibility(View.VISIBLE);
         btnDrawLottery.setEnabled(false);
@@ -452,7 +537,9 @@ public class EventManagementFragment extends Fragment implements OnMapReadyCallb
             }
         });
     }
-
+    /**
+     * Fetches entrant locations from Firestore and plots markers on the Google Map.
+     */
     private void loadEntrantLocations() {
         if (googleMap == null) return;
 
