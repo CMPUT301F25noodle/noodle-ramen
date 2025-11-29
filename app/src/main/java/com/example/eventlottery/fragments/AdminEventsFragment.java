@@ -28,6 +28,11 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AdminEventsFragment provides an interface for administrators to manage events.
+ * It allows viewing a list of all events, searching/filtering them, viewing details, and deleting events.
+ */
+
 public class AdminEventsFragment extends Fragment {
 
     private TextView eventsCount;
@@ -40,7 +45,14 @@ public class AdminEventsFragment extends Fragment {
 
     private final List<EventData> allEvents = new ArrayList<>();
     private final List<EventData> filteredEvents = new ArrayList<>();
-
+    /**
+     * Initializes the fragment's UI components and sets up listeners for data loading and user interaction.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -59,7 +71,9 @@ public class AdminEventsFragment extends Fragment {
 
         return view;
     }
-
+    /**
+     * Sets up a TextWatcher on the search bar to filter the event list as the user types.
+     */
     private void setupSearchListener() {
         searchEvents.addTextChangedListener(new TextWatcher() {
             @Override
@@ -76,7 +90,10 @@ public class AdminEventsFragment extends Fragment {
             }
         });
     }
-
+    /**
+     * Connects to Firestore to listen for real-time updates to the "events" collection.
+     * When data changes, it updates the local list and refreshes the display.
+     */
     private void loadEventsFromFirestore() {
 
         showLoading(true);
@@ -119,7 +136,12 @@ public class AdminEventsFragment extends Fragment {
                     }
                 });
     }
-
+    /**
+     * Filters the list of events based on the search query.
+     * Matches against event name or organizer name.
+     *
+     * @param query The search string entered by the user.
+     */
     private void filterEvents(String query) {
         filteredEvents.clear();
 
@@ -137,7 +159,9 @@ public class AdminEventsFragment extends Fragment {
 
         displayEvents();
     }
-
+    /**
+     * Clears the current list view and repopulates it with cards for the filtered events.
+     */
     private void displayEvents() {
 
         eventsList.removeAllViews();
@@ -152,7 +176,12 @@ public class AdminEventsFragment extends Fragment {
             addEventCard(event);
         }
     }
-
+    /**
+     * Inflates a new event card view, populates it with data, and adds it to the list layout.
+     * Sets up click listeners for the "View Details" and "Delete" buttons.
+     *
+     * @param event The EventData object containing details to display.
+     */
     @SuppressLint("SetTextI18n")
     private void addEventCard(EventData event) {
 
@@ -178,7 +207,12 @@ public class AdminEventsFragment extends Fragment {
 
         eventsList.addView(eventCard);
     }
-
+    /**
+     * Navigates to the EventDetailActivity to show more information about the selected event.
+     *
+     * @param eventId   The ID of the event to view.
+     * @param eventName The name of the event (passed for context).
+     */
     private void viewEventDetails(String eventId, String eventName) {
 
         Intent intent = new Intent(getContext(), EventDetailActivity.class);
@@ -187,6 +221,12 @@ public class AdminEventsFragment extends Fragment {
         startActivity(intent);
 
     }
+    /**
+     * Shows a confirmation dialog to delete an event. If confirmed, deletes the event from Firestore.
+     *
+     * @param eventId   The ID of the event to delete.
+     * @param eventName The name of the event (used in the confirmation message).
+     */
 
     private void deleteEvent(String eventId, String eventName) {
 
@@ -205,14 +245,20 @@ public class AdminEventsFragment extends Fragment {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
-
+    /**
+     * Toggles the visibility of the loading spinner and the event list.
+     *
+     * @param show True to show the loading spinner, false to show the list.
+     */
     private void showLoading(boolean show) {
         if (loadingSpinner != null) {
             loadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         eventsList.setVisibility(show ? View.GONE : View.VISIBLE);
     }
-
+    /**
+     * Displays a message indicating that no events match the current search or exist in the database.
+     */
     private void showEmptyMessage() {
         if (emptyMessage != null) {
             emptyMessage.setVisibility(View.VISIBLE);
@@ -232,11 +278,17 @@ public class AdminEventsFragment extends Fragment {
             eventsList.addView(emptyText);
         }
     }
-
+    /**
+     * Displays a toast message with an error description.
+     *
+     * @param message The error message to display.
+     */
     private void showError(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
-
+    /**
+     * Cleans up resources when the fragment view is destroyed, specifically removing the Firestore listener.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

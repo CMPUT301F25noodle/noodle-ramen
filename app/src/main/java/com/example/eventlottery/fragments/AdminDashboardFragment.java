@@ -10,12 +10,29 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.R;
 import com.google.firebase.firestore.FirebaseFirestore;
+/**
+ * AdminDashboardFragment displays the main dashboard for administrators.
+ * It shows statistics such as the total count of profiles, organizers, events, images, and notifications.
+ */
+
 
 public class AdminDashboardFragment extends Fragment {
 
     private TextView countProfiles, countOrganizers, countEvents, countImages, countNotifications;
     private FirebaseFirestore db;
 
+    /**
+     * Initializes the fragment view, sets up UI components, and triggers the data loading process.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -34,6 +51,11 @@ public class AdminDashboardFragment extends Fragment {
 
         return v;
     }
+    /**
+     * Fetches counts for profiles, organizers, events, images, and notifications from Firestore
+     * and updates the corresponding TextViews in the UI.
+     */
+
 
     private void loadCountsFromFirestore() {
 

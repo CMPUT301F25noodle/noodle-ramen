@@ -224,18 +224,16 @@ public class CreateEventFragment extends Fragment {
         placesAdapter = new PlacesCompleteAdapter(getContext(), placesClient);
         etLocation.setAdapter(placesAdapter);
 
-        // 2. Handle when user clicks a suggestion
         etLocation.setOnItemClickListener((parent, view, position, id) -> {
-            // Get the selected address string
+
             String selectedAddress = (String) parent.getItemAtPosition(position);
             etLocation.setText(selectedAddress);
 
-            // Get the Place ID if you need it for database/maps later
+
             String placeId = placesAdapter.getPlaceId(position);
             Log.d("CreateEvent", "Selected Place ID: " + placeId);
 
-            // Optional: Fetch Lat/Lng using the ID if you need coordinates
-            // fetchPlaceDetails(placeId);
+
         });
 
 
@@ -245,7 +243,7 @@ public class CreateEventFragment extends Fragment {
             if (totalImages >= 3) {
                 Toast.makeText(getContext(), "Maximum of 3 images allowed", Toast.LENGTH_SHORT).show();
             } else {
-                // OpenDocument requires an array of MIME types
+
                 imagePickerLauncher.launch(new String[]{"image/*"});
             }
         });
