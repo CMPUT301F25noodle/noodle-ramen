@@ -14,6 +14,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.eventlottery.utils.PlacesCompleteAdapter;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
@@ -48,8 +50,9 @@ import java.util.Map;
 public class CreateEventFragment extends Fragment {
 
     // ui elements
-    private EditText etPreCreatedEvent, etLocation, etOrganizerName, etEventDescription,
+    private EditText etPreCreatedEvent, etOrganizerName, etEventDescription,
             etEligibilityCriteria, etStartDate, etEndDate, etPrice, etWaitlistLimit, etPoolSize;
+    private AutoCompleteTextView etLocation;
     private Spinner spinnerCategory;
     private RadioGroup rgGeolocation;
     private Button btnAddImage, btnDone, btnCancel;
@@ -57,6 +60,8 @@ public class CreateEventFragment extends Fragment {
     private ImageView ivEventImage1, ivEventImage2, ivEventImage3;
     private LinearLayout llImageSlot1, llImageSlot2, llImageSlot3;
     private ImageButton btnLocation;
+    private com.google.android.libraries.places.api.net.PlacesClient placesClient;
+    private PlacesCompleteAdapter placesAdapter;
 
     // firebase
     private FirebaseFirestore db;
@@ -125,6 +130,7 @@ public class CreateEventFragment extends Fragment {
         if (!com.google.android.libraries.places.api.Places.isInitialized()) {
             com.google.android.libraries.places.api.Places.initialize(requireContext(), "AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek");
         }
+        placesClient = com.google.android.libraries.places.api.Places.createClient(requireContext());
 
         if (mAuth.getCurrentUser() != null) {
             currentUserId = mAuth.getCurrentUser().getUid();
@@ -215,18 +221,21 @@ public class CreateEventFragment extends Fragment {
         etStartDate.setOnClickListener(v -> showDatePicker(etStartDate));
         etEndDate.setOnClickListener(v -> showDatePicker(etEndDate));
 
-        btnLocation.setOnClickListener(v -> {
-            List<com.google.android.libraries.places.api.model.Place.Field> fields = Arrays.asList(
-                    com.google.android.libraries.places.api.model.Place.Field.ID,
-                    com.google.android.libraries.places.api.model.Place.Field.NAME,
-                    com.google.android.libraries.places.api.model.Place.Field.ADDRESS
-            );
+        placesAdapter = new PlacesCompleteAdapter(getContext(), placesClient);
+        etLocation.setAdapter(placesAdapter);
 
-            // Launch the search overlay
-            Intent intent = new com.google.android.libraries.places.widget.Autocomplete.IntentBuilder(
-                    com.google.android.libraries.places.widget.model.AutocompleteActivityMode.OVERLAY, fields)
-                    .build(requireContext());
-            locationPickerLauncher.launch(intent);
+        // 2. Handle when user clicks a suggestion
+        etLocation.setOnItemClickListener((parent, view, position, id) -> {
+            // Get the selected address string
+            String selectedAddress = (String) parent.getItemAtPosition(position);
+            etLocation.setText(selectedAddress);
+
+            // Get the Place ID if you need it for database/maps later
+            String placeId = placesAdapter.getPlaceId(position);
+            Log.d("CreateEvent", "Selected Place ID: " + placeId);
+
+            // Optional: Fetch Lat/Lng using the ID if you need coordinates
+            // fetchPlaceDetails(placeId);
         });
 
 
