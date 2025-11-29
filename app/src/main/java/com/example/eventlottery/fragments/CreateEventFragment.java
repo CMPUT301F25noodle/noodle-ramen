@@ -15,6 +15,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.eventlottery.utils.PlacesCompleteAdapter;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import java.util.Arrays;
+
 import com.bumptech.glide.Glide;
 import com.example.eventlottery.R;
 import com.example.eventlottery.QrGenerator;
@@ -42,8 +50,9 @@ import java.util.Map;
 public class CreateEventFragment extends Fragment {
 
     // ui elements
-    private EditText etPreCreatedEvent, etLocation, etOrganizerName, etEventDescription,
+    private EditText etPreCreatedEvent, etOrganizerName, etEventDescription,
             etEligibilityCriteria, etStartDate, etEndDate, etPrice, etWaitlistLimit, etPoolSize;
+    private AutoCompleteTextView etLocation;
     private Spinner spinnerCategory;
     private RadioGroup rgGeolocation;
     private Button btnAddImage, btnDone, btnCancel;
@@ -51,6 +60,8 @@ public class CreateEventFragment extends Fragment {
     private ImageView ivEventImage1, ivEventImage2, ivEventImage3;
     private LinearLayout llImageSlot1, llImageSlot2, llImageSlot3;
     private ImageButton btnLocation;
+    private com.google.android.libraries.places.api.net.PlacesClient placesClient;
+    private PlacesCompleteAdapter placesAdapter;
 
     // firebase
     private FirebaseFirestore db;
@@ -65,6 +76,33 @@ public class CreateEventFragment extends Fragment {
 
     private String eventId = null;
     private boolean isEditMode = false;
+
+    private final ActivityResultLauncher<Intent> locationPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == -1) { // Activity.RESULT_OK
+                    Intent data = result.getData();
+                    if (data != null) {
+                        com.google.android.libraries.places.api.model.Place place =
+                                com.google.android.libraries.places.widget.Autocomplete.getPlaceFromIntent(data);
+
+                        if (etLocation != null) {
+                            etLocation.setText(place.getAddress());
+                        }
+                    }
+                } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
+                    // --- THIS IS THE MISSING PART ---
+                    Intent data = result.getData();
+                    com.google.android.gms.common.api.Status status =
+                            com.google.android.libraries.places.widget.Autocomplete.getStatusFromIntent(data);
+
+                    String message = "Places Error: " + status.getStatusMessage();
+                    Log.e("Places", message);
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                } else if (result.getResultCode() == 0) { // RESULT_CANCELED
+                    // User closed the search without selecting anything
+                }
+            });
 
     /**
      * instanties the fragment in the user interface view
@@ -89,6 +127,10 @@ public class CreateEventFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         imageManager = ImageManager.getInstance();
+        if (!com.google.android.libraries.places.api.Places.isInitialized()) {
+            com.google.android.libraries.places.api.Places.initialize(requireContext(), "AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek");
+        }
+        placesClient = com.google.android.libraries.places.api.Places.createClient(requireContext());
 
         if (mAuth.getCurrentUser() != null) {
             currentUserId = mAuth.getCurrentUser().getUid();
@@ -179,10 +221,24 @@ public class CreateEventFragment extends Fragment {
         etStartDate.setOnClickListener(v -> showDatePicker(etStartDate));
         etEndDate.setOnClickListener(v -> showDatePicker(etEndDate));
 
-        btnLocation.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), QrGenerator.class);
-            startActivity(intent);
+        placesAdapter = new PlacesCompleteAdapter(getContext(), placesClient);
+        etLocation.setAdapter(placesAdapter);
+
+        // 2. Handle when user clicks a suggestion
+        etLocation.setOnItemClickListener((parent, view, position, id) -> {
+            // Get the selected address string
+            String selectedAddress = (String) parent.getItemAtPosition(position);
+            etLocation.setText(selectedAddress);
+
+            // Get the Place ID if you need it for database/maps later
+            String placeId = placesAdapter.getPlaceId(position);
+            Log.d("CreateEvent", "Selected Place ID: " + placeId);
+
+            // Optional: Fetch Lat/Lng using the ID if you need coordinates
+            // fetchPlaceDetails(placeId);
         });
+
+
 
         btnAddImage.setOnClickListener(v -> {
             int totalImages = isEditMode ? uploadedImages.size() : selectedImageUris.size();
