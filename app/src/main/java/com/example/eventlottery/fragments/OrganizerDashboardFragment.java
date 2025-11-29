@@ -24,8 +24,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
+
 
 /**
  * OrganizerDashboardFragment - handles organizer dashboard and event management
@@ -36,14 +39,18 @@ public class OrganizerDashboardFragment extends Fragment {
 
     // ui elements
     private LinearLayout btnCreateEvent;
-    private Button tabRegistered, tabWon, tabLost, tabPending;
+    private Button tabWon, tabLost, tabPending;
     private LinearLayout myEventsContainer, eventHistoryContainer;
     private android.widget.TextView emptyMyEventsText, emptyEventHistoryText;
+    private android.widget.ScrollView scrollView;
 
     // firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String currentUserId;
+
+    // scroll position tracking
+    private int savedScrollPosition = 0;
 
     @Nullable
     @Override
@@ -71,8 +78,8 @@ public class OrganizerDashboardFragment extends Fragment {
      */
     private void initializeViews(View view) {
         btnCreateEvent = view.findViewById(R.id.btn_create_event);
+        scrollView = view.findViewById(R.id.scroll_view);
 
-        tabRegistered = view.findViewById(R.id.tab_registered);
         tabWon = view.findViewById(R.id.tab_won);
         tabLost = view.findViewById(R.id.tab_lost);
         tabPending = view.findViewById(R.id.tab_pending);
@@ -108,24 +115,22 @@ public class OrganizerDashboardFragment extends Fragment {
             });
         }
 
-        tabRegistered.setOnClickListener(v -> {
-            updateTabSelection(tabRegistered);
-            loadEventHistory("registered");
+        tabPending.setOnClickListener(v -> {
+            saveScrollPosition();
+            updateTabSelection(tabPending);
+            loadEventHistory("pending");
         });
 
         tabWon.setOnClickListener(v -> {
+            saveScrollPosition();
             updateTabSelection(tabWon);
             loadEventHistory("won");
         });
 
         tabLost.setOnClickListener(v -> {
+            saveScrollPosition();
             updateTabSelection(tabLost);
             loadEventHistory("lost");
-        });
-
-        tabPending.setOnClickListener(v -> {
-            updateTabSelection(tabPending);
-            loadEventHistory("pending");
         });
     }
 
@@ -133,17 +138,14 @@ public class OrganizerDashboardFragment extends Fragment {
      * updates tab button styles
      */
     private void updateTabSelection(Button selectedTab) {
-        tabRegistered.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
-        tabRegistered.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        tabPending.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
+        tabPending.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
         tabWon.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
         tabWon.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
         tabLost.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
         tabLost.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-
-        tabPending.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
-        tabPending.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 
         selectedTab.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
         selectedTab.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
@@ -309,6 +311,7 @@ public class OrganizerDashboardFragment extends Fragment {
 
     /**
      * loads event history based on selected tab
+     * Queries all events and checks if user is in waitlistUsers or selected
      */
     private void loadEventHistory(String category) {
         eventHistoryContainer.removeAllViews();
@@ -319,34 +322,133 @@ public class OrganizerDashboardFragment extends Fragment {
             return;
         }
 
-        db.collection("users")
-                .document(currentUserId)
-                .collection("eventHistory")
-                .whereEqualTo("status", category)
+        // Query ALL events and filter by user participation
+        db.collection("events")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    eventHistoryContainer.removeAllViews();
+                    boolean foundAny = false;
 
-                    if (queryDocumentSnapshots.isEmpty()) {
+                    for (QueryDocumentSnapshot eventDoc : queryDocumentSnapshots) {
+                        String eventId = eventDoc.getId();
+                        String eventName = eventDoc.getString("eventName");
+
+                        @SuppressWarnings("unchecked")
+                        List<String> waitlistUsers = (List<String>) eventDoc.get("waitlistUsers");
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> selected = (Map<String, Object>) eventDoc.get("selected");
+
+                        boolean shouldShow = false;
+
+                        switch (category) {
+                            case "pending":
+                                // User on waitlist OR has pending selection
+                                if (waitlistUsers != null && waitlistUsers.contains(currentUserId)) {
+                                    shouldShow = true;
+                                } else if (selected != null && selected.containsKey(currentUserId)) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> userSelection = (Map<String, Object>) selected.get(currentUserId);
+                                    String status = userSelection != null ? (String) userSelection.get("status") : null;
+                                    if ("pending".equals(status)) shouldShow = true;
+                                }
+                                break;
+
+                            case "won":
+                                // User accepted invitation
+                                if (selected != null && selected.containsKey(currentUserId)) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> userSelection = (Map<String, Object>) selected.get(currentUserId);
+                                    String status = userSelection != null ? (String) userSelection.get("status") : null;
+                                    if ("accepted".equals(status)) shouldShow = true;
+                                }
+                                break;
+
+                            case "lost":
+                                // User declined
+                                if (selected != null && selected.containsKey(currentUserId)) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> userSelection = (Map<String, Object>) selected.get(currentUserId);
+                                    String status = userSelection != null ? (String) userSelection.get("status") : null;
+                                    if ("declined".equals(status)) shouldShow = true;
+                                }
+                                break;
+                        }
+
+                        if (shouldShow && eventName != null) {
+                            addEventToHistory(eventName, eventId);
+                            foundAny = true;
+                        }
+                    }
+
+                    if (!foundAny) {
+                        eventHistoryContainer.removeAllViews();
                         emptyEventHistoryText.setText("No " + category + " events found");
                         eventHistoryContainer.addView(emptyEventHistoryText);
-                        return;
                     }
 
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        String eventId = document.getString("eventId");
-                        String eventName = document.getString("eventName");
-
-                        // TODO: Add event cards for history
-                        // For now just showing a toast
-                        Toast.makeText(getContext(), "loaded " + category + " event: " + eventName, Toast.LENGTH_SHORT).show();
-                    }
+                    // Restore scroll position after loading
+                    restoreScrollPosition();
                 })
                 .addOnFailureListener(e -> {
                     eventHistoryContainer.removeAllViews();
                     emptyEventHistoryText.setText("Failed to load events");
                     eventHistoryContainer.addView(emptyEventHistoryText);
                     Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+
+                    // Restore scroll position even on error
+                    restoreScrollPosition();
                 });
+    }
+
+    /**
+     * Save current scroll position before switching tabs
+     */
+    private void saveScrollPosition() {
+        if (scrollView != null) {
+            savedScrollPosition = scrollView.getScrollY();
+        }
+    }
+
+    /**
+     * Restore scroll position after loading new content
+     */
+    private void restoreScrollPosition() {
+        if (scrollView != null) {
+            scrollView.post(() -> scrollView.scrollTo(0, savedScrollPosition));
+        }
+    }
+
+    /**
+     * Add event card to history container
+     */
+    private void addEventToHistory(String eventName, String eventId) {
+        if (getContext() == null) return;
+
+        // Remove empty state if it's showing
+        if (eventHistoryContainer.getChildCount() == 1 &&
+            eventHistoryContainer.getChildAt(0) == emptyEventHistoryText) {
+            eventHistoryContainer.removeAllViews();
+        }
+
+        android.widget.TextView eventCard = new android.widget.TextView(getContext());
+        eventCard.setText(eventName);
+        eventCard.setPadding(32, 24, 32, 24);
+        eventCard.setTextSize(16);
+        eventCard.setTextColor(0xFF000000);
+        eventCard.setBackgroundColor(0xFFF5F5F5);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 16);
+        eventCard.setLayoutParams(params);
+
+        eventCard.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), com.example.eventlottery.EventDetailActivity.class);
+            intent.putExtra("eventId", eventId);
+            startActivity(intent);
+        });
+
+        eventHistoryContainer.addView(eventCard);
     }
 }
