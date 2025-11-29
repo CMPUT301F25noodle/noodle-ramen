@@ -24,7 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
+/**
+ * NotificationActivity displays a list of notifications for the current user.
+ * It handles the logic for accepting or declining event lottery invitations directly from the notification list.
+ */
  public class NotificationActivity extends AppCompatActivity{
  private static final String TAG = "NotificationsActivity";
 
@@ -44,7 +47,12 @@ import java.util.List;
 
  // Data
  private List<Notification> notificationsList;
-
+ /**
+  * Initializes the activity, sets up the layout, and begins the process of identifying the user
+  * to load their specific notifications.
+  *
+  * @param savedInstanceState If non-null, this activity is being re-constructed from a previous saved state.
+  */
  @Override
  protected void onCreate(Bundle savedInstanceState) {
  super.onCreate(savedInstanceState);
@@ -56,13 +64,7 @@ import java.util.List;
  initializeViews();
  setupRecyclerView();
 
- //   getUserIdAndLoadNotifications();
 
- //  if (userId == null || userId.isEmpty()) {
- //      Toast.makeText(this, "Error: User not logged in", Toast.LENGTH_SHORT).show();
- //      finish();
- //      return;
- //   }
 
  lotteryManager = new LotteryManager();
  notificationManager = new NotificationManager();
@@ -70,7 +72,10 @@ import java.util.List;
  getUserIdAndLoadNotifications();
 
  }
-
+ /**
+  * Finds and assigns the UI views from the layout resource.
+  * Sets up the toolbar title and back button.
+  */
  private void initializeViews() {
  notificationsRecyclerView = findViewById(R.id.notifications_recycler_view);
  progressBar = findViewById(R.id.progress_bar);
@@ -84,7 +89,10 @@ import java.util.List;
  }
 
 
-
+ /**
+  * Configures the RecyclerView with a LayoutManager and the NotificationAdapter.
+  * Defines the callback logic for when accept or decline buttons are clicked on a notification.
+  */
  private void setupRecyclerView() {
  notificationsList = new ArrayList<>();
 
@@ -111,7 +119,10 @@ import java.util.List;
  notificationsRecyclerView.setAdapter(adapter);
  }
 
-
+ /**
+  * Fetches the user's notifications from the Firestore "notifications" collection.
+  * Listens for real-time updates and refreshes the list automatically.
+  */
  private void loadNotifications() {
  Log.d(TAG, "Loading notifications for user: " + userId);
 
@@ -162,7 +173,12 @@ import java.util.List;
  }
  });
  }
-
+ /**
+  * Helper method to convert a Firestore DocumentSnapshot into a Notification object.
+  *
+  * @param document The Firestore document to parse.
+  * @return A populated Notification object, or null if parsing fails.
+  */
  private Notification documentToNotification(DocumentSnapshot document) {
  try {
  Notification notification = new Notification();
@@ -181,14 +197,21 @@ import java.util.List;
  }
  }
 
-
+ /**
+  * Updates the UI to show a "No notifications" message when the list is empty.
+  */
  private void showEmptyState() {
  notificationsRecyclerView.setVisibility(View.GONE);
  emptyStateTextView.setVisibility(View.VISIBLE);
  emptyStateTextView.setText("No notifications yet");
  }
 
-
+ /**
+  * Handles the click event for the "Accept" button.
+  * Shows a confirmation dialog before proceeding with the acceptance logic.
+  *
+  * @param notification The notification associated with the accepted event.
+  */
  private void handleAcceptClicked(Notification notification) {
  Log.d(TAG, "Accept clicked for notification: " + notification.getId());
 
@@ -212,7 +235,12 @@ import java.util.List;
  .setNegativeButton("Cancel", null)
  .show();
  }
-
+ /**
+  * Calls the LotteryManager to record the user's acceptance of the event invitation.
+  * Updates the UI upon success or failure.
+  *
+  * @param notification The notification being accepted.
+  */
  private void acceptInvitation(Notification notification) {
  // Show progress
  progressBar.setVisibility(View.VISIBLE);
@@ -248,7 +276,12 @@ import java.util.List;
  }
  });
  }
-
+ /**
+  * Handles the click event for the "Decline" button.
+  * Shows a confirmation dialog warning the user that their spot will be given away.
+  *
+  * @param notification The notification associated with the declined event.
+  */
  private void handleDeclineClicked(Notification notification) {
  Log.d(TAG, "Decline clicked for notification: " + notification.getId());
 
@@ -272,7 +305,12 @@ import java.util.List;
  .setNegativeButton("Cancel", null)
  .show();
  }
-
+ /**
+  * Calls the LotteryManager to record the user's rejection of the event invitation.
+  * This may trigger a redraw for a new winner.
+  *
+  * @param notification The notification being declined.
+  */
  private void declineInvitation(Notification notification) {
 
  progressBar.setVisibility(View.VISIBLE);
@@ -308,7 +346,11 @@ import java.util.List;
  }
  });
  }
-
+ /**
+  * Updates the status of a specific notification in Firestore to mark it as 'read' and 'responded'.
+  *
+  * @param notificationId The ID of the notification to update.
+  */
  private void markNotificationAsResponded(String notificationId) {
  db.collection("notifications")
  .document(userId)
@@ -323,7 +365,11 @@ import java.util.List;
  });
  }
 
-
+ /**
+  * Determines the current user's ID. It first checks for a locally cached ID in SharedPreferences.
+  * If not found, it queries Firestore using the device's unique ID to find the user.
+  * Once the user ID is found, it triggers the loading of notifications.
+  */
 private void getUserIdAndLoadNotifications() {
 SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 

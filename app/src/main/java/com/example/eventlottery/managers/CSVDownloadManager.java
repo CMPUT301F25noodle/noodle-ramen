@@ -18,21 +18,37 @@ import java.util.List;
 import java.util.Locale;
 import androidx.annotation.RequiresApi;
 
-
+/**
+ * CSVDownloadManager handles the export of data lists to CSV files.
+ * It ensures files are saved to the device's public Downloads folder, adapting to different Android API storage requirements.
+ */
 public class CSVDownloadManager {
-
+    /**
+     * Exports a list of user names to a CSV file in the system's Downloads directory.
+     * Automatically chooses the correct storage method based on the Android version (MediaStore for newer, File I/O for older).
+     *
+     * @param context   The application context.
+     * @param fileName  The base name for the file (timestamp will be appended).
+     * @param userNames The list of strings to write into the CSV.
+     */
     public static void exportToCSV(Context context, String fileName, List<String> userNames) {
         String finalFileName = fileName + "_" + getTimestamp() + ".csv";
 
-        // Method 1: For Modern Android (API 29+) - The standard for new apps
-        // This saves directly to the user's "Downloads" folder
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             saveToDownloadsMediaStore(context, finalFileName, userNames);
         } else {
-            // Method 2: Fallback for older Android versions (Before Android 10)
+
             saveToDownloadsLegacy(context, finalFileName, userNames);
         }
     }
+    /**
+     * Saves the CSV file using the MediaStore API, required for Android Q (API 29) and above.
+     *
+     * @param context   The application context.
+     * @param fileName  The full file name including extension.
+     * @param userNames The list of data to write.
+     */
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private static void saveToDownloadsMediaStore(Context context, String fileName, List<String> userNames) {
         try {
@@ -41,7 +57,6 @@ public class CSVDownloadManager {
             values.put(MediaStore.MediaColumns.MIME_TYPE, "text/csv");
             values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
 
-            // This inserts a new file record into the system
             Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 
             if (uri != null) {
@@ -65,7 +80,13 @@ public class CSVDownloadManager {
         }
     }
 
-    // Legacy support (Before Android 10) - unlikely to be used on your emulator but good practice
+    /**
+     * Saves the CSV file using standard File I/O, used for legacy Android versions (before API 29).
+     *
+     * @param context   The application context.
+     * @param fileName  The full file name including extension.
+     * @param userNames The list of data to write.
+     */
     private static void saveToDownloadsLegacy(Context context, String fileName, List<String> userNames) {
         try {
             File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);

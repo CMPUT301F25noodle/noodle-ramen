@@ -21,7 +21,12 @@ public class QrScannerActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_REQUEST = 101;
     private DecoratedBarcodeView barcodeView;
-
+    /**
+     * Initializes the activity, sets up the barcode scanner view, and checks for camera permissions.
+     * If permissions are granted, it starts the scanning process.
+     *
+     * @param savedInstanceState If non-null, this activity is being re-constructed from a previous saved state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +44,11 @@ public class QrScannerActivity extends AppCompatActivity {
 
         barcodeView.decodeContinuous(callback); // if there are scan result, callback
     }
-
+    /**
+     * Callback that handles the result of a barcode scan.
+     * It checks if the scanned text matches the expected event URI format, extracts the Event ID,
+     * and navigates to the event details page.
+     */
     private final BarcodeCallback callback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
@@ -71,7 +80,14 @@ public class QrScannerActivity extends AppCompatActivity {
         super.onPause();
         barcodeView.pause();
     }
-
+    /**
+     * Handles the result of the camera permission request.
+     * If granted, resumes the scanner. If denied, shows a toast and closes the scanner.
+     *
+     * @param requestCode  The request code passed in requestPermissions.
+     * @param permissions  The requested permissions.
+     * @param grantResults The grant results for the corresponding permissions.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {

@@ -32,12 +32,20 @@ public class FilterDialogFragment extends DialogFragment {
     private EventFilter currentFilter;
 
     // Callback interface
+    /**
+     * Interface definition for a callback to be invoked when filters are applied.
+     */
     public interface FilterAppliedListener {
         void onFiltersApplied(EventFilter filter);
     }
 
     private FilterAppliedListener listener;
-
+    /**
+     * Creates a new instance of FilterDialogFragment.
+     *
+     * @param currentFilter The current filter settings to pre-populate the dialog with.
+     * @return A new instance of FilterDialogFragment.
+     */
     public static FilterDialogFragment newInstance(EventFilter currentFilter) {
         FilterDialogFragment fragment = new FilterDialogFragment();
         Bundle args = new Bundle();
@@ -46,18 +54,34 @@ public class FilterDialogFragment extends DialogFragment {
         fragment.currentFilter = currentFilter != null ? currentFilter : new EventFilter();
         return fragment;
     }
-
+    /**
+     * Sets the listener that will be notified when the user applies filters.
+     *
+     * @param listener The listener to set.
+     */
     public void setFilterAppliedListener(FilterAppliedListener listener) {
         this.listener = listener;
     }
-
+    /**
+     * Inflates the layout for the filter dialog.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate any views.
+     * @param container          The parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.dialog_filter, container, false);
     }
-
+    /**
+     * Initializes views, populates current filter data, and sets up listeners after the view is created.
+     *
+     * @param view               The View returned by onCreateView.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -66,7 +90,10 @@ public class FilterDialogFragment extends DialogFragment {
         populateCurrentFilters();
         setupListeners();
     }
-
+    /**
+     * Called when the Fragment is visible to the user.
+     * Used here to set the dialog width to match the parent window.
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -78,7 +105,11 @@ public class FilterDialogFragment extends DialogFragment {
             );
         }
     }
-
+    /**
+     * Finds and initializes all UI components from the layout.
+     *
+     * @param view The root view of the fragment.
+     */
     private void initializeViews(View view) {
         // Category checkboxes
         cbSports = view.findViewById(R.id.cb_sports);
@@ -104,7 +135,10 @@ public class FilterDialogFragment extends DialogFragment {
         btnApplyFilters = view.findViewById(R.id.btn_apply_filters);
         btnClearFilters = view.findViewById(R.id.btn_clear_filters);
     }
-
+    /**
+     * Populates the dialog fields with values from the current filter object.
+     * Checks the appropriate category box and fills in date/price/location fields.
+     */
     private void populateCurrentFilters() {
         if (currentFilter == null) return;
 
@@ -146,7 +180,10 @@ public class FilterDialogFragment extends DialogFragment {
             editLocation.setText(currentFilter.getLocation());
         }
     }
-
+    /**
+     * Sets up interaction listeners for checkboxes, date pickers, and buttons.
+     * Ensures mutually exclusive selection for category checkboxes.
+     */
     private void setupListeners() {
         // Setup category checkbox listeners to ensure only one is selected at a time
         CheckBox.OnCheckedChangeListener categoryCheckListener = (buttonView, isChecked) -> {
@@ -189,7 +226,11 @@ public class FilterDialogFragment extends DialogFragment {
             dismiss();
         });
     }
-
+    /**
+     * Shows a date picker dialog and updates the specified EditText with the selected date.
+     *
+     * @param dateField The EditText to populate with the selected date.
+     */
     private void showDatePicker(EditText dateField) {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -209,7 +250,10 @@ public class FilterDialogFragment extends DialogFragment {
 
         datePickerDialog.show();
     }
-
+    /**
+     * Collects all input data from the dialog, creates an EventFilter object,
+     * and notifies the listener to apply the filter.
+     */
     private void applyFilters() {
         EventFilter filter = new EventFilter();
 
@@ -272,7 +316,9 @@ public class FilterDialogFragment extends DialogFragment {
             listener.onFiltersApplied(filter);
         }
     }
-
+    /**
+     * Resets all input fields in the dialog to their default empty or unchecked state.
+     */
     private void clearFilters() {
         // Uncheck all category checkboxes
         cbSports.setChecked(false);

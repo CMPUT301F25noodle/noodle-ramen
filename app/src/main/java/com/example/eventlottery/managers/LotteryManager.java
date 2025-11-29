@@ -45,7 +45,6 @@ public class LotteryManager {
 
         Log.d(TAG, "Initializing lottery for event: " + eventId);
 
-        // Reference  event document
         DocumentReference eventRef = db.collection("events").document(eventId);
 
         eventRef.get().addOnSuccessListener(eventSnapshot -> {
@@ -212,11 +211,23 @@ public class LotteryManager {
             }
         });
     }
-
+    /**
+     * Updates a user's status to "accepted" for a specific event.
+     *
+     * @param eventId  The unique ID of the event.
+     * @param userId   The ID of the user accepting the invitation.
+     * @param callback Callback to confirm the update or report errors.
+     */
     public void acceptInvitation(String eventId, String userId, StatusCallback callback) {
         updateUserStatus(eventId, userId, "accepted", callback);
     }
-
+    /**
+     * Updates a user's status to "declined" and automatically attempts to draw a replacement winner.
+     *
+     * @param eventId  The unique ID of the event.
+     * @param userId   The ID of the user declining the invitation.
+     * @param callback Callback to confirm the update and the result of the replacement draw.
+     */
     public void declineInvitation(String eventId, String userId, StatusCallback callback) {
 
         updateUserStatus(eventId, userId, "declined", new StatusCallback() {
@@ -248,7 +259,10 @@ public class LotteryManager {
             }
         });
     }
-
+    /**
+     * Helper method to update the user's status in the Firestore "selected" map and move them to
+     * the appropriate list (accepted or declined).
+     */
     private void updateUserStatus(String eventId, String userId, String newStatus, StatusCallback callback) {
         DocumentReference eventRef = db.collection("events").document(eventId);
 
@@ -280,7 +294,13 @@ public class LotteryManager {
                 }).addOnSuccessListener(result -> callback.onSuccess("Status updated to " + newStatus))
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
-
+    /**
+     * Adds a user to the "retry" pool, indicating they wish to remain eligible for replacement draws.
+     *
+     * @param eventId  The unique ID of the event.
+     * @param userId   The ID of the user joining the retry list.
+     * @param callback Callback to confirm the action or report errors.
+     */
     public void joinRetryList(String eventId, String userId, StatusCallback callback) {
         if (eventId == null || userId == null) {
             callback.onError("Invalid ID");
