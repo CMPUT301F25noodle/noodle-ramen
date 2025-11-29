@@ -6,10 +6,11 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="383dp"
-        android:layout_height="314dp"
-        android:layout_marginTop="40dp"
+        android:id="@+id/header_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -18,60 +19,87 @@
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Event History"
             android:textColor="@android:color/black"
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="201dp"
-            android:orientation="horizontal">
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleButton_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleSelection="true">
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleButton_group"
-                android:layout_width="wrap_content"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pending_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:selectionRequired="true"
-                app:singleSelection="true">
+                android:layout_weight="1"
+                android:text="Pending"
+                android:textColor="@color/button_selected_colour" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/registered_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Registered"
-                    android:textColor="@color/button_selected_colour" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/won_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Won"
+                android:textColor="@color/button_selected_colour"
+                app:iconTint="@color/button_selected_colour" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/won_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="77dp"
-                    android:layout_height="wrap_content"
-                    android:text="Won"
-                    android:textColor="@color/button_selected_colour"
-                    app:iconTint="@color/button_selected_colour" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/lost_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="77dp"
-                    android:layout_height="wrap_content"
-                    android:text="Lost"
-                    android:textColor="@color/button_selected_colour"
-                    app:iconTint="@color/button_selected_colour" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/pending_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Pending"
-                    android:textColor="@color/button_selected_colour"
-                    app:iconTint="@color/button_selected_colour" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-        </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/lost_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lost"
+                android:textColor="@color/button_selected_colour"
+                app:iconTint="@color/button_selected_colour" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
     </LinearLayout>
+
+    <!-- Progress Bar for loading state -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_section" />
+
+    <!-- Empty state text -->
+    <TextView
+        android:id="@+id/empty_state_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No events found"
+        android:textColor="#666666"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_section" />
+
+    <!-- RecyclerView for events list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/events_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_section"
+        tools:listitem="@layout/item_history_event" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
