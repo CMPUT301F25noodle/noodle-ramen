@@ -12,6 +12,26 @@ public class EventViewModel {
     /** Whether the current user is on this event's waitlist */
     private final boolean isUserOnWaitlist;
 
+    /** Base64 encoded image data for this event (null if no image) */
+    private final String imageData;
+
+    /**
+     * Creates an EventViewModel with user-specific waitlist status and image data.
+     *
+     * @param event the Event to wrap
+     * @param isUserOnWaitlist whether user is on waitlist
+     * @param imageData Base64 encoded image data (null if no image)
+     * @throws IllegalArgumentException if event is null
+     */
+    public EventViewModel(Event event, boolean isUserOnWaitlist, String imageData) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event cannot be null");
+        }
+        this.event = event;
+        this.isUserOnWaitlist = isUserOnWaitlist;
+        this.imageData = imageData;
+    }
+
     /**
      * Creates an EventViewModel with user-specific waitlist status.
      *
@@ -20,11 +40,7 @@ public class EventViewModel {
      * @throws IllegalArgumentException if event is null
      */
     public EventViewModel(Event event, boolean isUserOnWaitlist) {
-        if (event == null) {
-            throw new IllegalArgumentException("Event cannot be null");
-        }
-        this.event = event;
-        this.isUserOnWaitlist = isUserOnWaitlist;
+        this(event, isUserOnWaitlist, null);
     }
 
     /**
@@ -34,7 +50,7 @@ public class EventViewModel {
      * @throws IllegalArgumentException if event is null
      */
     public EventViewModel(Event event) {
-        this(event, false);
+        this(event, false, null);
     }
 
     /** @return the underlying Event */
@@ -42,6 +58,9 @@ public class EventViewModel {
 
     /** @return true if user is on waitlist */
     public boolean isUserOnWaitlist() { return isUserOnWaitlist; }
+
+    /** @return Base64 encoded image data (null if no image) */
+    public String getImageData() { return imageData; }
 
     /** @return event ID */
     public String getId() { return event.getId(); }
@@ -79,6 +98,26 @@ public class EventViewModel {
     /** @return formatted price ("$25" or "Free") */
     public String getFormattedPrice() {
         return event.getPrice().toDisplayString();
+    }
+
+    /** @return raw price value for filtering */
+    public double getPrice() {
+        return event.getPrice().getAmount();
+    }
+
+    /** @return category for filtering */
+    public String getCategory() {
+        return event.getCategory();
+    }
+
+    /** @return start date for filtering */
+    public String getStartDate() {
+        return event.getDates().getStartDate();
+    }
+
+    /** @return end date for filtering */
+    public String getEndDate() {
+        return event.getDates().getEndDate();
     }
 
     /** @return status text */
@@ -137,7 +176,7 @@ public class EventViewModel {
      * @return new EventViewModel with updated status
      */
     public EventViewModel withWaitlistStatus(boolean newStatus) {
-        return new EventViewModel(event, newStatus);
+        return new EventViewModel(event, newStatus, imageData);
     }
 
     @Override

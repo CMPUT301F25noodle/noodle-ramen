@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 android:text="Join Waitlist"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#CE93D8"
+                android:backgroundTint="@color/brand_green"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:layout_marginBottom="12dp" />
@@ -335,7 +335,7 @@
                 android:layout_height="wrap_content"
                 android:text="Share"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#CE93D8"
+                android:backgroundTint="@color/brand_green"
                 android:textAllCaps="false"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />

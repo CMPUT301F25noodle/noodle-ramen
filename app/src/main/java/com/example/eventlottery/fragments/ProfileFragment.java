@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.EditProfileActivity;
-import com.example.eventlottery.LoginActivity;
+import com.example.eventlottery.SplashActivity;
 import com.example.eventlottery.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -150,9 +150,9 @@ public class ProfileFragment extends Fragment {
                                         .addOnSuccessListener(v -> {
                                             Toast.makeText(getContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show();
 
-                                            // Sign out and close or redirect
+                                            // Sign out and redirect to splash screen
                                             auth.signOut();
-                                            Intent intent = new Intent(requireContext(), LoginActivity.class);
+                                            Intent intent = new Intent(requireContext(), SplashActivity.class);
                                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                             startActivity(intent);
                                             requireActivity().finish();

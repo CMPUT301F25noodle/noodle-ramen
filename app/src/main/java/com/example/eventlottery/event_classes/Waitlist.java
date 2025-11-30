@@ -42,9 +42,13 @@ public class Waitlist {
 
     /**
      * Checks if waitlist is at capacity.
-     * @return true if full
+     * @return true if full (always false for unlimited capacity)
      */
     public boolean isFull() {
+        if (capacity == 0) {
+            // Unlimited capacity - never full
+            return false;
+        }
         return currentCount >= capacity;
     }
 
@@ -58,9 +62,13 @@ public class Waitlist {
 
     /**
      * Formats waitlist info for display.
-     * @return formatted string (e.g., "50/100 on the waitlist")
+     * @return formatted string (e.g., "50/100 on the waitlist" or "50 on the waitlist" if unlimited)
      */
     public String getWaitlistInfoText() {
+        if (capacity == 0) {
+            // Unlimited capacity - just show count
+            return currentCount + " on the waitlist";
+        }
         return currentCount + "/" + capacity + " on the waitlist";
     }
 

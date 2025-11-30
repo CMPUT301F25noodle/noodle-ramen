@@ -1,102 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="#FFFFFF"
-    android:elevation="2dp"
-    android:padding="16dp"
-    android:layout_marginBottom="12dp">
-
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="8dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Top Row: Status Badge (Days Until Event) -->
         <TextView
-            android:id="@+id/tv_event_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/pre_created_event"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#000000" />
-
-        <TextView
-            android:id="@+id/tv_go_to_page"
+            android:id="@+id/tv_status_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="4dp"
-            android:text="@string/go_to_event_page"
-            android:textColor="#666666"
-            android:textSize="12sp"
-            tools:ignore="TouchTargetSizeCheck" />
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/status_badge_background"
+            android:paddingStart="12dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="4dp"
+            android:text="2 days left"
+            android:textColor="@android:color/black"
+            android:textSize="12sp" />
+
+        <!-- Event Title -->
+        <TextView
+            android:id="@+id/tv_event_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event 1"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Date Range -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📅"
+                android:textSize="14sp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_date_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10/15/2025 - 10/21/2025"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Bottom Section: Waitlist Info and Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#E8F4F1"
+            android:padding="12dp">
+
+            <!-- Waitlist Count -->
+            <TextView
+                android:id="@+id/tv_waitlist_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="25 on waitlist"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+
+            <!-- Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <!-- "Edit" Button -->
+                <Button
+                    android:id="@+id/btn_edit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Edit"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/brand_green"
+                    android:textAllCaps="false" />
+
+                <!-- "Manage" Button -->
+                <Button
+                    android:id="@+id/btn_manage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Manage >"
+                    android:textColor="#666666"
+                    android:backgroundTint="@android:color/transparent"
+                    android:textAllCaps="false"
+                    style="?attr/materialButtonOutlinedStyle" />
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 
-
-    <TextView
-        android:id="@+id/tv_status_badge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@android:drawable/dialog_holo_light_frame"
-        android:gravity="center"
-        android:paddingStart="10dp"
-        android:paddingTop="3dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="3dp"
-        android:text="@string/_2_days_left"
-        android:textColor="#D81B60"
-        android:textSize="11sp" />
-
-    <TextView
-        android:id="@+id/tv_waitlist_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:text="@string/waitlist_2"
-        android:textColor="#666666"
-        android:textSize="12sp" />
-
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btn_edit"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:backgroundTint="#71D88E"
-            android:text="@string/edit"
-            android:textAllCaps="false"
-            android:textColor="#5E35B1"
-            android:textSize="13sp"
-            tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
-
-        <Button
-            android:id="@+id/btn_manage"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:backgroundTint="#F5F5F5"
-            android:text="@string/manage"
-            android:textAllCaps="false"
-            android:textColor="#666666"
-            android:textSize="13sp"
-            tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
-    </LinearLayout>
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

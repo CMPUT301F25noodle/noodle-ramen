@@ -15,65 +15,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical"
-            android:background="#FFFFFF">
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:contentDescription="@string/todo"
-                android:src="@android:drawable/ic_menu_recent_history"
-                android:layout_marginEnd="8dp"
-                app:tint="#EE90F6"
-                tools:ignore="ContentDescription" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/eventlottery"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000" />
-
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp">
-
-                <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:contentDescription="@string/todo1"
-                    android:src="@android:drawable/ic_popup_reminder"
-                    app:tint="#EE90F6"
-                    tools:ignore="HardcodedText" />
-
-                <TextView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:text="@string/_1"
-                    android:textSize="8sp"
-                    android:textColor="#FFFFFF"
-                    android:gravity="center"
-                    android:background="@android:drawable/presence_online"
-                    android:backgroundTint="#FF0000"
-                    android:layout_gravity="end|top"
-                    tools:ignore="SmallSp" />
-            </FrameLayout>
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:contentDescription="@string/todo2" android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="#000000" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:background="#FFFFFF"
             android:elevation="4dp"
@@ -111,18 +52,21 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <EditText
+                <AutoCompleteTextView
                     android:id="@+id/et_location"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:autofillHints=""
                     android:background="@android:color/transparent"
                     android:hint="@string/location"
                     android:paddingStart="16dp"
                     android:paddingEnd="8dp"
                     android:textColorHint="#999999"
                     android:textSize="14sp"
+                    android:inputType="textPostalAddress"
+                    android:maxLines="1"
+                    android:completionThreshold="1"
+                    android:dropDownHeight="wrap_content"
                     tools:ignore="TextFields,TouchTargetSizeCheck" />
 
                 <ImageButton
@@ -171,6 +115,7 @@
                 android:id="@+id/et_eligibility_criteria"
                 android:layout_width="match_parent"
                 android:layout_height="31dp"
+                android:layout_marginBottom="12dp"
                 android:autofillHints=""
                 android:background="@drawable/rounded_input"
                 android:hint="@string/eligibility_criteria"
@@ -179,6 +124,25 @@
                 android:textColorHint="#999999"
                 android:textSize="14sp"
                 tools:ignore="TextFields,TouchTargetSizeCheck" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Category"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp" />
+
+            <Spinner
+                android:id="@+id/spinner_category"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:background="@drawable/rounded_input"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:spinnerMode="dropdown"
+                tools:ignore="TouchTargetSizeCheck" />
         </LinearLayout>
 
         <LinearLayout
@@ -224,7 +188,7 @@
                 android:layout_marginBottom="12dp"
                 android:autofillHints=""
                 android:background="@drawable/rounded_input"
-                android:hint="@string/_2025_12_20"
+                android:hint="DD-MM-YYYY"
                 android:inputType="date"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
@@ -247,7 +211,7 @@
                 android:layout_marginBottom="16dp"
                 android:autofillHints=""
                 android:background="@drawable/rounded_input"
-                android:hint="@string/date"
+                android:hint="DD-MM-YYYY"
                 android:inputType="date"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
@@ -285,7 +249,7 @@
                     android:id="@+id/et_price"
                     android:layout_width="0dp"
                     android:layout_height="31dp"
-                    android:layout_weight="0"
+                    android:layout_weight="1"
                     android:autofillHints=""
                     android:background="@android:color/transparent"
                     android:hint=""
@@ -447,91 +411,137 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_image_slot_1"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_input"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/image_1"
-                    android:textSize="14sp"
-                    android:textColor="#999999" />
+                android:padding="8dp"
+                android:visibility="gone">
 
                 <ImageView
-                    android:id="@+id/btn_delete_image1"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:contentDescription="@string/todo6" android:src="@android:drawable/ic_menu_delete"
-                    android:padding="6dp"
-                    android:background="@android:drawable/presence_offline"
-                    android:backgroundTint="#FF6B6B"
-                    app:tint="#FFFFFF" />
+                    android:id="@+id/iv_event_image_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/image_1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/image_1"
+                        android:textSize="12sp"
+                        android:textColor="#666666" />
+
+                    <ImageView
+                        android:id="@+id/btn_delete_image1"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:contentDescription="@string/todo6"
+                        android:src="@android:drawable/ic_menu_delete"
+                        android:padding="6dp"
+                        android:background="@android:drawable/presence_offline"
+                        android:backgroundTint="#FF6B6B"
+                        app:tint="#FFFFFF" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_image_slot_2"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_input"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/image_2"
-                    android:textSize="14sp"
-                    android:textColor="#999999" />
+                android:padding="8dp"
+                android:visibility="gone">
 
                 <ImageView
-                    android:id="@+id/btn_delete_image2"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:contentDescription="@string/todo7"
-                    android:src="@android:drawable/ic_menu_delete"
-                    android:padding="6dp"
-                    android:background="@android:drawable/presence_offline"
-                    android:backgroundTint="#FF6B6B"
-                    app:tint="#FFFFFF" />
+                    android:id="@+id/iv_event_image_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/image_2" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/image_2"
+                        android:textSize="12sp"
+                        android:textColor="#666666" />
+
+                    <ImageView
+                        android:id="@+id/btn_delete_image2"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:contentDescription="@string/todo7"
+                        android:src="@android:drawable/ic_menu_delete"
+                        android:padding="6dp"
+                        android:background="@android:drawable/presence_offline"
+                        android:backgroundTint="#FF6B6B"
+                        app:tint="#FFFFFF" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_image_slot_3"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:background="@drawable/rounded_input"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/image_3"
-                    android:textSize="14sp"
-                    android:textColor="#999999" />
+                android:padding="8dp"
+                android:visibility="gone">
 
                 <ImageView
-                    android:id="@+id/btn_delete_image3"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@android:drawable/ic_menu_delete"
-                    android:padding="6dp"
-                    android:background="@android:drawable/presence_offline"
-                    android:backgroundTint="#FF6B6B"
-                    app:tint="#FFFFFF"
-                    tools:ignore="ContentDescription" />
+                    android:id="@+id/iv_event_image_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/image_3" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/image_3"
+                        android:textSize="12sp"
+                        android:textColor="#666666" />
+
+                    <ImageView
+                        android:id="@+id/btn_delete_image3"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@android:drawable/ic_menu_delete"
+                        android:padding="6dp"
+                        android:background="@android:drawable/presence_offline"
+                        android:backgroundTint="#FF6B6B"
+                        app:tint="#FFFFFF"
+                        android:contentDescription="@string/todo7" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -575,80 +585,6 @@
             android:background="#FFFFFF"
             android:elevation="8dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                tools:ignore="UseCompoundDrawables">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@string/todo09"
-                    android:src="@android:drawable/ic_menu_search"
-                    app:tint="#999999"
-                    tools:ignore="ContentDescription,UseAppTint" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/browse"
-                    android:textSize="12sp"
-                    android:textColor="#999999"
-                    android:paddingTop="4dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                tools:ignore="UseCompoundDrawables">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@string/todo8"
-                    android:src="@android:drawable/ic_menu_gallery"
-                    app:tint="#999999" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/my_events"
-                    android:textSize="12sp"
-                    android:textColor="#999999"
-                    android:paddingTop="4dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                tools:ignore="UseCompoundDrawables">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="#999999"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/scan"
-                    android:textSize="12sp"
-                    android:textColor="#999999"
-                    android:paddingTop="4dp" />
-            </LinearLayout>
-        </LinearLayout>
+            android:paddingBottom="8dp"/>
     </LinearLayout>
 </ScrollView>

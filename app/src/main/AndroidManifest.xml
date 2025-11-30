@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
     <application
         android:allowBackup="true"
@@ -16,6 +19,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EventLottery">
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value ="AIzaSyAQE0X0FVaZeOnI6v2FHNGbz6y4Tz6H1ek"/>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+
         <activity
             android:name=".CreateEventActivity" />
 
@@ -23,12 +41,12 @@
         <activity android:name=".QrScannerActivity" />
 
         <activity android:name=".MainActivity" android:exported="true" />
+        <activity android:name=".AdminMainActivity" android:exported="false" />
         <activity android:name=".NotificationActivity" android:exported="false" />
         <activity android:name=".EditProfileActivity" android:exported="false" />
-        <activity android:name=".LoginActivity" android:exported="false"/>
 
         <activity
-            android:name=".LandingActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,11 +55,16 @@
         </activity>
 
         <activity
+            android:name=".LandingActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".QrGenerator"
             android:exported="false" />
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
+
 
     </application>
 

@@ -20,7 +20,7 @@ public class LocationTest {
                 "123 Main Street",
                 location.getAddress());
     }
-    // TEST 2: Should nit allow null address
+    // TEST 2: Should not allow null address
     @Test(expected = IllegalArgumentException.class)
     public void testNullAddressThrowsError() {
         new Location(null);

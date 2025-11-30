@@ -1,30 +1,49 @@
 package com.example.eventlottery;
 
+import static android.content.ContentValues.TAG;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
+import com.example.eventlottery.managers.ImageManager;
+import com.example.eventlottery.models.Image;
+import com.example.eventlottery.utils.ImageCompressionHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.google.firebase.firestore.FieldValue;
+import com.example.eventlottery.managers.WaitlistManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Shows event details and its QR code.
- * fetches data from firebase
- * retrieves the event details that were entered by the organizer
+ * Fetches data from firebase and handles waitlist joining with optional geolocation.
  */
 public class EventDetailActivity extends AppCompatActivity {
 
@@ -32,23 +51,50 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView statusBadge, priceText, locationText, dateText;
     private TextView waitlistInfo, spotsText;
     private ImageView qrCodeImage, backButton;
+    private ImageView eventMainImage;
+    private TextView imagePlaceholder;
     private Button joinWaitlistButton, shareButton;
 
     private FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private FusedLocationProviderClient fusedLocationClient;
+    private ImageManager imageManager;
 
-    /**
-     * called when activity is made, intializes the UI, firebase instance
-     * REtieves the event ID, and triggers loading of the event
-     * @param savedInstanceState If the activity is being re-initialized after
-     *     previously being shut down then this Bundle contains the data it most
-     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
-     *
-     */
+    private boolean isGeolocationRequired = false; // Track if this specific event needs location
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private WaitlistManager waitlistManager;
+    private String currentEventId = null;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_event_detail);
 
+        initializeViews();
+
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        imageManager = ImageManager.getInstance();
+
+        // Setup back button
+        backButton.setOnClickListener(v -> finish());
+
+        String eventId = getIntent().getStringExtra("eventId");
+        if (eventId == null) {
+            Toast.makeText(this, "Invalid event ID", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        waitlistManager = WaitlistManager.getInstance();
+        currentEventId = eventId;
+
+        loadEvent(eventId);
+        loadEventImages(eventId);
+    }
+
+    private void initializeViews() {
         eventTitle = findViewById(R.id.event_title);
         eventDescription = findViewById(R.id.event_description);
         eventCriteria = findViewById(R.id.event_criteria);
@@ -62,32 +108,16 @@ public class EventDetailActivity extends AppCompatActivity {
         joinWaitlistButton = findViewById(R.id.join_waitlist_button);
         shareButton = findViewById(R.id.share_button);
         backButton = findViewById(R.id.back_button);
-
-        db = FirebaseFirestore.getInstance();
-
-        // Setup back button
-        backButton.setOnClickListener(v -> finish());
-
-        String eventId = getIntent().getStringExtra("eventId");
-        if (eventId == null) {
-            Toast.makeText(this, "Invalid event ID", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        loadEvent(eventId);
+        eventMainImage = findViewById(R.id.eventMainImage);
+        imagePlaceholder = findViewById(R.id.imagePlaceholder);
     }
 
-    /**
-     * fetche event data from the events collection in firebase
-     * @param eventId
-     */
     private void loadEvent(String eventId) {
         db.collection("events").document(eventId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
-                        // Read all fields from Firestore
+                        // 1. Get Event Data
                         String eventName = doc.getString("eventName");
                         String description = doc.getString("description");
                         String eligibility = doc.getString("eligibility");
@@ -98,54 +128,40 @@ public class EventDetailActivity extends AppCompatActivity {
                         String waitlistLimitStr = doc.getString("waitlistLimit");
                         String entrantMaxStr = doc.getString("entrantMaxCapacity");
 
-                        // Set event title
+                        // 2. Check Geolocation Requirement
+                        Boolean geoReq = doc.getBoolean("geolocationRequired");
+                        isGeolocationRequired = geoReq != null && geoReq;
+
+                        // UI Updates
                         eventTitle.setText(eventName != null ? eventName : "Untitled Event");
-
-                        // Set event description
                         eventDescription.setText(description != null ? description : "No description available");
-
-                        // Set event criteria (eligibility)
                         eventCriteria.setText(eligibility != null ? eligibility : "No specific criteria");
-
-                        // Set location
                         locationText.setText(location != null ? location : "TBD");
 
-                        // Set date range
                         if (startDate != null && endDate != null) {
                             dateText.setText(startDate + " - " + endDate);
                         } else {
                             dateText.setText("Date TBD");
                         }
 
-                        // Set price
-                        if (priceStr != null && !priceStr.isEmpty()) {
-                            priceText.setText("$" + priceStr);
-                        } else {
-                            priceText.setText("Free");
-                        }
-
-                        // Set status badge (simple for now)
+                        priceText.setText((priceStr != null && !priceStr.isEmpty()) ? "$" + priceStr : "Free");
                         statusBadge.setText("Open");
 
-                        // Set waitlist info
                         int waitlistLimit = waitlistLimitStr != null ? Integer.parseInt(waitlistLimitStr) : 0;
                         waitlistInfo.setText("Waitlist limit: " + waitlistLimit);
 
-                        // Set spots available
                         int entrantMax = entrantMaxStr != null ? Integer.parseInt(entrantMaxStr) : 0;
                         spotsText.setText(entrantMax + " spots");
 
-                        // Join waitlist button (simple toast for MVP)
-                        joinWaitlistButton.setOnClickListener(v -> {
-                            Toast.makeText(this, "Join waitlist functionality coming soon", Toast.LENGTH_SHORT).show();
-                        });
+                        // 3. Set Join Button Logic
+                        // We check permissions/requirements inside handleJoinClick
+                        joinWaitlistButton.setOnClickListener(v -> handleJoinClick(eventId));
 
-                        // Generate and display QR code
+                        // Generate QR code
                         String qrPayload = "eventlottery://event/" + eventId;
                         Bitmap qr = createQrBitmap(qrPayload, 400);
-                        qrCodeImage.setImageBitmap(qr);
+                        if (qr != null) qrCodeImage.setImageBitmap(qr);
 
-                        // Share button (simple toast for MVP)
                         shareButton.setOnClickListener(v -> {
                             Toast.makeText(this, "Share functionality coming soon", Toast.LENGTH_SHORT).show();
                         });
@@ -155,15 +171,110 @@ public class EventDetailActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed to load event: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     /**
-     * generates a QR code uses the string content for it
-     * @param content the string data that is encoded in the QR code
-     * @param sizePx
-     * @return
+     * Decides whether to ask for location or join directly
      */
+    private void handleJoinClick(String eventId) {
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Please sign in to join", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        currentEventId = eventId; // Store for permission callback
+
+        if (isGeolocationRequired) {
+            // Check if we already have permission
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Request Permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        LOCATION_PERMISSION_REQUEST_CODE);
+            } else {
+                // Permission already granted
+                joinWithLocation(eventId);
+            }
+        } else {
+            // Geolocation NOT required, join without it
+            performJoinWaitlist(eventId, null, null);
+        }
+    }
+
+    /**
+     * Handle the result of the permission request
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed to join
+                if (currentEventId != null) {
+                    joinWithLocation(currentEventId);
+                }
+            } else {
+                Toast.makeText(this, "Location permission is required to join this event.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    private void joinWithLocation(String eventId) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                        // Get user name for location tracking
+                        db.collection("users").document(auth.getCurrentUser().getUid())
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+                                    performJoinWaitlist(eventId, geoPoint, userName);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error getting user data", e);
+                                    performJoinWaitlist(eventId, geoPoint, "Unknown");
+                                });
+                    } else {
+                        Toast.makeText(this, "Unable to determine location. Ensure GPS is on.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting location", e);
+                    Toast.makeText(this, "Error getting location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    /**
+     * Actually perform the join operation using WaitlistManager
+     */
+    private void performJoinWaitlist(String eventId, GeoPoint location, String userName) {
+        waitlistManager.joinWaitlist(eventId, location, userName, new WaitlistManager.WaitlistCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(EventDetailActivity.this, "Successfully joined waitlist!", Toast.LENGTH_SHORT).show();
+                joinWaitlistButton.setEnabled(false);
+                joinWaitlistButton.setText("Joined Waitlist");
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Error joining waitlist" + error);
+                Toast.makeText(EventDetailActivity.this, "Failed to join: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
     private Bitmap createQrBitmap(String content, int sizePx) {
         try {
             QRCodeWriter writer = new QRCodeWriter();
@@ -183,5 +294,49 @@ public class EventDetailActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Load and display event images
+     */
+    private void loadEventImages(String eventId) {
+        imageManager.getImagesForEvent(eventId, new ImageManager.ImageListCallback() {
+            @Override
+            public void onSuccess(List<Image> images) {
+                if (!images.isEmpty()) {
+                    // Get the first image's data
+                    String imageData = images.get(0).getImageData();
+
+                    if (imageData != null && !imageData.isEmpty()) {
+                        // Decode Base64 to Bitmap
+                        Bitmap bitmap = ImageCompressionHelper.decodeFromBase64(imageData);
+
+                        if (bitmap != null) {
+                            // Show image, hide placeholder
+                            eventMainImage.setVisibility(View.VISIBLE);
+                            imagePlaceholder.setVisibility(View.GONE);
+
+                            // Load with Glide
+                            Glide.with(EventDetailActivity.this)
+                                    .load(bitmap)
+                                    .centerCrop()
+                                    .into(eventMainImage);
+                        }
+                    }
+                } else {
+                    // No images, keep placeholder visible
+                    eventMainImage.setVisibility(View.GONE);
+                    imagePlaceholder.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to load event images: " + error);
+                // Keep placeholder visible on error
+                eventMainImage.setVisibility(View.GONE);
+                imagePlaceholder.setVisibility(View.VISIBLE);
+            }
+        });
     }
 }

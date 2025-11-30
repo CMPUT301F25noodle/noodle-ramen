@@ -20,7 +20,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * AdminLogsFragment displays a log of system notifications for administrators.
+ * It listens to the "notifications" collection in Firestore and displays them in a scrollable list,
+ * styling each card based on the notification type (e.g., winning, losing, or general info).
+ */
 public class AdminLogsFragment extends Fragment {
 
     private TextView notificationsCount;
@@ -33,7 +37,14 @@ public class AdminLogsFragment extends Fragment {
 
     // list of all notifications from firestore
     private final List<LogData> allLogs = new ArrayList<>();
-
+    /**
+     * Initializes the fragment's UI components and triggers the data loading process.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -53,7 +64,10 @@ public class AdminLogsFragment extends Fragment {
 
         return view;
     }
-
+    /**
+     * Connects to Firestore to listen for real-time updates to the "notifications" collection.
+     * Parses the documents into LogData objects and updates the UI.
+     */
     // pull notifications from firestore
     private void loadLogsFromFirestore() {
         showLoading(true);
@@ -95,7 +109,10 @@ public class AdminLogsFragment extends Fragment {
                     showLoading(false);
                 });
     }
-
+    /**
+     * Renders the list of notification logs into the LinearLayout container.
+     * Displays an empty message if no logs are found.
+     */
     // show all logs in the list
     private void showLogs() {
         notificationsList.removeAllViews();
@@ -113,6 +130,12 @@ public class AdminLogsFragment extends Fragment {
     }
 
     // add one card to the list
+    /**
+     * Inflates and populates a single notification card view.
+     * Sets the card background color based on the notification type (win, lose, draw, etc.).
+     *
+     * @param log The LogData object containing the notification details.
+     */
     private void addNotificationCard(LogData log) {
         View card = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_admin_log_card, notificationsList, false);
@@ -142,17 +165,28 @@ public class AdminLogsFragment extends Fragment {
     }
 
     // simple helper to show and hide loading spinner
+    /**
+     * Toggles the visibility of the loading spinner and the notifications list.
+     *
+     * @param show True to show the loading spinner, false to show the list.
+     */
     private void showLoading(boolean show) {
         if (loadingSpinner != null) {
             loadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         notificationsList.setVisibility(show ? View.GONE : View.VISIBLE);
     }
-
+    /**
+     * Displays a toast message with an error description.
+     *
+     * @param message The error message to display.
+     */
     private void showError(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
-
+    /**
+     * Cleans up resources when the fragment view is destroyed, removing the Firestore listener.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

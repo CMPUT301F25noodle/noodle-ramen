@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/lottery"
-        android:textColor="#EE90F6"
+        android:textColor="@color/brand_green"
         android:textSize="42sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/tv_event"
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:text="@string/up"
-        android:textColor="#EE90F6"
+        android:textColor="@color/brand_green"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/tv_sign"
@@ -91,6 +91,7 @@
         android:backgroundTint="#E0E0E0"
         android:text="@string/entrant"
         android:textColor="#000000"
+        android:textColorLink="@color/brand_green"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_organizer"
@@ -154,21 +155,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <EditText
-        android:id="@+id/et_password"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        android:textSize="16sp"
-        android:padding="12dp"
-        android:layout_marginTop="12dp"
-        android:background="@android:drawable/edit_text"
-        app:layout_constraintTop_toBottomOf="@id/et_email"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <TextView
         android:id="@+id/tv_notifications_label"
         android:layout_width="0dp"
@@ -181,28 +167,27 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/et_password" />
+        app:layout_constraintTop_toBottomOf="@id/et_email" />
 
     <RadioGroup
         android:id="@+id/rg_notifications"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginTop="12dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_notifications_label"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/tv_notifications_label">
 
         <RadioButton
             android:id="@+id/rb_yes"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:buttonTint="#B86969"
             android:checked="true"
             android:text="@string/yes"
-            android:textColorLink="#8C4242"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:buttonTint="@color/radio_button_color" />
 
         <RadioButton
             android:id="@+id/rb_no"
@@ -210,7 +195,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/no"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:buttonTint="@color/radio_button_color" />
     </RadioGroup>
 
     <Button
@@ -218,7 +204,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:backgroundTint="#71D88E"
+        android:backgroundTint="@color/brand_green"
         android:padding="16dp"
         android:text="@string/sign_up"
         android:textColor="#FFFFFF"

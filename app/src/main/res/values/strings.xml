@@ -21,7 +21,7 @@
 
     <string name="generate_qr">Generate QR</string>
     <string name="event_title">Event title</string>
-    <string name="pre_created_event">Pre Created Event</string>
+    <string name="pre_created_event">Event Name</string>
     <string name="waitlist_2">Waitlist: 2</string>
     <string name="_2_days_left">2 days left</string>
     <string name="go_to_event_page"><![CDATA[Go to Event Page >]]></string>
@@ -65,7 +65,7 @@
     <string name="registration_period">Registration Period</string>
     <string name="end_date">End Date</string>
     <string name="browse">Browse</string>
-    <string name="event_description_criteria">Event Description Criteria</string>
+    <string name="event_description_criteria">Event Description</string>
     <string name="start_date">Start Date</string>
     <string name="_2025_12_20">2025-12-20</string>
     <string name="date">2025-12-20</string>
@@ -200,5 +200,15 @@
     <string name="_02">0</string>
     <string name="_0324">0</string>
     <string name="no_images_found2">No images found</string>
+
+    <string-array name="event_categories">
+        <item>Sports</item>
+        <item>Music</item>
+        <item>Arts</item>
+        <item>Tech</item>
+        <item>Educational</item>
+        <item>Workshops</item>
+        <item>Other</item>
+    </string-array>
 
 </resources>

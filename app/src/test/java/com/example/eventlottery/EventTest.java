@@ -37,44 +37,46 @@ public class EventTest {
     @Test
     public void testCreateValidEvent() {
         Event event = new Event("event123", "Concert", "Music Org",
-                location, dates, "http://image.url", waitlist, price, EventStatus.OPEN);
+                "A great music concert", "Open to all", location, dates,
+                "http://image.url", waitlist, price, EventStatus.OPEN, false, "Music");
 
         assertEquals("ID should be event123", "event123", event.getId());
         assertEquals("Title should be Concert", "Concert", event.getTitle());
         assertEquals("Organization should be Music Org", "Music Org", event.getOrganizationName());
+        assertEquals("Category should be Music", "Music", event.getCategory());
     }
     // TEST 2: Event should not allow null ID
     @Test(expected = IllegalArgumentException.class)
     public void testNullIdThrowsError() {
-        new Event(null, "Concert", "Music Org",
-                location, dates, "url", waitlist, price, EventStatus.OPEN);
+        new Event(null, "Concert", "Music Org", "Description", "Eligibility",
+                location, dates, "url", waitlist, price, EventStatus.OPEN, false, "Music");
     }
     // TEST 3: Event should not allow empty title
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyTitleThrowsError() {
-        new Event("event123", "", "Music Org",
-                location, dates, "url", waitlist, price, EventStatus.OPEN);
+        new Event("event123", "", "Music Org", "Description", "Eligibility",
+                location, dates, "url", waitlist, price, EventStatus.OPEN, false, "Music");
     }
     // TEST 4: Event should not allow null location
     @Test(expected = IllegalArgumentException.class)
     public void testNullLocationThrowsError() {
-        new Event("event123", "Concert", "Music Org",
-                null, dates, "url", waitlist, price, EventStatus.OPEN);
+        new Event("event123", "Concert", "Music Org", "Description", "Eligibility",
+                null, dates, "url", waitlist, price, EventStatus.OPEN, false, "Music");
     }
     // TEST 5: Open event with spots should be available
     @Test
     public void testEventIsAvailable() {
         Waitlist availableWaitlist = new Waitlist(50, 100, 30);
-        Event event = new Event("event123", "Concert", "Music Org",
-                location, dates, "url", availableWaitlist, price, EventStatus.OPEN);
+        Event event = new Event("event123", "Concert", "Music Org", "Description", "Eligibility",
+                location, dates, "url", availableWaitlist, price, EventStatus.OPEN, false, "Music");
 
         assertTrue("Open event with spots should be available", event.isAvailable());
     }
     // TEST 6: Closed event should not be available
     @Test
     public void testClosedEventNotAvailable() {
-        Event event = new Event("event123", "Concert", "Music Org",
-                location, dates, "url", waitlist, price, EventStatus.CLOSED);
+        Event event = new Event("event123", "Concert", "Music Org", "Description", "Eligibility",
+                location, dates, "url", waitlist, price, EventStatus.CLOSED, false, "Music");
 
         assertFalse("Closed event should not be available", event.isAvailable());
     }
@@ -82,26 +84,26 @@ public class EventTest {
     @Test
     public void testWaitlistFull() {
         Waitlist fullWaitlist = new Waitlist(100, 100, 30);
-        Event event = new Event("event123", "Concert", "Music Org",
-                location, dates, "url", fullWaitlist, price, EventStatus.OPEN);
+        Event event = new Event("event123", "Concert", "Music Org", "Description", "Eligibility",
+                location, dates, "url", fullWaitlist, price, EventStatus.OPEN, false, "Music");
 
         assertTrue("Should detect full waitlist", event.isWaitlistFull());
     }
     // TEST 8: Should detect not full waitlist
     @Test
     public void testWaitlistNotFull() {
-        Event event = new Event("event123", "Concert", "Music Org",
-                location, dates, "url", waitlist, price, EventStatus.OPEN);
+        Event event = new Event("event123", "Concert", "Music Org", "Description", "Eligibility",
+                location, dates, "url", waitlist, price, EventStatus.OPEN, false, "Music");
 
         assertFalse("Should detect not full waitlist", event.isWaitlistFull());
     }
     // TEST 9: Two events with same ID should be equal
     @Test
     public void testEventEquality() {
-        Event event1 = new Event("event123", "Concert", "Music Org",
-                location, dates, "url", waitlist, price, EventStatus.OPEN);
-        Event event2 = new Event("event123", "Different Title", "Different Org",
-                location, dates, "url2", waitlist, price, EventStatus.CLOSED);
+        Event event1 = new Event("event123", "Concert", "Music Org", "Description", "Eligibility",
+                location, dates, "url", waitlist, price, EventStatus.OPEN, false, "Music");
+        Event event2 = new Event("event123", "Different Title", "Different Org", "Other desc", "Other elig",
+                location, dates, "url2", waitlist, price, EventStatus.CLOSED, true, "Sports");
 
         assertEquals("Events with same ID should be equal", event1, event2);
     }

@@ -43,7 +43,6 @@ public class LandingActivityTest {
      * TEST 1: Does the landing page open properly?
      * What we're checking:
      * - The page opens without errors
-     * - The login button is on the screen
      * - The signup button is on the screen
      */
     @Test
@@ -51,44 +50,17 @@ public class LandingActivityTest {
         // Check that the landing page exists
         assertNotNull("Landing page should open", activity);
 
-        // Look for the login button on the screen
-        Button loginButton = activity.findViewById(R.id.login_button);
         // Look for the signup button on the screen
         Button signupButton = activity.findViewById(R.id.signup_button);
 
-        // Make sure we found both buttons
-        assertNotNull("Login button should be on the screen", loginButton);
+        // Make sure we found the button
         assertNotNull("Signup button should be on the screen", signupButton);
     }
 
     /**
-     * TEST 2: Does the login button take you to the login page?
+     * TEST 2: Does the signup button take you to the signup page?
      * What we're checking:
-     * - When I click "Login", does it open the LoginActivity page?
-     */
-    @Test
-    public void testLoginButtonNavigatesToLoginActivity() {
-        //  Find the login button on the screen
-        Button loginButton = activity.findViewById(R.id.login_button);
-
-        //  Pretend the user clicked the button
-        loginButton.performClick();
-
-        // Check which page opened after the click
-        ShadowActivity shadowActivity = Shadows.shadowOf(activity);
-        Intent startedIntent = shadowActivity.getNextStartedActivity();
-
-        // Make sure the correct page (LoginActivity) opened
-        assertNotNull("Clicking login should open a new page", startedIntent);
-        String expectedPage = LoginActivity.class.getName();
-        String actualPage = startedIntent.getComponent().getClassName();
-        assertEquals("Login button should take you to the login page", expectedPage, actualPage);
-    }
-
-    /**
-     * TEST 3: Does the signup button take you to the signup page?
-     * What we're checking:
-     * - When I click "Sign Up", does it open the SignUpActivity page?
+     * - When I click "Get Started", does it open the SignUpActivity page?
      */
     @Test
     public void testSignupButtonNavigatesToSignUpActivity() {
