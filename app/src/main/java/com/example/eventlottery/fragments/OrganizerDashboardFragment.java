@@ -138,16 +138,18 @@ public class OrganizerDashboardFragment extends Fragment {
      * updates tab button styles
      */
     private void updateTabSelection(Button selectedTab) {
-        tabPending.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
-        tabPending.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        // Unselected tabs: white background with brand green text
+        tabPending.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.white));
+        tabPending.setTextColor(ContextCompat.getColor(requireContext(), R.color.brand_green));
 
-        tabWon.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
-        tabWon.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        tabWon.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.white));
+        tabWon.setTextColor(ContextCompat.getColor(requireContext(), R.color.brand_green));
 
-        tabLost.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
-        tabLost.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        tabLost.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.white));
+        tabLost.setTextColor(ContextCompat.getColor(requireContext(), R.color.brand_green));
 
-        selectedTab.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+        // Selected tab: brand green background with white text
+        selectedTab.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.brand_green));
         selectedTab.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
     }
 
