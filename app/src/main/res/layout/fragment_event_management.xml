@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="#CE93D8"
+            android:backgroundTint="@color/brand_green"
             android:text="← Back"
             android:textAllCaps="false"
             android:textColor="#FFFFFF" />
@@ -122,7 +122,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:backgroundTint="#CE93D8"
+                    android:backgroundTint="@color/brand_green"
                     android:text="View All Entrants"
                     android:textAllCaps="false"
                     android:textColor="#FFFFFF" />
@@ -131,7 +131,7 @@
                     android:id="@+id/btn_download_all_waitlist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#F3E5F5"
+                    android:backgroundTint="#FFFFFF"
                     android:text="Download All Entrants (CSV)"
                     android:textAllCaps="false"
                     android:textColor="#050505" />
@@ -200,7 +200,7 @@
                     android:id="@+id/btn_draw_lottery"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#CE93D8"
+                    android:backgroundTint="@color/brand_green"
                     android:padding="16dp"
                     android:text="Draw Lottery"
                     android:textAllCaps="false"
@@ -255,7 +255,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#CE93D8"
+                            android:backgroundTint="@color/brand_green"
                             android:text="View"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF" />
@@ -266,7 +266,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#F3E5F5"
+                            android:backgroundTint="#FFFFFF"
                             android:text="Download CSV"
                             android:textAllCaps="false"
                             android:textColor="#070707" />
@@ -312,7 +312,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#CE93D8"
+                            android:backgroundTint="@color/brand_green"
                             android:text="View"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF" />
@@ -323,7 +323,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#F3E5F5"
+                            android:backgroundTint="#FFFFFF"
                             android:text="Download CSV"
                             android:textAllCaps="false"
                             android:textColor="#0D0D0D" />
@@ -369,7 +369,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#CE93D8"
+                            android:backgroundTint="@color/brand_green"
                             android:text="View"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF" />
@@ -380,7 +380,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#F3E5F5"
+                            android:backgroundTint="#FFFFFF"
                             android:text="Download CSV"
                             android:textAllCaps="false"
                             android:textColor="#070707" />

@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_marginBottom="20dp"
-                android:background="#F3E5F5"
+                android:background="@color/brand_green"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/pluss"
-                    android:textColor="#9575CD"
+                    android:textColor="#FFFFFF"
                     android:textSize="32sp"
                     android:textStyle="bold" />
 
@@ -45,7 +45,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/create_event"
-                    android:textColor="#000000"
+                    android:textColor="#FFFFFF"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -96,10 +96,10 @@
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:backgroundTint="#F5F5F5"
+                    android:backgroundTint="#FFFFFF"
                     android:text="@string/won"
                     android:textAllCaps="false"
-                    android:textColor="#666666"
+                    android:textColor="@color/brand_green"
                     android:textSize="12sp"
                     tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
 
@@ -109,10 +109,10 @@
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:backgroundTint="#F5F5F5"
+                    android:backgroundTint="#FFFFFF"
                     android:text="@string/lost"
                     android:textAllCaps="false"
-                    android:textColor="#666666"
+                    android:textColor="@color/brand_green"
                     android:textSize="12sp"
                     tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
 
@@ -122,7 +122,7 @@
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:backgroundTint="#666666"
+                    android:backgroundTint="@color/brand_green"
                     android:text="@string/pending"
                     android:textAllCaps="false"
                     android:textColor="#FFFFFF"

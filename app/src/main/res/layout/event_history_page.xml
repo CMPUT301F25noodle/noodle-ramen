@@ -39,7 +39,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Pending"
-                android:textColor="@color/button_selected_colour" />
+                android:textColor="@color/button_text_color"
+                app:backgroundTint="@color/button_background_tint"
+                app:strokeColor="@color/brand_green"
+                app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/won_button"
@@ -48,8 +51,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Won"
-                android:textColor="@color/button_selected_colour"
-                app:iconTint="@color/button_selected_colour" />
+                android:textColor="@color/button_text_color"
+                app:backgroundTint="@color/button_background_tint"
+                app:strokeColor="@color/brand_green"
+                app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/lost_button"
@@ -58,8 +63,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Lost"
-                android:textColor="@color/button_selected_colour"
-                app:iconTint="@color/button_selected_colour" />
+                android:textColor="@color/button_text_color"
+                app:backgroundTint="@color/button_background_tint"
+                app:strokeColor="@color/brand_green"
+                app:strokeWidth="1dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
     </LinearLayout>
