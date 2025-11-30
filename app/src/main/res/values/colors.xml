@@ -9,8 +9,4 @@
     <color name="brand_green">#587A6D</color>
     <color name="brand_black">#000000</color>
 
-    <!-- Legacy purple colors (can be removed after full migration) -->
-    <color name="legacy_purple_light">#F3E5F5</color>
-    <color name="legacy_purple">#CE93D8</color>
-    <color name="legacy_purple_dark">#DF79E4</color>
 </resources>
