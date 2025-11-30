@@ -38,6 +38,7 @@ import java.util.Map;
 
 public class SignUpFragment extends Fragment {
     private EditText nameField, phoneField, emailField;
+    public final int brand_green = R.color.brand_green;
     private Button organizerButton, entrantButton, signUpButton;
     private RadioGroup notificationsGroup;
     private ProgressBar progressBar;
@@ -117,10 +118,10 @@ public class SignUpFragment extends Fragment {
 
         private void updateRoleButtonStyles () {
             if (selectedRole.equals("organizer")) {
-                organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+                organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.brand_green));
                 entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
             } else {
-                entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.holo_purple));
+                entrantButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.brand_green));
                 organizerButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
             }
         }
