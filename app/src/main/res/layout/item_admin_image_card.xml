@@ -8,6 +8,15 @@
     android:background="@drawable/card_bg"
     android:layout_marginBottom="8dp">
 
+    <ImageView
+        android:id="@+id/imagePreview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:background="#E0E0E0"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/event_image" />
+
     <TextView
         android:id="@+id/eventName"
         android:layout_width="wrap_content"
@@ -18,7 +27,7 @@
         android:textColor="#000000" />
 
     <TextView
-        android:id="@+id/uploaderName"
+        android:id="@+id/organizerName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
@@ -36,38 +45,15 @@
         android:textColor="#757575"
         android:textSize="11sp" />
 
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
+    <Button
+        android:id="@+id/deleteImageBtn"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <Button
-            android:id="@+id/viewImageBtn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="6dp"
-            android:layout_weight="1"
-            android:backgroundTint="#E8E8E8"
-            android:text="@string/view_image_details"
-            android:textAllCaps="false"
-            android:textColor="#666666"
-            android:textSize="11sp"
-            tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
-
-        <Button
-            android:id="@+id/deleteImageBtn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:backgroundTint="#F19A9A"
-            android:text="@string/delete_image233"
-            android:textAllCaps="false"
-            android:textColor="#37474F"
-            android:textSize="11sp"
-            tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
-    </LinearLayout>
+        android:layout_height="40dp"
+        android:backgroundTint="#F19A9A"
+        android:text="@string/delete_image233"
+        android:textAllCaps="false"
+        android:textColor="#37474F"
+        android:textSize="11sp"
+        tools:ignore="VisualLintButtonSize" />
 </LinearLayout>

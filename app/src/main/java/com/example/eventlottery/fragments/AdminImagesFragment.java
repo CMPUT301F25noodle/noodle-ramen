@@ -1,14 +1,17 @@
 package com.example.eventlottery.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,12 +23,18 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.R;
+import com.example.eventlottery.models.Image;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 /**
  * AdminImagesFragment provides an interface for administrators to manage uploaded images.
  * It allows viewing a list of all images, searching/filtering them, and deleting images from the database.
@@ -41,8 +50,9 @@ public class AdminImagesFragment extends Fragment {
     private FirebaseFirestore db;
     private ListenerRegistration listener;
 
-    private final List<ImageData> allImages = new ArrayList<>();
-    private final List<ImageData> filteredImages = new ArrayList<>();
+    private final List<ImageDataWithEvent> allImages = new ArrayList<>();
+    private final List<ImageDataWithEvent> filteredImages = new ArrayList<>();
+    private final Map<String, String> eventNameCache = new HashMap<>();
     /**
      * Initializes the fragment's UI components and triggers the data loading process.
      *
@@ -84,7 +94,7 @@ public class AdminImagesFragment extends Fragment {
     }
     /**
      * Connects to Firestore to listen for real-time updates to the "images" collection.
-     * Fetches image metadata like event name, uploader, and date.
+     * Fetches image metadata like event name, organizer, and date.
      */
     private void loadImages() {
         showLoading(true);
@@ -99,29 +109,88 @@ public class AdminImagesFragment extends Fragment {
 
                     if (value != null) {
                         allImages.clear();
+                        List<Image> images = new ArrayList<>();
 
                         for (QueryDocumentSnapshot doc : value) {
-                            String id = doc.getId();
-                            String event = doc.getString("eventName");
-                            String uploader = doc.getString("uploader");
-                            String date = doc.getString("date");
-
-                            allImages.add(new ImageData(id,
-                                    event != null ? event : "Unknown Event",
-                                    uploader != null ? uploader : "Unknown",
-                                    date != null ? date : "Unknown Date"));
+                            Image image = Image.fromMap(doc.getId(), doc.getData());
+                            images.add(image);
                         }
 
-                        imagesCount.setText(String.valueOf(allImages.size()));
-                        filterImages(searchImages.getText().toString());
-
-                        showLoading(false);
+                        // Fetch event names for all images
+                        fetchEventNamesForImages(images);
                     }
                 });
     }
+
+    /**
+     * Fetches event names for all images and creates ImageDataWithEvent objects
+     */
+    private void fetchEventNamesForImages(List<Image> images) {
+        if (images.isEmpty()) {
+            imagesCount.setText("0");
+            filterImages(searchImages.getText().toString());
+            showLoading(false);
+            return;
+        }
+
+        // Counter to track when all event names are fetched
+        final int[] fetchedCount = {0};
+        final int totalImages = images.size();
+
+        for (Image image : images) {
+            String eventId = image.getEventId();
+
+            // Check if event name is already cached
+            if (eventNameCache.containsKey(eventId)) {
+                allImages.add(new ImageDataWithEvent(image, eventNameCache.get(eventId)));
+                fetchedCount[0]++;
+
+                if (fetchedCount[0] == totalImages) {
+                    onAllEventNamesFetched();
+                }
+            } else {
+                // Fetch event name from Firestore
+                db.collection("events").document(eventId)
+                        .get()
+                        .addOnSuccessListener(eventDoc -> {
+                            String eventName = "Unknown Event";
+                            if (eventDoc.exists()) {
+                                eventName = eventDoc.getString("eventName");
+                                if (eventName == null) eventName = "Unknown Event";
+                                eventNameCache.put(eventId, eventName);
+                            }
+
+                            allImages.add(new ImageDataWithEvent(image, eventName));
+                            fetchedCount[0]++;
+
+                            if (fetchedCount[0] == totalImages) {
+                                onAllEventNamesFetched();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // Add with unknown event name on failure
+                            allImages.add(new ImageDataWithEvent(image, "Unknown Event"));
+                            fetchedCount[0]++;
+
+                            if (fetchedCount[0] == totalImages) {
+                                onAllEventNamesFetched();
+                            }
+                        });
+            }
+        }
+    }
+
+    /**
+     * Called when all event names have been fetched
+     */
+    private void onAllEventNamesFetched() {
+        imagesCount.setText(String.valueOf(allImages.size()));
+        filterImages(searchImages.getText().toString());
+        showLoading(false);
+    }
     /**
      * Filters the list of images based on the search query.
-     * Matches against the event name or uploader name.
+     * Matches against the event name or organizer name.
      *
      * @param query The search string entered by the user.
      */
@@ -132,9 +201,9 @@ public class AdminImagesFragment extends Fragment {
             filteredImages.addAll(allImages);
         } else {
             String q = query.toLowerCase();
-            for (ImageData img : allImages) {
+            for (ImageDataWithEvent img : allImages) {
                 if (img.eventName.toLowerCase().contains(q) ||
-                        img.uploader.toLowerCase().contains(q)) {
+                        img.image.getOrganizerName().toLowerCase().contains(q)) {
                     filteredImages.add(img);
                 }
             }
@@ -156,45 +225,66 @@ public class AdminImagesFragment extends Fragment {
 
         emptyMessage.setVisibility(View.GONE);
 
-        for (ImageData img : filteredImages) addImageCard(img);
+        for (ImageDataWithEvent img : filteredImages) addImageCard(img);
     }
     /**
      * Inflates and populates a single image card view with data, then adds it to the list.
      * Sets up the delete button listener.
      *
-     * @param img The ImageData object containing details to display.
+     * @param imgData The ImageDataWithEvent object containing details to display.
      */
     @SuppressLint("SetTextI18n")
-    private void addImageCard(ImageData img) {
-
+    private void addImageCard(ImageDataWithEvent imgData) {
         View card = LayoutInflater.from(getContext()).inflate(R.layout.item_admin_image_card, imagesList, false);
 
+        ImageView imagePreview = card.findViewById(R.id.imagePreview);
         TextView name = card.findViewById(R.id.eventName);
-        TextView uploader = card.findViewById(R.id.uploaderName);
+        TextView organizer = card.findViewById(R.id.organizerName);
         TextView info = card.findViewById(R.id.imageInfo);
-        Button viewBtn = card.findViewById(R.id.viewImageBtn);
         Button deleteBtn = card.findViewById(R.id.deleteImageBtn);
 
-        name.setText(img.eventName);
-        uploader.setText("Uploaded by " + img.uploader);
-        info.setText("Date: " + img.date);
+        // Decode and display the image
+        try {
+            byte[] imageBytes = Base64.decode(imgData.image.getImageData(), Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            imagePreview.setImageBitmap(bitmap);
+        } catch (Exception e) {
+            // If image fails to load, keep the default background
+            imagePreview.setImageResource(android.R.color.transparent);
+        }
 
-        viewBtn.setOnClickListener(v -> Toast.makeText(getContext(), "Open Image Viewer (not built)", Toast.LENGTH_SHORT).show());
+        name.setText(imgData.eventName);
+        organizer.setText("By " + imgData.image.getOrganizerName());
 
-        deleteBtn.setOnClickListener(v -> deleteImage(img.id));
+        // Format the upload date
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        String formattedDate = sdf.format(new Date(imgData.image.getUploadedAt()));
+        info.setText("Uploaded: " + formattedDate);
+
+        deleteBtn.setOnClickListener(v -> deleteImage(imgData.image.getImageId(), imgData.eventName));
 
         imagesList.addView(card);
     }
     /**
-     * Deletes the specified image document from the Firestore "images" collection.
+     * Shows a confirmation dialog to delete an image. If confirmed, deletes the image from Firestore.
      *
-     * @param id The unique document ID of the image to delete.
+     * @param imageId The unique document ID of the image to delete.
+     * @param eventName The name of the event (used in the confirmation message).
      */
-    private void deleteImage(String id) {
-        db.collection("images").document(id)
-                .delete()
-                .addOnSuccessListener(a -> Toast.makeText(getContext(), "Image deleted", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show());
+    private void deleteImage(String imageId, String eventName) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Delete Image")
+                .setMessage("Are you sure you want to delete this image from '" + eventName + "'?\n\nThis action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    Toast.makeText(getContext(), "Deleting image...", Toast.LENGTH_SHORT).show();
+
+                    db.collection("images").document(imageId)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Image deleted successfully", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to delete image: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
     /**
      * Toggles the visibility of the loading spinner and the image list.
@@ -222,16 +312,15 @@ public class AdminImagesFragment extends Fragment {
         if (listener != null) listener.remove();
     }
     /**
-     * A simple data model class to hold image information for display.
+     * A simple data model class to hold image information combined with event name for display.
      */
-    private static class ImageData {
-        String id, eventName, uploader, date;
+    private static class ImageDataWithEvent {
+        Image image;
+        String eventName;
 
-        ImageData(String i, String e, String u, String d) {
-            id = i;
-            eventName = e;
-            uploader = u;
-            date = d;
+        ImageDataWithEvent(Image image, String eventName) {
+            this.image = image;
+            this.eventName = eventName;
         }
     }
 }
