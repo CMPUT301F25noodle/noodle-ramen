@@ -65,6 +65,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private WaitlistManager waitlistManager;
     private String currentEventId = null;
 
+    private boolean hasJoined = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +119,6 @@ public class EventDetailActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
-                        // 1. Get Event Data
                         String eventName = doc.getString("eventName");
                         String description = doc.getString("description");
                         String eligibility = doc.getString("eligibility");
@@ -128,11 +129,9 @@ public class EventDetailActivity extends AppCompatActivity {
                         String waitlistLimitStr = doc.getString("waitlistLimit");
                         String entrantMaxStr = doc.getString("entrantMaxCapacity");
 
-                        // 2. Check Geolocation Requirement
                         Boolean geoReq = doc.getBoolean("geolocationRequired");
                         isGeolocationRequired = geoReq != null && geoReq;
 
-                        // UI Updates
                         eventTitle.setText(eventName != null ? eventName : "Untitled Event");
                         eventDescription.setText(description != null ? description : "No description available");
                         eventCriteria.setText(eligibility != null ? eligibility : "No specific criteria");
@@ -153,8 +152,22 @@ public class EventDetailActivity extends AppCompatActivity {
                         int entrantMax = entrantMaxStr != null ? Integer.parseInt(entrantMaxStr) : 0;
                         spotsText.setText(entrantMax + " spots");
 
-                        // 3. Set Join Button Logic
-                        // We check permissions/requirements inside handleJoinClick
+
+                        if (auth.getCurrentUser() != null) {
+                            List<String> waitlistUsers = (List<String>) doc.get("waitlistUsers");
+                            String currentUserId = auth.getCurrentUser().getUid();
+
+                            // Check if list exists and contains user ID
+                            if (waitlistUsers != null && waitlistUsers.contains(currentUserId)) {
+                                hasJoined = true;
+                            } else {
+                                hasJoined = false;
+                            }
+                            // Update button immediately
+                            updateButtonState();
+                        }
+
+                        // Set Join Button Listener
                         joinWaitlistButton.setOnClickListener(v -> handleJoinClick(eventId));
 
                         // Generate QR code
@@ -175,7 +188,20 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Decides whether to ask for location or join directly
+     * Update button text and state based on hasJoined flag
+     */
+    private void updateButtonState() {
+        if (hasJoined) {
+            joinWaitlistButton.setText("Leave Waitlist");
+            joinWaitlistButton.setEnabled(true);
+        } else {
+            joinWaitlistButton.setText("Join Waitlist");
+            joinWaitlistButton.setEnabled(true);
+        }
+    }
+
+    /**
+     * Decides whether to join or leave the waitlist based on current state
      */
     private void handleJoinClick(String eventId) {
         if (auth.getCurrentUser() == null) {
@@ -185,6 +211,13 @@ public class EventDetailActivity extends AppCompatActivity {
 
         currentEventId = eventId; // Store for permission callback
 
+        // Check if user has already joined - if so, leave the waitlist
+        if (hasJoined) {
+            performLeaveWaitlist(eventId);
+            return;
+        }
+
+        // User hasn't joined yet, proceed with join logic
         if (isGeolocationRequired) {
             // Check if we already have permission
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -261,14 +294,34 @@ public class EventDetailActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 Toast.makeText(EventDetailActivity.this, "Successfully joined waitlist!", Toast.LENGTH_SHORT).show();
-                joinWaitlistButton.setEnabled(false);
-                joinWaitlistButton.setText("Joined Waitlist");
+                hasJoined = true;
+                updateButtonState();
             }
 
             @Override
             public void onFailure(String error) {
                 Log.e(TAG, "Error joining waitlist" + error);
                 Toast.makeText(EventDetailActivity.this, "Failed to join: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Leave the waitlist
+     */
+    private void performLeaveWaitlist(String eventId) {
+        waitlistManager.leaveWaitlist(eventId, new WaitlistManager.WaitlistCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(EventDetailActivity.this, "Left waitlist", Toast.LENGTH_SHORT).show();
+                hasJoined = false;
+                updateButtonState();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Error leaving waitlist: " + error);
+                Toast.makeText(EventDetailActivity.this, "Failed to leave waitlist: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }

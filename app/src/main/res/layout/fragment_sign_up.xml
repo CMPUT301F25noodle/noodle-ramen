@@ -7,41 +7,32 @@
     android:background="#FFFFFF"
     android:padding="24dp">
 
-    <TextView
-        android:id="@+id/tv_event"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:text="@string/event"
-        android:textColor="#000000"
-        android:textSize="42sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_lottery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/lottery"
-        android:textColor="@color/brand_green"
-        android:textSize="42sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@id/tv_event"
-        app:layout_constraintTop_toTopOf="@id/tv_event" />
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="675dp"
+        android:layout_height="156dp"
+        android:contentDescription="App Logo"
+        android:src="@drawable/venttologo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.631"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/tv_sign"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="124dp"
         android:text="@string/sign"
         android:textColor="#000000"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_event" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_up"
