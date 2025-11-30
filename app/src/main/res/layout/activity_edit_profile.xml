@@ -101,7 +101,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
                 android:text="Done Edit"
-                android:backgroundTint="#E5E1F7"
+                android:backgroundTint="@color/brand_green"
                 android:textColor="@android:color/black" />
         </LinearLayout>
 
