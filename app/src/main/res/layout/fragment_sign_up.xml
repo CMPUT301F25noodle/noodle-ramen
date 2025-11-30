@@ -186,7 +186,8 @@
             android:layout_weight="1"
             android:checked="true"
             android:text="@string/yes"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:buttonTint="@color/radio_button_color" />
 
         <RadioButton
             android:id="@+id/rb_no"
@@ -194,7 +195,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/no"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:buttonTint="@color/radio_button_color" />
     </RadioGroup>
 
     <Button

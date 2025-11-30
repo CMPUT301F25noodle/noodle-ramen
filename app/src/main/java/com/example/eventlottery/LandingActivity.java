@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class LandingActivity extends AppCompatActivity {
 
     private Button signupButton;
-    private TextView titleEvent, titleLottery, subtitle, readyText;
+    private TextView titleEvent, titleLottery;
     /**
      * Initializes the activity, sets up the UI layout, and configures the navigation button.
      *
@@ -30,10 +30,6 @@ public class LandingActivity extends AppCompatActivity {
 
         // Initialize layout components
         signupButton = findViewById(R.id.signup_button);
-        titleEvent = findViewById(R.id.textEvent);
-        titleLottery = findViewById(R.id.textLottery);
-        subtitle = findViewById(R.id.textSubtitle);
-        readyText = findViewById(R.id.textReady);
 
         // Set up navigation to SignUpActivity
         signupButton.setOnClickListener(v -> {

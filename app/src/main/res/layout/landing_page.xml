@@ -8,35 +8,26 @@
     android:background="#FFFFFF"
     tools:context=".LandingActivity">
 
-    <!-- Title: Event -->
-    <TextView
-        android:id="@+id/textEvent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Event"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/textLottery"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="5dp" />
-
-    <!-- Title: Lottery -->
-    <TextView
-        android:id="@+id/textLottery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Lottery"
-        android:textColor="@color/brand_green"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@id/textEvent"
-        app:layout_constraintStart_toEndOf="@id/textEvent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Subtitle -->
+
+    <!-- Ready to begin -->
+
+    <!-- Get Started Button -->
+
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="306dp"
+        android:layout_height="231dp"
+        android:contentDescription="App Logo"
+        android:src="@drawable/venttologo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.31" />
+
     <TextView
         android:id="@+id/textSubtitle"
         android:layout_width="wrap_content"
@@ -45,37 +36,37 @@
         android:textAlignment="center"
         android:textSize="14sp"
         android:textStyle="italic"
-        app:layout_constraintTop_toBottomOf="@id/textEvent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.442" />
 
-    <!-- Ready to begin -->
     <TextView
         android:id="@+id/textReady"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
         android:text="Ready to begin?"
         android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/signup_button"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="12dp" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Get Started Button -->
     <Button
         android:id="@+id/signup_button"
         android:layout_width="200dp"
         android:layout_height="56dp"
+        android:layout_marginBottom="192dp"
+        android:backgroundTint="@color/brand_green"
         android:text="Get Started"
         android:textColor="#FFFFFF"
-        android:backgroundTint="@color/brand_green"
-        android:textStyle="bold"
         android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="120dp" />
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
