@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected/Checked state - brand green background -->
     <item android:state_checked="true"
         android:color="@color/brand_green"/>
 
-    <item android:color="#666666">
-
-    </item>
+    <!-- Unselected state - white/transparent background -->
+    <item android:color="#FFFFFF"/>
 </selector>

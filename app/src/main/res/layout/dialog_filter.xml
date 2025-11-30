@@ -74,7 +74,7 @@
                         android:id="@+id/cb_sports"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#CE93D8" />
+                        android:buttonTint="@color/brand_green" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -97,7 +97,7 @@
                         android:id="@+id/cb_music"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#CE93D8" />
+                        android:buttonTint="@color/brand_green" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -127,7 +127,7 @@
                         android:id="@+id/cb_arts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#CE93D8" />
+                        android:buttonTint="@color/brand_green" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -150,7 +150,7 @@
                         android:id="@+id/cb_tech"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#CE93D8" />
+                        android:buttonTint="@color/brand_green" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -180,7 +180,7 @@
                         android:id="@+id/cb_educational"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#CE93D8" />
+                        android:buttonTint="@color/brand_green" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -203,7 +203,7 @@
                         android:id="@+id/cb_workshops"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#CE93D8" />
+                        android:buttonTint="@color/brand_green" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -225,7 +225,7 @@
                     android:id="@+id/cb_other"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:buttonTint="#CE93D8" />
+                    android:buttonTint="@color/brand_green" />
             </LinearLayout>
         </LinearLayout>
 
@@ -365,7 +365,7 @@
             android:padding="12dp"
             android:background="@drawable/search_background"
             android:drawableEnd="@android:drawable/ic_menu_mylocation"
-            android:drawableTint="#CE93D8"
+            android:drawableTint="@color/brand_green"
             android:layout_marginBottom="24dp" />
 
         <!-- Action Buttons -->
@@ -381,8 +381,8 @@
                 android:layout_height="wrap_content"
                 android:text="Clear"
                 android:textAllCaps="false"
-                android:backgroundTint="#F3E5F5"
-                android:textColor="#CE93D8"
+                android:backgroundTint="#FFFFFF"
+                android:textColor="@color/brand_green"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -391,7 +391,7 @@
                 android:layout_height="wrap_content"
                 android:text="Apply Filters"
                 android:textAllCaps="false"
-                android:backgroundTint="#CE93D8"
+                android:backgroundTint="@color/brand_green"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
 
