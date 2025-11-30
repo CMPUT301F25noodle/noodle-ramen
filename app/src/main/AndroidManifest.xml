@@ -41,6 +41,7 @@
         <activity android:name=".QrScannerActivity" />
 
         <activity android:name=".MainActivity" android:exported="true" />
+        <activity android:name=".AdminMainActivity" android:exported="false" />
         <activity android:name=".NotificationActivity" android:exported="false" />
         <activity android:name=".EditProfileActivity" android:exported="false" />
 

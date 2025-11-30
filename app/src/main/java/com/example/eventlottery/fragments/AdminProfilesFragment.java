@@ -14,7 +14,9 @@ import androidx.fragment.app.Fragment;
 import com.example.eventlottery.R;
 import com.google.firebase.firestore.*;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 /**
  * AdminProfilesFragment provides an interface for administrators to manage user profiles.
  * It allows viewing a list of all registered users, searching/filtering them by name or email,
@@ -93,13 +95,19 @@ public class AdminProfilesFragment extends Fragment {
                         String id = d.getId();
                         String name = d.getString("name");
                         String email = d.getString("email");
-                        String date = d.getString("joinedDate");
+                        Long createdAt = d.getLong("createdAt");
+
+                        String formattedDate = "Unknown Date";
+                        if (createdAt != null) {
+                            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+                            formattedDate = sdf.format(new Date(createdAt));
+                        }
 
                         allProfiles.add(new ProfileData(
                                 id,
                                 name != null ? name : "Unknown Name",
                                 email != null ? email : "Unknown Email",
-                                date != null ? date : "Unknown Date"
+                                formattedDate
                         ));
                     }
 
