@@ -298,7 +298,7 @@
                         android:text="@string/yess"
                         android:textSize="14sp"
                         android:checked="true"
-                        android:buttonTint="#EE90F6"
+                        android:buttonTint="@color/radio_button_color"
                         android:paddingEnd="12dp"
                         tools:ignore="RtlSymmetry" />
 
@@ -306,7 +306,7 @@
                         android:id="@+id/rb_geo_no"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="#999999"
+                        android:buttonTint="@color/radio_button_color"
                         android:text="@string/no1"
                         android:textColorLink="#714B8C"
                         android:textSize="14sp" />
