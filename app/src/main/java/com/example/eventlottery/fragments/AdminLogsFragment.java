@@ -22,6 +22,13 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+/**
+ * AdminLogsFragment displays a log of system notifications for administrators.
+ * It listens to the "notifications" collection in Firestore and displays them in a scrollable list,
+ * styling each card based on the notification type (e.g., winning, losing, or general info).
+ */
 public class AdminLogsFragment extends Fragment {
 
     private TextView notificationsCount;
@@ -53,6 +60,11 @@ public class AdminLogsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Connects to Firestore to listen for real-time updates to the "notifications" collection.
+     * Parses the documents into LogData objects and updates the UI.
+     */
+    // pull notifications from firestore
     private void loadLogsFromFirestore() {
         showLoading(true);
         allLogs.clear();
@@ -146,6 +158,13 @@ public class AdminLogsFragment extends Fragment {
         }
     }
 
+
+    /**
+     * Inflates and populates a single notification card view.
+     * Sets the card background color based on the notification type (win, lose, draw, etc.).
+     *
+     * @param log The LogData object containing the notification details.
+     */
     private void addNotificationCard(LogData log) {
         View card = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_admin_log_card, notificationsList, false);
