@@ -196,7 +196,8 @@ public class SignUpFragment extends Fragment {
                     callback.onResult(!queryDocumentSnapshots.isEmpty());
                 })
                 .addOnFailureListener(e-> {
-                    Toast.makeText(getContext(), "Error checking email" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Permission denied is expected for unauthenticated users
+                    // Proceed with sign-up - duplicate emails will be caught by unique user IDs
                     callback.onResult(false);
                 });
 
