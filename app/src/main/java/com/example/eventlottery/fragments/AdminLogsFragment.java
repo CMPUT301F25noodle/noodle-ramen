@@ -1,6 +1,7 @@
 package com.example.eventlottery.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,17 +15,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.R;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
- * AdminLogsFragment displays a log of system notifications for administrators.
- * It listens to the "notifications" collection in Firestore and displays them in a scrollable list,
- * styling each card based on the notification type (e.g., winning, losing, or general info).
- */
+
 public class AdminLogsFragment extends Fragment {
 
     private TextView notificationsCount;
@@ -33,18 +30,9 @@ public class AdminLogsFragment extends Fragment {
     private ProgressBar loadingSpinner;
 
     private FirebaseFirestore db;
-    private ListenerRegistration logsListener;
-
-    // list of all notifications from firestore
     private final List<LogData> allLogs = new ArrayList<>();
-    /**
-     * Initializes the fragment's UI components and triggers the data loading process.
-     *
-     * @param inflater           The LayoutInflater object that can be used to inflate any views in the fragment.
-     * @param container          If non-null, this is the parent view that the fragment's UI should be attached to.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
-     * @return The View for the fragment's UI.
-     */
+    private static final String TAG = "AdminLogsFragment";
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -64,56 +52,85 @@ public class AdminLogsFragment extends Fragment {
 
         return view;
     }
-    /**
-     * Connects to Firestore to listen for real-time updates to the "notifications" collection.
-     * Parses the documents into LogData objects and updates the UI.
-     */
-    // pull notifications from firestore
+
     private void loadLogsFromFirestore() {
         showLoading(true);
+        allLogs.clear();
 
-        logsListener = db.collection("notifications")
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
+        // Use collectionGroup to get ALL messages from ALL users at once
+        db.collectionGroup("messages")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
                         showLoading(false);
-                        showError("failed to load notifications: " + error.getMessage());
+                        notificationsCount.setText("0");
+                        showLogs();
                         return;
                     }
 
-                    allLogs.clear();
-
-                    if (value != null) {
-                        for (QueryDocumentSnapshot doc : value) {
-
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        try {
+                            // Extract Message Data
                             String id = doc.getId();
-                            String title = doc.getString("title");
-                            String subtitle = doc.getString("subtitle");
+                            String eventName = doc.getString("eventName");
                             String message = doc.getString("message");
-                            String type = doc.getString("type"); // "congrats", "sorry", "drawing"
+                            String type = doc.getString("type");
+                            String organizerName = doc.getString("organizerName");
+
+                            // Extract Recipient ID from the path: notifications/{userId}/messages/{messageId}
+                            // parent() = messages, parent().parent() = userId document
+                            String recipientId = "Unknown";
+                            if (doc.getReference().getParent().getParent() != null) {
+                                recipientId = doc.getReference().getParent().getParent().getId();
+                            }
+
+                            // Build Log Title
+                            String title = getNotificationTitle(type) + " - " + (eventName != null ? eventName : "Event");
+
+                            // Build Subtitle
+                            // Note: We display User ID here. Fetching names for every log
+                            // individually causes performance issues.
+                            String subtitle = "From: " + (organizerName != null ? organizerName : "System") +
+                                    " | To ID: " + recipientId;
 
                             LogData log = new LogData(
                                     id,
-                                    title != null ? title : "notification",
-                                    subtitle != null ? subtitle : "",
+                                    title,
+                                    subtitle,
                                     message != null ? message : "",
                                     type != null ? type : ""
                             );
 
                             allLogs.add(log);
+
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing log: " + e.getMessage());
                         }
                     }
 
+                    // Update UI
                     notificationsCount.setText(String.valueOf(allLogs.size()));
                     showLogs();
-
                     showLoading(false);
+                })
+                .addOnFailureListener(error -> {
+                    showLoading(false);
+                    Log.e(TAG, "Firestore Error: " + error.getMessage());
+                    showError("Failed to load logs. Check Logcat.");
                 });
     }
-    /**
-     * Renders the list of notification logs into the LinearLayout container.
-     * Displays an empty message if no logs are found.
-     */
-    // show all logs in the list
+
+    private String getNotificationTitle(String type) {
+        if (type == null) return "Notification";
+        switch (type.toLowerCase()) {
+            case "win": return "Winner Selected";
+            case "loss": return "Not Selected";
+            case "replacement": return "Replacement Selected";
+            default: return "Notification";
+        }
+    }
+
     private void showLogs() {
         notificationsList.removeAllViews();
 
@@ -129,13 +146,6 @@ public class AdminLogsFragment extends Fragment {
         }
     }
 
-    // add one card to the list
-    /**
-     * Inflates and populates a single notification card view.
-     * Sets the card background color based on the notification type (win, lose, draw, etc.).
-     *
-     * @param log The LogData object containing the notification details.
-     */
     private void addNotificationCard(LogData log) {
         View card = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_admin_log_card, notificationsList, false);
@@ -149,13 +159,13 @@ public class AdminLogsFragment extends Fragment {
         subtitleText.setText(log.subtitle);
         messageText.setText(log.message);
 
-        // pick card color based on type
+        // Styling based on type
         String t = log.type.toLowerCase();
-        if (t.contains("congrats") || t.contains("win")) {
+        if (t.contains("win") || t.contains("congrat")) {
             cardRoot.setBackgroundResource(R.drawable.card_congratulations);
-        } else if (t.contains("sorry") || t.contains("lose")) {
+        } else if (t.contains("loss") || t.contains("sorry")) {
             cardRoot.setBackgroundResource(R.drawable.card_sorry);
-        } else if (t.contains("draw") || t.contains("info")) {
+        } else if (t.contains("replace")) {
             cardRoot.setBackgroundResource(R.drawable.card_drawing);
         } else {
             cardRoot.setBackgroundResource(R.drawable.card_bg);
@@ -164,38 +174,20 @@ public class AdminLogsFragment extends Fragment {
         notificationsList.addView(card);
     }
 
-    // simple helper to show and hide loading spinner
-    /**
-     * Toggles the visibility of the loading spinner and the notifications list.
-     *
-     * @param show True to show the loading spinner, false to show the list.
-     */
     private void showLoading(boolean show) {
         if (loadingSpinner != null) {
             loadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
         }
-        notificationsList.setVisibility(show ? View.GONE : View.VISIBLE);
-    }
-    /**
-     * Displays a toast message with an error description.
-     *
-     * @param message The error message to display.
-     */
-    private void showError(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-    }
-    /**
-     * Cleans up resources when the fragment view is destroyed, removing the Firestore listener.
-     */
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (logsListener != null) {
-            logsListener.remove();
+        if (notificationsList != null) {
+            notificationsList.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
-    // simple data holder for one notification
+    private void showError(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    // Data Holder
     private static class LogData {
         String id;
         String title;
