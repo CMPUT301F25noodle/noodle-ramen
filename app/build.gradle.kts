@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    //  implementation(files("C:\\Users\\Angad\\AppData\\Local\\Android\\Sdk\\platforms\\android-36\\android.jar"))
+   // implementation(files("C:\\Users\\Angad\\AppData\\Local\\Android\\Sdk\\platforms\\android-36\\android.jar"))
 
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-analytics")
@@ -49,6 +49,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.android.libraries.places:places:3.5.0")
+
 
 
     // Image loading library
@@ -68,20 +69,8 @@ dependencies {
     // Unit testing dependencies
     testImplementation(libs.junit)
     testImplementation("org.robolectric:robolectric:4.11.1")
-
-    // Mockito for mocking
-    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("org.mockito:mockito-core:5.5.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
-
-    // Firebase testing
-    testImplementation("com.google.firebase:firebase-firestore:24.10.0")
-    testImplementation("com.google.firebase:firebase-auth:22.3.0")
-
-    // AndroidX test libraries for unit tests
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.test.ext:junit:1.1.5")
-
-    // Instrumented testing dependencies
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
