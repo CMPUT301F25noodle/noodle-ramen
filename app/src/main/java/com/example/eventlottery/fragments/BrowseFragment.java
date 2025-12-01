@@ -363,7 +363,9 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
                     != PackageManager.PERMISSION_GRANTED) {
                 // Store the event for later and request permission
                 pendingJoinEvent = eventViewModel;
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION},
                         LOCATION_PERMISSION_REQUEST_CODE);
             } else {
                 // Permission already granted, get location and join
