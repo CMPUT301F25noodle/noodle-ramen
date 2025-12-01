@@ -1,5 +1,6 @@
 package com.example.eventlottery;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,15 +41,15 @@ public class EditProfileActivity extends AppCompatActivity {
     // Header bits (optional action)
 
     // Top summary
-    private TextView userNameText, userRoleText;
+    private TextView userRoleText;
     //back button
     private ImageView backButton;
 
     // Info fields
-    private EditText phoneEditText, emailEditText, passwordHintField;
+    private EditText userNameEditText, phoneEditText, emailEditText, passwordHintField;
 
     // Pencil buttons
-    private ImageButton phoneEditBtn, emailEditBtn,passwordEditBtn;
+    private ImageButton userNameBtn, phoneEditBtn, emailEditBtn,passwordEditBtn;
 
     // Done
     private Button doneButton;
@@ -70,13 +71,14 @@ public class EditProfileActivity extends AppCompatActivity {
 
         // Bind UI
         backButton = findViewById(R.id.backButton3);
-        userNameText      = findViewById(R.id.userNameText);
+        userNameEditText      = findViewById(R.id.userNameEditText);
         userRoleText      = findViewById(R.id.userRoleText);
 
         phoneEditText     = findViewById(R.id.phoneEditText);
         emailEditText     = findViewById(R.id.emailEditText);
         passwordHintField = findViewById(R.id.passwordHintField);
 
+        userNameBtn       = findViewById(R.id.userNameBtn);
         phoneEditBtn      = findViewById(R.id.phoneEditBtn);
         emailEditBtn      = findViewById(R.id.emailEditBtn);
         passwordEditBtn   = findViewById(R.id.passwordEditBtn);
@@ -89,6 +91,12 @@ public class EditProfileActivity extends AppCompatActivity {
         loadProfile();
 
         // Pencil toggles
+        userNameBtn.setOnClickListener(v -> {
+            userNameEditText.setEnabled(true);
+            userNameEditText.requestFocus();
+            userNameEditText.setSelection(userNameEditText.getText().length());
+        });
+
         phoneEditBtn.setOnClickListener(v -> {
             phoneEditText.setEnabled(true);
             phoneEditText.requestFocus();
@@ -135,13 +143,14 @@ public class EditProfileActivity extends AppCompatActivity {
                     String phone = doc.getString("phone");
                     String role  = doc.getString("role");
 
-                    userNameText.setText(name == null ? "User" : name);
+                    userNameEditText.setText(name == null ? "User" : name);
                     userRoleText.setText(role == null ? "" : role);
 
                     emailEditText.setText(email);
                     phoneEditText.setText(phone);
 
                     // Start in read-only; pencil enables each
+                    userNameEditText.setEnabled(false);
                     emailEditText.setEnabled(false);
                     phoneEditText.setEnabled(false);
                     passwordHintField.setEnabled(false);
@@ -157,11 +166,13 @@ public class EditProfileActivity extends AppCompatActivity {
     private void saveAndClose() {
         if (userId == null) return;
 
+        String newName = userNameEditText.getText().toString().trim();
         String newEmail = emailEditText.getText().toString().trim();
         String newPhone = phoneEditText.getText().toString().trim();
         String newPasswordHint = passwordHintField.getText().toString().trim();
 
         Map<String, Object> updates = new HashMap<>();
+        updates.put("name", newName);
         updates.put("email", newEmail);
         updates.put("phone", newPhone);
         updates.put("passwordHint", newPasswordHint);

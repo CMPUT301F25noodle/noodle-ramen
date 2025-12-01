@@ -130,6 +130,7 @@ public class ProfileActivity extends AppCompatActivity {
      * Enable/disable input fields.
      */
     private void setEditable(boolean enabled) {
+        userNameText.setEnabled(enabled);
         emailEditText.setEnabled(enabled);
         phoneEditText.setEnabled(enabled);
         // password field stays disabled (hint only)
