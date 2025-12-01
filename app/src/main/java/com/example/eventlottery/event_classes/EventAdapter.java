@@ -126,6 +126,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         private Button joinWaitlistButton;
         private Button goToEventButton;
         private View imageContainer;
+        private android.widget.ProgressBar joinButtonProgress;
 
 
         /**
@@ -149,6 +150,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             joinWaitlistButton = itemView.findViewById(R.id.join_waitlist_button);
             goToEventButton = itemView.findViewById(R.id.go_to_event_button);
             imageContainer = itemView.findViewById(R.id.image_container);
+            joinButtonProgress = itemView.findViewById(R.id.join_button_progress);
         }
 
         /**
@@ -178,12 +180,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
 
         private void setupButtons(EventViewModel vm, OnEventClickListener listener) {
-            if (vm.isUserOnWaitlist()) {
-                joinWaitlistButton.setText("Leave Waitlist");
-                joinWaitlistButton.setEnabled(true);
+            // Handle loading state
+            if (vm.isLoadingLocation()) {
+                joinWaitlistButton.setText("");
+                joinWaitlistButton.setEnabled(false);
+                joinButtonProgress.setVisibility(View.VISIBLE);
             } else {
-                joinWaitlistButton.setText(vm.getJoinButtonText());
-                joinWaitlistButton.setEnabled(vm.isJoinButtonEnabled());
+                joinButtonProgress.setVisibility(View.GONE);
+
+                if (vm.isUserOnWaitlist()) {
+                    joinWaitlistButton.setText("Leave Waitlist");
+                    joinWaitlistButton.setEnabled(true);
+                } else {
+                    joinWaitlistButton.setText(vm.getJoinButtonText());
+                    joinWaitlistButton.setEnabled(vm.isJoinButtonEnabled());
+                }
             }
 
             joinWaitlistButton.setOnClickListener(v -> {

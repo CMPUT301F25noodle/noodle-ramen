@@ -125,16 +125,30 @@
             </LinearLayout>
 
             <!-- Join Waitlist Button -->
-            <Button
-                android:id="@+id/join_waitlist_button"
+            <FrameLayout
+                android:id="@+id/join_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Join Waitlist"
-                android:textColor="@android:color/white"
-                android:backgroundTint="@color/brand_green"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="12dp">
+
+                <Button
+                    android:id="@+id/join_waitlist_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Join Waitlist"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/brand_green"
+                    android:textAllCaps="false"
+                    android:textSize="16sp" />
+
+                <ProgressBar
+                    android:id="@+id/join_button_progress"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminateTint="@android:color/white" />
+            </FrameLayout>
 
             <!-- Waitlist and Spots Info -->
             <LinearLayout

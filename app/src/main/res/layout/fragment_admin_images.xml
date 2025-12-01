@@ -80,7 +80,7 @@
                 android:layout_weight="1"
                 android:autofillHints=""
                 android:background="@android:color/transparent"
-                android:hint="@string/search_for_a_images423"
+                android:hint="@string/image_search"
                 android:inputType="text"
                 android:padding="4dp"
                 android:textColorHint="#757575"
