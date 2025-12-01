@@ -76,6 +76,7 @@ public class CreateEventFragment extends Fragment {
     private LinearLayout btnBackContainer;
     private Button btnAddImage, btnDone, btnCancel ;
     private ImageView btnDeleteImage1, btnDeleteImage2, btnDeleteImage3;
+    private ProgressBar progressBarDone;
     private ImageView ivEventImage1, ivEventImage2, ivEventImage3;
     private LinearLayout llImageSlot1, llImageSlot2, llImageSlot3;
     private ImageButton btnLocation;
@@ -244,6 +245,7 @@ public class CreateEventFragment extends Fragment {
         btnDeleteImage2 = view.findViewById(R.id.btn_delete_image2);
         btnDeleteImage3 = view.findViewById(R.id.btn_delete_image3);
         btnLocation = view.findViewById(R.id.btn_location);
+        progressBarDone = view.findViewById(R.id.progress_bar_done);
 
         // Initialize image views and containers
         ivEventImage1 = view.findViewById(R.id.iv_event_image_1);
@@ -298,7 +300,6 @@ public class CreateEventFragment extends Fragment {
         btnDone.setOnClickListener(v -> handleEventCreation());
         btnCancel.setOnClickListener(v -> {
             clearForm();
-            Toast.makeText(getContext(), "form cleared", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -318,8 +319,6 @@ public class CreateEventFragment extends Fragment {
      * loads event data from Firestore for editing
      */
     private void loadEventData(String eventId) {
-        Toast.makeText(getContext(), "Loading event data...", Toast.LENGTH_SHORT).show();
-
         db.collection("events").document(eventId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -354,8 +353,6 @@ public class CreateEventFragment extends Fragment {
                         } else {
                             rgGeolocation.check(R.id.rb_geo_no);
                         }
-
-                        Toast.makeText(getContext(), "Event loaded successfully", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
                         navigateToOrganizerDashboard();
@@ -368,10 +365,32 @@ public class CreateEventFragment extends Fragment {
     }
 
     /**
+     * Shows loading state on the done button
+     */
+    private void showLoadingState() {
+        if (btnDone != null && progressBarDone != null) {
+            btnDone.setText("");
+            btnDone.setEnabled(false);
+            progressBarDone.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Hides loading state and restores button
+     */
+    private void hideLoadingState() {
+        if (btnDone != null && progressBarDone != null) {
+            progressBarDone.setVisibility(View.GONE);
+            btnDone.setEnabled(true);
+            btnDone.setText(isEditMode ? "Save Changes" : "Done");
+        }
+    }
+
+    /**
      * handles event creation and saves to firestore
      */
     private void handleEventCreation() {
-        Toast.makeText(getContext(), "done button pressed", Toast.LENGTH_SHORT).show();
+        showLoadingState();
 
         String eventName = etPreCreatedEvent.getText().toString().trim();
         String location = etLocation.getText().toString().trim();
@@ -385,14 +404,10 @@ public class CreateEventFragment extends Fragment {
         String entrantMax = etPoolSize.getText().toString().trim();
         boolean geolocationRequired = rgGeolocation.getCheckedRadioButtonId() == R.id.rb_geo_yes;
 
-        Toast.makeText(getContext(), "validating inputs", Toast.LENGTH_SHORT).show();
-
         if (!validateInputs(eventName, organizerName)) {
-            Toast.makeText(getContext(), "validation failed", Toast.LENGTH_SHORT).show();
+            hideLoadingState();
             return;
         }
-
-        Toast.makeText(getContext(), "creating event data", Toast.LENGTH_SHORT).show();
 
         String category = spinnerCategory.getSelectedItem().toString();
 
@@ -412,8 +427,6 @@ public class CreateEventFragment extends Fragment {
         eventData.put("category", category);
         eventData.put("createdAt", System.currentTimeMillis());
 
-        Toast.makeText(getContext(), "saving to firestore", Toast.LENGTH_SHORT).show();
-
         if (!isEditMode) {
             eventData.put("createdAt", System.currentTimeMillis());
 
@@ -424,15 +437,15 @@ public class CreateEventFragment extends Fragment {
 
                         // Check if there are images to upload
                         if (!selectedImageUris.isEmpty()) {
-                            Toast.makeText(getContext(), "Event created! Uploading images...", Toast.LENGTH_SHORT).show();
                             uploadSelectedImagesWithQr(newEventId, organizerName, eventName);
                         } else {
-                            Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_LONG).show();
+                            hideLoadingState();
                             showQrCodeDialog(newEventId, eventName);
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        hideLoadingState();
+                        Toast.makeText(getContext(), "Failed to create event: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         e.printStackTrace();
                     });
         } else {
@@ -442,12 +455,14 @@ public class CreateEventFragment extends Fragment {
                     .document(eventId)
                     .update(eventData)  // Updates existing event
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(getContext(), "event updated successfully!", Toast.LENGTH_LONG).show();
+                        hideLoadingState();
+                        Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
                         clearForm();
                         navigateToOrganizerDashboard();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "failed to update event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        hideLoadingState();
+                        Toast.makeText(getContext(), "Failed to update event: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         e.printStackTrace();
                     });
         }
@@ -515,14 +530,11 @@ public class CreateEventFragment extends Fragment {
                 organizerName = "Organizer";
             }
 
-            Toast.makeText(getContext(), "Compressing and uploading image...", Toast.LENGTH_SHORT).show();
-
             imageManager.uploadImage(requireContext(), eventId, imageUri, organizerName, new ImageManager.ImageUploadCallback() {
                 @Override
                 public void onSuccess(Image image) {
                     uploadedImages.add(image);
                     displayImages();
-                    Toast.makeText(getContext(), "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -534,7 +546,6 @@ public class CreateEventFragment extends Fragment {
             // Create mode: Store URI for later upload
             selectedImageUris.add(imageUri);
             displaySelectedImages();
-            Toast.makeText(getContext(), "Image added (will upload when event is created)", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -552,7 +563,7 @@ public class CreateEventFragment extends Fragment {
 
             @Override
             public void onFailure(String error) {
-                Toast.makeText(getContext(), "Failed to load images: " + error, Toast.LENGTH_SHORT).show();
+                // Silent failure - images are optional
             }
         });
     }
@@ -614,14 +625,12 @@ public class CreateEventFragment extends Fragment {
             }
 
             Image imageToDelete = uploadedImages.get(index);
-            Toast.makeText(getContext(), "Deleting image...", Toast.LENGTH_SHORT).show();
 
             imageManager.deleteImage(imageToDelete, new ImageManager.ImageDeleteCallback() {
                 @Override
                 public void onSuccess() {
                     uploadedImages.remove(index);
                     displayImages();
-                    Toast.makeText(getContext(), "Image deleted successfully", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -636,7 +645,6 @@ public class CreateEventFragment extends Fragment {
             }
             selectedImageUris.remove(index);
             displaySelectedImages();
-            Toast.makeText(getContext(), "Image removed", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -738,10 +746,8 @@ public class CreateEventFragment extends Fragment {
      */
     private void checkUploadComplete(int uploaded, int failed, int total) {
         if (uploaded + failed == total) {
-            if (failed == 0) {
-                Toast.makeText(getContext(), "Event and images created successfully!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getContext(), "Event created. " + failed + " image(s) failed to upload.", Toast.LENGTH_LONG).show();
+            if (failed > 0) {
+                Toast.makeText(getContext(), failed + " image(s) failed to upload", Toast.LENGTH_SHORT).show();
             }
             clearForm();
             navigateToOrganizerDashboard();
@@ -753,10 +759,9 @@ public class CreateEventFragment extends Fragment {
      */
     private void checkUploadCompleteWithQr(int uploaded, int failed, int total, String eventId, String eventName) {
         if (uploaded + failed == total) {
-            if (failed == 0) {
-                Toast.makeText(getContext(), "Event and images created successfully!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getContext(), "Event created. " + failed + " image(s) failed to upload.", Toast.LENGTH_LONG).show();
+            hideLoadingState();
+            if (failed > 0) {
+                Toast.makeText(getContext(), failed + " image(s) failed to upload", Toast.LENGTH_SHORT).show();
             }
             showQrCodeDialog(eventId, eventName);
         }
@@ -797,7 +802,7 @@ public class CreateEventFragment extends Fragment {
         Bitmap qrBitmap = createQrBitmap(qrPayload, 600);
 
         if (qrBitmap == null) {
-            Toast.makeText(getContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+            clearForm();
             navigateToOrganizerDashboard();
             return;
         }
@@ -884,14 +889,14 @@ public class CreateEventFragment extends Fragment {
                 if (outputStream != null) {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                     outputStream.close();
-                    Toast.makeText(getContext(), "QR code saved to gallery!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "QR code saved!", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(getContext(), "Failed to save QR code", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             Log.e("CreateEventFragment", "Error saving QR code", e);
-            Toast.makeText(getContext(), "Error saving QR code: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Failed to save QR code", Toast.LENGTH_SHORT).show();
         }
     }
 }
