@@ -113,7 +113,7 @@ public class CreateEventFragment extends Fragment {
                         }
                     }
                 } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
-                    // --- THIS IS THE MISSING PART ---
+                    // THIS IS THE MISSING PART
                     Intent data = result.getData();
                     com.google.android.gms.common.api.Status status =
                             com.google.android.libraries.places.widget.Autocomplete.getStatusFromIntent(data);
@@ -836,11 +836,11 @@ public class CreateEventFragment extends Fragment {
     private void saveQrCodeToGallery(Bitmap bitmap, String eventName) {
         if (getContext() == null) return;
 
-        // For Android 10+ (API 29+), no permission needed with MediaStore
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             saveQrCodeToGalleryInternal(bitmap, eventName);
         } else {
-            // For Android 9 and below, check for WRITE_EXTERNAL_STORAGE permission
+            // For Android 9 and below check for WRITE_EXTERNAL_STORAGE permission because it
+            // is not granted by default unlike Android 10 and above
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 saveQrCodeToGalleryInternal(bitmap, eventName);
