@@ -72,7 +72,9 @@ public class CreateEventFragment extends Fragment {
     private AutoCompleteTextView etLocation;
     private Spinner spinnerCategory;
     private RadioGroup rgGeolocation;
-    private Button btnAddImage, btnDone, btnCancel;
+
+    private LinearLayout btnBackContainer;
+    private Button btnAddImage, btnDone, btnCancel ;
     private ImageView btnDeleteImage1, btnDeleteImage2, btnDeleteImage3;
     private ImageView ivEventImage1, ivEventImage2, ivEventImage3;
     private LinearLayout llImageSlot1, llImageSlot2, llImageSlot3;
@@ -224,6 +226,7 @@ public class CreateEventFragment extends Fragment {
         etPoolSize = view.findViewById(R.id.et_pool_size);
         spinnerCategory = view.findViewById(R.id.spinner_category);
         rgGeolocation = view.findViewById(R.id.rg_geolocation);
+        btnBackContainer = view.findViewById(R.id.btn_back_container);
 
         // Setup category spinner
         ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(
@@ -260,6 +263,9 @@ public class CreateEventFragment extends Fragment {
 
         placesAdapter = new PlacesCompleteAdapter(getContext(), placesClient);
         etLocation.setAdapter(placesAdapter);
+        if (btnBackContainer != null) {
+            btnBackContainer.setOnClickListener(v-> navigateToOrganizerDashboard());
+        }
 
         etLocation.setOnItemClickListener((parent, view, position, id) -> {
 
