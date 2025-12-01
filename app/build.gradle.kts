@@ -51,6 +51,7 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.5.0")
 
 
+
     // Image loading library
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
@@ -67,6 +68,8 @@ dependencies {
     implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
