@@ -15,6 +15,28 @@ public class EventViewModel {
     /** Base64 encoded image data for this event (null if no image) */
     private final String imageData;
 
+    /** Whether location is currently being fetched for this event */
+    private final boolean isLoadingLocation;
+
+    /**
+     * Creates an EventViewModel with all parameters.
+     *
+     * @param event the Event to wrap
+     * @param isUserOnWaitlist whether user is on waitlist
+     * @param imageData Base64 encoded image data (null if no image)
+     * @param isLoadingLocation whether location is being fetched
+     * @throws IllegalArgumentException if event is null
+     */
+    public EventViewModel(Event event, boolean isUserOnWaitlist, String imageData, boolean isLoadingLocation) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event cannot be null");
+        }
+        this.event = event;
+        this.isUserOnWaitlist = isUserOnWaitlist;
+        this.imageData = imageData;
+        this.isLoadingLocation = isLoadingLocation;
+    }
+
     /**
      * Creates an EventViewModel with user-specific waitlist status and image data.
      *
@@ -24,12 +46,7 @@ public class EventViewModel {
      * @throws IllegalArgumentException if event is null
      */
     public EventViewModel(Event event, boolean isUserOnWaitlist, String imageData) {
-        if (event == null) {
-            throw new IllegalArgumentException("Event cannot be null");
-        }
-        this.event = event;
-        this.isUserOnWaitlist = isUserOnWaitlist;
-        this.imageData = imageData;
+        this(event, isUserOnWaitlist, imageData, false);
     }
 
     /**
@@ -40,7 +57,7 @@ public class EventViewModel {
      * @throws IllegalArgumentException if event is null
      */
     public EventViewModel(Event event, boolean isUserOnWaitlist) {
-        this(event, isUserOnWaitlist, null);
+        this(event, isUserOnWaitlist, null, false);
     }
 
     /**
@@ -50,7 +67,7 @@ public class EventViewModel {
      * @throws IllegalArgumentException if event is null
      */
     public EventViewModel(Event event) {
-        this(event, false, null);
+        this(event, false, null, false);
     }
 
     /** @return the underlying Event */
@@ -61,6 +78,9 @@ public class EventViewModel {
 
     /** @return Base64 encoded image data (null if no image) */
     public String getImageData() { return imageData; }
+
+    /** @return true if location is being fetched */
+    public boolean isLoadingLocation() { return isLoadingLocation; }
 
     /** @return event ID */
     public String getId() { return event.getId(); }
@@ -176,7 +196,16 @@ public class EventViewModel {
      * @return new EventViewModel with updated status
      */
     public EventViewModel withWaitlistStatus(boolean newStatus) {
-        return new EventViewModel(event, newStatus, imageData);
+        return new EventViewModel(event, newStatus, imageData, isLoadingLocation);
+    }
+
+    /**
+     * Creates a new ViewModel with updated loading state.
+     * @param loading whether location is being fetched
+     * @return new EventViewModel with updated loading state
+     */
+    public EventViewModel withLoadingState(boolean loading) {
+        return new EventViewModel(event, isUserOnWaitlist, imageData, loading);
     }
 
     @Override

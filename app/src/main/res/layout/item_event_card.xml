@@ -172,22 +172,36 @@
         </LinearLayout>
 
         <!-- 7. JOIN BUTTON (Bottom Black Button) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/join_waitlist_button"
+        <FrameLayout
+            android:id="@+id/join_button_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:text="Join"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            app:backgroundTint="#587A6D"
-            app:cornerRadius="8dp"
             app:layout_constraintEnd_toStartOf="@+id/go_to_event_button"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/spots_row" />
+            app:layout_constraintTop_toBottomOf="@id/spots_row">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/join_waitlist_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Join"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                app:backgroundTint="#587A6D"
+                app:cornerRadius="8dp" />
+
+            <ProgressBar
+                android:id="@+id/join_button_progress"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="@android:color/white" />
+        </FrameLayout>
 
         <!-- 8. ARROW BUTTON (Replacing "Go To Event" Text Button with an Icon) -->
         <com.google.android.material.button.MaterialButton
@@ -205,9 +219,9 @@
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconTint="#1A1A1A"
-            app:layout_constraintBottom_toBottomOf="@+id/join_waitlist_button"
+            app:layout_constraintBottom_toBottomOf="@+id/join_button_container"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/join_waitlist_button"
+            app:layout_constraintTop_toTopOf="@+id/join_button_container"
             app:strokeColor="#DDDDDD"
             app:strokeWidth="1dp" />
 

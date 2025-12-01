@@ -25,6 +25,8 @@ import com.example.eventlottery.models.Image;
 import com.example.eventlottery.utils.ImageCompressionHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -54,6 +56,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private ImageView eventMainImage;
     private TextView imagePlaceholder;
     private Button joinWaitlistButton, shareButton;
+    private android.widget.ProgressBar joinButtonProgress;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -112,6 +115,7 @@ public class EventDetailActivity extends AppCompatActivity {
         backButton = findViewById(R.id.back_button);
         eventMainImage = findViewById(R.id.eventMainImage);
         imagePlaceholder = findViewById(R.id.imagePlaceholder);
+        joinButtonProgress = findViewById(R.id.join_button_progress);
     }
 
     private void loadEvent(String eventId) {
@@ -191,12 +195,26 @@ public class EventDetailActivity extends AppCompatActivity {
      * Update button text and state based on hasJoined flag
      */
     private void updateButtonState() {
-        if (hasJoined) {
-            joinWaitlistButton.setText("Leave Waitlist");
-            joinWaitlistButton.setEnabled(true);
+        updateButtonState(false);
+    }
+
+    /**
+     * Update button state with optional loading indicator
+     */
+    private void updateButtonState(boolean isLoading) {
+        if (isLoading) {
+            joinWaitlistButton.setText("");
+            joinWaitlistButton.setEnabled(false);
+            joinButtonProgress.setVisibility(View.VISIBLE);
         } else {
-            joinWaitlistButton.setText("Join Waitlist");
-            joinWaitlistButton.setEnabled(true);
+            joinButtonProgress.setVisibility(View.GONE);
+            if (hasJoined) {
+                joinWaitlistButton.setText("Leave Waitlist");
+                joinWaitlistButton.setEnabled(true);
+            } else {
+                joinWaitlistButton.setText("Join Waitlist");
+                joinWaitlistButton.setEnabled(true);
+            }
         }
     }
 
@@ -234,6 +252,7 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         } else {
             // Geolocation NOT required, join without it
+            updateButtonState(true);
             performJoinWaitlist(eventId, null, null);
         }
     }
@@ -261,30 +280,79 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
+        // Show loading state
+        updateButtonState(true);
+
+        // Try to get last location first (faster)
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
-                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-
-                        // Get user name for location tracking
-                        db.collection("users").document(auth.getCurrentUser().getUid())
-                                .get()
-                                .addOnSuccessListener(userDoc -> {
-                                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
-                                    performJoinWaitlist(eventId, geoPoint, userName);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Error getting user data", e);
-                                    performJoinWaitlist(eventId, geoPoint, "Unknown");
-                                });
+                        // We have a recent location, use it
+                        processLocationAndJoin(eventId, location);
                     } else {
-                        Toast.makeText(this, "Unable to determine location. Ensure GPS is on.",
-                                Toast.LENGTH_SHORT).show();
+                        // No cached location, request current location
+                        requestCurrentLocation(eventId);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting location", e);
-                    Toast.makeText(this, "Error getting location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Failed to get last location, try current location
+                    Log.w(TAG, "Failed to get last location, requesting current location", e);
+                    requestCurrentLocation(eventId);
+                });
+    }
+
+    /**
+     * Request current location actively (not from cache)
+     */
+    private void requestCurrentLocation(String eventId) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        com.google.android.gms.tasks.CancellationTokenSource cancellationTokenSource =
+            new com.google.android.gms.tasks.CancellationTokenSource();
+
+        fusedLocationClient.getCurrentLocation(
+                com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY,
+                cancellationTokenSource.getToken())
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        processLocationAndJoin(eventId, location);
+                    } else {
+                        // Clear loading state
+                        updateButtonState(false);
+                        Toast.makeText(this,
+                                "Unable to get location. Please ensure GPS is enabled and try again.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Clear loading state
+                    updateButtonState(false);
+                    Log.e(TAG, "Error getting current location", e);
+                    Toast.makeText(this,
+                            "Error getting location: " + e.getMessage() + ". Please ensure GPS is enabled.",
+                            Toast.LENGTH_LONG).show();
+                });
+    }
+
+    /**
+     * Process the location and join the waitlist
+     */
+    private void processLocationAndJoin(String eventId, android.location.Location location) {
+        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+        // Get user name for location tracking
+        db.collection("users").document(auth.getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+                    performJoinWaitlist(eventId, geoPoint, userName);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting user data", e);
+                    performJoinWaitlist(eventId, geoPoint, "Unknown");
                 });
     }
 
@@ -295,13 +363,13 @@ public class EventDetailActivity extends AppCompatActivity {
         waitlistManager.joinWaitlist(eventId, location, userName, new WaitlistManager.WaitlistCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(EventDetailActivity.this, "Successfully joined waitlist!", Toast.LENGTH_SHORT).show();
                 hasJoined = true;
-                updateButtonState();
+                updateButtonState(false);
             }
 
             @Override
             public void onFailure(String error) {
+                updateButtonState(false);
                 Log.e(TAG, "Error joining waitlist" + error);
                 Toast.makeText(EventDetailActivity.this, "Failed to join: " + error, Toast.LENGTH_SHORT).show();
             }
@@ -312,16 +380,19 @@ public class EventDetailActivity extends AppCompatActivity {
      * Leave the waitlist
      */
     private void performLeaveWaitlist(String eventId) {
+        // Show loading state
+        updateButtonState(true);
+
         waitlistManager.leaveWaitlist(eventId, new WaitlistManager.WaitlistCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(EventDetailActivity.this, "Left waitlist", Toast.LENGTH_SHORT).show();
                 hasJoined = false;
-                updateButtonState();
+                updateButtonState(false);
             }
 
             @Override
             public void onFailure(String error) {
+                updateButtonState(false);
                 Log.e(TAG, "Error leaving waitlist: " + error);
                 Toast.makeText(EventDetailActivity.this, "Failed to leave waitlist: " + error, Toast.LENGTH_SHORT).show();
             }
