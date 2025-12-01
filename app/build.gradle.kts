@@ -66,10 +66,14 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.android.material:material:1.9.0")
     implementation(libs.firebase.storage)
+    // Unit testing dependencies
     testImplementation(libs.junit)
     testImplementation("org.robolectric:robolectric:4.11.1")
     testImplementation("org.mockito:mockito-core:5.5.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+    androidTestImplementation("androidx.test:rules:1.5.0")
 }

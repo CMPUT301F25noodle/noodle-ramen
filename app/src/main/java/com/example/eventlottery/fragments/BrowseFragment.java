@@ -26,6 +26,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.firebase.firestore.GeoPoint;
 
 import com.example.eventlottery.EventDetailActivity;
@@ -386,31 +388,78 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
             return;
         }
 
+        // Set loading state
+        updateEventViewModel(eventViewModel.getId(), eventViewModel.withLoadingState(true));
+
+        // Try to get last location first (faster)
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
-                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-
-                        // Get user name for location tracking
-                        db.collection("users").document(currentUserId)
-                                .get()
-                                .addOnSuccessListener(userDoc -> {
-                                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
-                                    performJoinWaitlist(eventViewModel, geoPoint, userName);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Error getting user data", e);
-                                    performJoinWaitlist(eventViewModel, geoPoint, "Unknown");
-                                });
+                        // We have a recent location, use it
+                        processLocationAndJoin(eventViewModel, location);
                     } else {
-                        Toast.makeText(getContext(), "Unable to determine location. Ensure GPS is on.",
-                                Toast.LENGTH_SHORT).show();
+                        // No cached location, request current location
+                        requestCurrentLocation(eventViewModel);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting location", e);
-                    Toast.makeText(getContext(), "Error getting location: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                    // Failed to get last location, try current location
+                    Log.w(TAG, "Failed to get last location, requesting current location", e);
+                    requestCurrentLocation(eventViewModel);
+                });
+    }
+
+    /**
+     * Request current location actively (not from cache)
+     */
+    private void requestCurrentLocation(EventViewModel eventViewModel) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        fusedLocationClient.getCurrentLocation(
+                LocationRequest.PRIORITY_HIGH_ACCURACY,
+                cancellationTokenSource.getToken())
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        processLocationAndJoin(eventViewModel, location);
+                    } else {
+                        // Clear loading state
+                        updateEventViewModel(eventViewModel.getId(), eventViewModel.withLoadingState(false));
+                        Toast.makeText(getContext(),
+                                "Unable to get location. Please ensure GPS is enabled and try again.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Clear loading state
+                    updateEventViewModel(eventViewModel.getId(), eventViewModel.withLoadingState(false));
+                    Log.e(TAG, "Error getting current location", e);
+                    Toast.makeText(getContext(),
+                            "Error getting location: " + e.getMessage() + ". Please ensure GPS is enabled.",
+                            Toast.LENGTH_LONG).show();
+                });
+    }
+
+    /**
+     * Process the location and join the waitlist
+     */
+    private void processLocationAndJoin(EventViewModel eventViewModel, android.location.Location location) {
+        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+        // Get user name for location tracking
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String userName = userDoc.exists() ? userDoc.getString("name") : "Unknown";
+                    performJoinWaitlist(eventViewModel, geoPoint, userName);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting user data", e);
+                    performJoinWaitlist(eventViewModel, geoPoint, "Unknown");
                 });
     }
 
@@ -423,19 +472,18 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
         waitlistManager.joinWaitlist(eventId, location, userName, new WaitlistManager.WaitlistCallback() {
             @Override
             public void onSuccess() {
-                // Create new ViewModel with updated waitlist status
-                EventViewModel updatedViewModel = eventViewModel.withWaitlistStatus(true);
+                // Create new ViewModel with updated waitlist status and clear loading state
+                EventViewModel updatedViewModel = eventViewModel.withWaitlistStatus(true).withLoadingState(false);
 
                 // Update the list
                 updateEventViewModel(eventId, updatedViewModel);
-
-                Toast.makeText(getContext(),
-                        "Successfully joined waitlist for " + eventViewModel.getTitle(),
-                        Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(String error) {
+                // Clear loading state on failure
+                updateEventViewModel(eventId, eventViewModel.withLoadingState(false));
+
                 Toast.makeText(getContext(),
                         "Failed to join waitlist: " + error,
                         Toast.LENGTH_LONG).show();
@@ -459,10 +507,6 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
 
                 // Update the list
                 updateEventViewModel(eventId, updatedViewModel);
-
-                Toast.makeText(getContext(),
-                        "Successfully left waitlist for " + eventViewModel.getTitle(),
-                        Toast.LENGTH_SHORT).show();
             }
 
             @Override

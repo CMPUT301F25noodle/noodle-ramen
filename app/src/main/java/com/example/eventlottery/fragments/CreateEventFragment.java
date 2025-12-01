@@ -1,9 +1,18 @@
 package com.example.eventlottery.fragments;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +22,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlottery.utils.PlacesCompleteAdapter;
@@ -31,7 +41,14 @@ import com.example.eventlottery.models.Image;
 import com.example.eventlottery.utils.ImageCompressionHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -74,6 +91,11 @@ public class CreateEventFragment extends Fragment {
     private List<Image> uploadedImages = new ArrayList<>();
     private List<Uri> selectedImageUris = new ArrayList<>(); // Store URIs before upload
 
+    // QR code storage permission
+    private ActivityResultLauncher<String> storagePermissionLauncher;
+    private Bitmap pendingQrBitmap = null;
+    private String pendingEventName = null;
+
     private String eventId = null;
     private boolean isEditMode = false;
 
@@ -91,7 +113,7 @@ public class CreateEventFragment extends Fragment {
                         }
                     }
                 } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
-                    // --- THIS IS THE MISSING PART ---
+                    // THIS IS THE MISSING PART
                     Intent data = result.getData();
                     com.google.android.gms.common.api.Status status =
                             com.google.android.libraries.places.widget.Autocomplete.getStatusFromIntent(data);
@@ -151,6 +173,21 @@ public class CreateEventFragment extends Fragment {
                             Log.e("CreateEventFragment", "Failed to take persistable permission", e);
                         }
                         handleImageSelected(uri);
+                    }
+                });
+
+        // Initialize storage permission launcher for saving QR codes
+        storagePermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted && pendingQrBitmap != null && pendingEventName != null) {
+                        saveQrCodeToGalleryInternal(pendingQrBitmap, pendingEventName);
+                        pendingQrBitmap = null;
+                        pendingEventName = null;
+                    } else {
+                        Toast.makeText(getContext(), "Storage permission is required to save QR code", Toast.LENGTH_LONG).show();
+                        pendingQrBitmap = null;
+                        pendingEventName = null;
                     }
                 });
 
@@ -382,11 +419,10 @@ public class CreateEventFragment extends Fragment {
                         // Check if there are images to upload
                         if (!selectedImageUris.isEmpty()) {
                             Toast.makeText(getContext(), "Event created! Uploading images...", Toast.LENGTH_SHORT).show();
-                            uploadSelectedImages(newEventId, organizerName);
+                            uploadSelectedImagesWithQr(newEventId, organizerName, eventName);
                         } else {
                             Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_LONG).show();
-                            clearForm();
-                            navigateToOrganizerDashboard();
+                            showQrCodeDialog(newEventId, eventName);
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -667,6 +703,31 @@ public class CreateEventFragment extends Fragment {
     }
 
     /**
+     * Upload all selected images after event creation, then show QR code dialog
+     */
+    private void uploadSelectedImagesWithQr(String newEventId, String organizerName, String eventName) {
+        final int totalImages = selectedImageUris.size();
+        final int[] uploadedCount = {0};
+        final int[] failedCount = {0};
+
+        for (Uri imageUri : selectedImageUris) {
+            imageManager.uploadImage(requireContext(), newEventId, imageUri, organizerName, new ImageManager.ImageUploadCallback() {
+                @Override
+                public void onSuccess(Image image) {
+                    uploadedCount[0]++;
+                    checkUploadCompleteWithQr(uploadedCount[0], failedCount[0], totalImages, newEventId, eventName);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    failedCount[0]++;
+                    checkUploadCompleteWithQr(uploadedCount[0], failedCount[0], totalImages, newEventId, eventName);
+                }
+            });
+        }
+    }
+
+    /**
      * Check if all images have been uploaded and show result
      */
     private void checkUploadComplete(int uploaded, int failed, int total) {
@@ -678,6 +739,153 @@ public class CreateEventFragment extends Fragment {
             }
             clearForm();
             navigateToOrganizerDashboard();
+        }
+    }
+
+    /**
+     * Check if all images have been uploaded and show QR code dialog
+     */
+    private void checkUploadCompleteWithQr(int uploaded, int failed, int total, String eventId, String eventName) {
+        if (uploaded + failed == total) {
+            if (failed == 0) {
+                Toast.makeText(getContext(), "Event and images created successfully!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(), "Event created. " + failed + " image(s) failed to upload.", Toast.LENGTH_LONG).show();
+            }
+            showQrCodeDialog(eventId, eventName);
+        }
+    }
+
+    /**
+     * Generate QR code bitmap from content string
+     */
+    private Bitmap createQrBitmap(String content, int sizePx) {
+        try {
+            QRCodeWriter writer = new QRCodeWriter();
+            Map<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hints.put(EncodeHintType.MARGIN, 1);
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
+            BitMatrix matrix = writer.encode(content, BarcodeFormat.QR_CODE, sizePx, sizePx, hints);
+            Bitmap bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+            for (int y = 0; y < sizePx; y++) {
+                for (int x = 0; x < sizePx; x++) {
+                    bmp.setPixel(x, y, matrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                }
+            }
+            return bmp;
+        } catch (WriterException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Show dialog with QR code after event creation
+     */
+    private void showQrCodeDialog(String eventId, String eventName) {
+        if (getContext() == null) return;
+
+        // Generate QR code
+        String qrPayload = "eventlottery://event/" + eventId;
+        Bitmap qrBitmap = createQrBitmap(qrPayload, 600);
+
+        if (qrBitmap == null) {
+            Toast.makeText(getContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+            navigateToOrganizerDashboard();
+            return;
+        }
+
+        // Create dialog
+        Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.dialog_qr_code);
+        dialog.setCancelable(true);
+
+        // Get dialog views
+        ImageView qrCodeImageView = dialog.findViewById(R.id.qr_code_image);
+        Button btnSaveQr = dialog.findViewById(R.id.btn_save_qr);
+        Button btnClose = dialog.findViewById(R.id.btn_close);
+
+        // Set QR code image
+        qrCodeImageView.setImageBitmap(qrBitmap);
+
+        // Save QR code button
+        btnSaveQr.setOnClickListener(v -> {
+            saveQrCodeToGallery(qrBitmap, eventName);
+        });
+
+        // Close button
+        btnClose.setOnClickListener(v -> {
+            dialog.dismiss();
+            clearForm();
+            navigateToOrganizerDashboard();
+        });
+
+        // When dialog is dismissed, navigate back
+        dialog.setOnDismissListener(dialogInterface -> {
+            clearForm();
+            navigateToOrganizerDashboard();
+        });
+
+        dialog.show();
+    }
+
+    /**
+     * Save QR code bitmap to device gallery with permission check
+     */
+    private void saveQrCodeToGallery(Bitmap bitmap, String eventName) {
+        if (getContext() == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            saveQrCodeToGalleryInternal(bitmap, eventName);
+        } else {
+            // For Android 9 and below check for WRITE_EXTERNAL_STORAGE permission because it
+            // is not granted by default unlike Android 10 and above
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                saveQrCodeToGalleryInternal(bitmap, eventName);
+            } else {
+                // Request permission
+                pendingQrBitmap = bitmap;
+                pendingEventName = eventName;
+                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+        }
+    }
+
+    /**
+     * Internal method to save QR code bitmap to device gallery
+     */
+    private void saveQrCodeToGalleryInternal(Bitmap bitmap, String eventName) {
+        if (getContext() == null) return;
+
+        try {
+            // Prepare image file name
+            String fileName = "QR_" + eventName.replaceAll("[^a-zA-Z0-9]", "_") + "_" + System.currentTimeMillis() + ".png";
+
+            // Use MediaStore to save image (works for Android 10+)
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EventLottery");
+            }
+
+            Uri imageUri = getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+            if (imageUri != null) {
+                OutputStream outputStream = getContext().getContentResolver().openOutputStream(imageUri);
+                if (outputStream != null) {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    outputStream.close();
+                    Toast.makeText(getContext(), "QR code saved to gallery!", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(getContext(), "Failed to save QR code", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e("CreateEventFragment", "Error saving QR code", e);
+            Toast.makeText(getContext(), "Error saving QR code: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 }
