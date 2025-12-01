@@ -37,13 +37,13 @@ public class WaitlistManagerTest {
     @Mock private FirebaseAuth mockAuth;
     @Mock private FirebaseUser mockUser;
 
-    // Events Collection Mocks
+
     @Mock private CollectionReference mockEventsCollection;
     @Mock private DocumentReference mockEventDocRef;
     @Mock private CollectionReference mockWaitlistCollection;
     @Mock private DocumentReference mockUserWaitlistDocRef;
 
-    // Users Collection Mocks (ADDED THIS)
+
     @Mock private CollectionReference mockUsersCollection;
     @Mock private DocumentReference mockUserDocRef;
 
@@ -66,38 +66,32 @@ public class WaitlistManagerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        // 1. Reset the Singleton instance
+
         resetSingleton();
 
-        // 2. Mock Log to prevent "Method d not mocked" error
         mockedLog = mockStatic(Log.class);
 
-        // 3. Mock Static instances for Firestore and Auth
         mockedFirestoreStatic = mockStatic(FirebaseFirestore.class);
         mockedFirestoreStatic.when(FirebaseFirestore::getInstance).thenReturn(mockDb);
 
         mockedAuthStatic = mockStatic(FirebaseAuth.class);
         mockedAuthStatic.when(FirebaseAuth::getInstance).thenReturn(mockAuth);
 
-        // 4. Setup Auth Mock
         when(mockAuth.getCurrentUser()).thenReturn(mockUser);
         when(mockUser.getUid()).thenReturn(TEST_USER_ID);
 
-        // 5. Setup Firestore Chain Mocks
+
         when(mockDb.batch()).thenReturn(mockBatch);
 
-        // --- MOCK "events" COLLECTION ---
         when(mockDb.collection("events")).thenReturn(mockEventsCollection);
         when(mockEventsCollection.document(TEST_EVENT_ID)).thenReturn(mockEventDocRef);
         when(mockEventDocRef.collection("waitlist")).thenReturn(mockWaitlistCollection);
         when(mockWaitlistCollection.document(TEST_USER_ID)).thenReturn(mockUserWaitlistDocRef);
 
-        // --- MOCK "users" COLLECTION (NEW FIX) ---
         // This prevents the NPE when performJoinWaitlist accesses db.collection("users")
         when(mockDb.collection("users")).thenReturn(mockUsersCollection);
         when(mockUsersCollection.document(TEST_USER_ID)).thenReturn(mockUserDocRef);
 
-        // 6. Initialize the Manager
         waitlistManager = WaitlistManager.getInstance();
     }
 
@@ -113,7 +107,6 @@ public class WaitlistManagerTest {
     public void testJoinWaitlist_Success() {
         WaitlistManager.WaitlistCallback callback = mock(WaitlistManager.WaitlistCallback.class);
 
-        // 1. Mock "isUserOnWaitlist" check (Should return FALSE)
         when(mockUserWaitlistDocRef.get()).thenReturn(mockUserDocTask);
         when(mockUserDocTask.addOnSuccessListener(any())).thenAnswer(invocation -> {
             OnSuccessListener<DocumentSnapshot> listener = invocation.getArgument(0);
@@ -122,7 +115,6 @@ public class WaitlistManagerTest {
             return mockUserDocTask;
         });
 
-        // 2. Mock "checkWaitlistCapacity" check (Should return TRUE)
         when(mockEventDocRef.get()).thenReturn(mockEventDocTask);
         when(mockEventDocTask.addOnSuccessListener(any())).thenAnswer(invocation -> {
             OnSuccessListener<DocumentSnapshot> listener = invocation.getArgument(0);
@@ -133,7 +125,6 @@ public class WaitlistManagerTest {
             return mockEventDocTask;
         });
 
-        // 3. Mock the Batch Commit
         when(mockBatch.commit()).thenReturn(mockVoidTask);
         when(mockVoidTask.addOnSuccessListener(any())).thenAnswer(invocation -> {
             OnSuccessListener<Void> listener = invocation.getArgument(0);
@@ -141,10 +132,8 @@ public class WaitlistManagerTest {
             return mockVoidTask;
         });
 
-        // Act
         waitlistManager.joinWaitlist(TEST_EVENT_ID, null, null, callback);
 
-        // Assert
         verify(callback).onSuccess();
         verify(mockBatch).set(eq(mockUserWaitlistDocRef), any(WaitlistEntry.class));
         verify(mockBatch).update(eq(mockEventDocRef), eq("waitlistCount"), any());

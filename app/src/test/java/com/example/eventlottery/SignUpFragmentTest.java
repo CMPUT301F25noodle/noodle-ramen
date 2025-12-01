@@ -174,7 +174,6 @@ public class SignUpFragmentTest {
         // --- PERFORM ACTION ---
         signUpBtn.performClick();
 
-        // --- TRIGGER CALLBACKS MANUALLY ---
 
         // A. Trigger Email Check Success (Empty snapshot = email does not exist)
         when(mockQuerySnapshot.isEmpty()).thenReturn(true);

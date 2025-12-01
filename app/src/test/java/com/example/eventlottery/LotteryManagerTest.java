@@ -49,30 +49,24 @@ public class LotteryManagerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        // 1. Mock Log to prevent "Method d not mocked" error
-        mockedLog = mockStatic(Log.class); // <--- INITIALIZE MOCK HERE
+        mockedLog = mockStatic(Log.class);
 
-        // 2. Mock the static getInstance() so the constructor doesn't crash
         mockedFirestoreStatic = mockStatic(FirebaseFirestore.class);
         mockedFirestoreStatic.when(FirebaseFirestore::getInstance).thenReturn(mockDb);
 
-        // 3. Setup standard Firestore mock chain
         when(mockDb.collection("events")).thenReturn(mockCollectionRef);
         when(mockCollectionRef.document(anyString())).thenReturn(mockDocRef);
         when(mockDb.batch()).thenReturn(mockBatch);
 
-        // 4. Instantiate the manager
         lotteryManager = new LotteryManager();
 
-        // 5. Use Reflection to inject the mock NotificationManager
         injectPrivateField(lotteryManager, "notificationManager", mockNotificationManager);
     }
 
     @After
     public void tearDown() {
-        // Always close static mocks to avoid memory leaks or interfering with other tests
         mockedFirestoreStatic.close();
-        mockedLog.close(); // <--- CLOSE MOCK HERE
+        mockedLog.close(); //
     }
 
     @Test
