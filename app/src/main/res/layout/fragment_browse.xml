@@ -48,7 +48,9 @@
                 android:drawableStart="@android:drawable/ic_menu_search"
                 android:drawablePadding="8dp"
                 android:hint="Search for an Event"
-                android:padding="12dp" />
+                android:padding="12dp"
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
 
             <!-- Filter -->
             <ImageView

@@ -343,16 +343,6 @@
                 android:contentDescription="Event QR Code" />
 
             <!-- Share Button (won't be added till Part 4 -->
-            <Button
-                android:id="@+id/share_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Share"
-                android:textColor="@android:color/white"
-                android:backgroundTint="@color/brand_green"
-                android:textAllCaps="false"
-                android:paddingStart="40dp"
-                android:paddingEnd="40dp" />
         </LinearLayout>
 
         <!-- Bottom Spacer for Navigation Bar -->

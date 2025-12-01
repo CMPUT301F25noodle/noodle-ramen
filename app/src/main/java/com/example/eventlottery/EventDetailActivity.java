@@ -55,7 +55,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private ImageView qrCodeImage, backButton;
     private ImageView eventMainImage;
     private TextView imagePlaceholder;
-    private Button joinWaitlistButton, shareButton;
+    private Button joinWaitlistButton;
     private android.widget.ProgressBar joinButtonProgress;
 
     private FirebaseFirestore db;
@@ -111,7 +111,6 @@ public class EventDetailActivity extends AppCompatActivity {
         spotsText = findViewById(R.id.spots_text);
         qrCodeImage = findViewById(R.id.qr_code_image);
         joinWaitlistButton = findViewById(R.id.join_waitlist_button);
-        shareButton = findViewById(R.id.share_button);
         backButton = findViewById(R.id.back_button);
         eventMainImage = findViewById(R.id.eventMainImage);
         imagePlaceholder = findViewById(R.id.imagePlaceholder);
@@ -179,9 +178,6 @@ public class EventDetailActivity extends AppCompatActivity {
                         Bitmap qr = createQrBitmap(qrPayload, 400);
                         if (qr != null) qrCodeImage.setImageBitmap(qr);
 
-                        shareButton.setOnClickListener(v -> {
-                            Toast.makeText(this, "Share functionality coming soon", Toast.LENGTH_SHORT).show();
-                        });
 
                     } else {
                         Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();

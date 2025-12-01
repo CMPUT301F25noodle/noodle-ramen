@@ -6,13 +6,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -284,6 +288,34 @@ public class BrowseFragment extends Fragment implements EventAdapter.OnEventClic
             public void afterTextChanged(Editable s) {
                 // Not needed
             }
+        });
+
+        // Handle Enter key press on search bar
+        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                (event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
+                 event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+
+                // Remove any pending search callbacks
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+
+                // Hide keyboard
+                InputMethodManager imm = (InputMethodManager) requireContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+
+                // Perform search immediately
+                String query = searchEditText.getText().toString();
+                performSearch(query);
+
+                return true;
+            }
+            return false;
         });
 
         // Filter button
