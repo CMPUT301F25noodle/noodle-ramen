@@ -145,15 +145,34 @@ public class SignUpFragment extends Fragment {
         signUpButton.setEnabled(false);
         showLoading(true);
 
-        // Check if email already exists, then create account
-        checkEmailExists(email, exists -> {
-            if (exists) {
+        // First check if deviceId already exists
+        String deviceId = getDeviceId();
+        if (deviceId == null || deviceId.isEmpty()) {
+            signUpButton.setEnabled(true);
+            showLoading(false);
+            Toast.makeText(getContext(), "Error: Unable to get device ID. Please try again.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        checkDeviceIdExists(deviceId, deviceExists -> {
+            if (deviceExists) {
                 signUpButton.setEnabled(true);
                 showLoading(false);
-                emailField.setError("An account with this email already exists");
-                Toast.makeText(getContext(), "Email already registered.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(),
+                    "An account already exists on this device. Please restart the app to sign in.",
+                    Toast.LENGTH_LONG).show();
             } else {
-                createUserAccount(name, email, phone);
+                // Device ID is unique, now check email
+                checkEmailExists(email, emailExists -> {
+                    if (emailExists) {
+                        signUpButton.setEnabled(true);
+                        showLoading(false);
+                        emailField.setError("An account with this email already exists");
+                        Toast.makeText(getContext(), "Email already registered.", Toast.LENGTH_LONG).show();
+                    } else {
+                        createUserAccount(name, email, phone);
+                    }
+                });
             }
         });
     }
@@ -183,6 +202,40 @@ public class SignUpFragment extends Fragment {
         return isValid;
 
     }
+    /**
+     * Gets the unique Android device ID
+     * @return The device ID string, or null if unable to retrieve
+     */
+    private String getDeviceId() {
+        try {
+            return android.provider.Settings.Secure.getString(
+                    getContext().getContentResolver(),
+                    android.provider.Settings.Secure.ANDROID_ID
+            );
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * check if deviceId already exists in db
+     * @param deviceId the device ID to check
+     * @param callback Callback - true if deviceId exists, false otherwise
+     */
+    private void checkDeviceIdExists(String deviceId, DeviceCheckCallback callback) {
+        db.collection("users")
+                .whereEqualTo("deviceId", deviceId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    callback.onResult(!queryDocumentSnapshots.isEmpty());
+                })
+                .addOnFailureListener(e-> {
+                    // On error (e.g., permission denied), assume device doesn't exist
+                    // to allow sign-up to proceed
+                    callback.onResult(false);
+                });
+    }
+
     /**
      * check if email already in db
      * @param email we check
@@ -245,9 +298,7 @@ public class SignUpFragment extends Fragment {
         userProfile.put("role", selectedRole);
         userProfile.put("notificationsEnabled", notificationsEnabled);
         userProfile.put("createdAt", System.currentTimeMillis());
-        userProfile.put("deviceId", android.provider.Settings.Secure.getString(
-                getContext().getContentResolver(),
-                android.provider.Settings.Secure.ANDROID_ID)); // gets the device id so we dont need to sign in again
+        userProfile.put("deviceId", getDeviceId()); // gets the device id so we dont need to sign in again
 
         // Add role-specific fields
         if (selectedRole.equals("entrant")) {
@@ -335,6 +386,13 @@ public class SignUpFragment extends Fragment {
     private interface EmailCheckCallback {
         void onResult (boolean exists) ;
 
+    }
+
+    /**
+     * Callback for checking if deviceId exists
+     */
+    private interface DeviceCheckCallback {
+        void onResult(boolean exists);
     }
 
 
