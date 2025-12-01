@@ -43,23 +43,48 @@ public class NotificationManager {
         String message = "Congratulations! You've been selected for \"" + eventName + "\". " +
                 "Please accept or decline your invitation.";
 
-        Map<String, Object> notification = createNotificationData(
-                TYPE_WIN,
-                eventId,
-                eventName,
-                message,
-                false  // responded = false (needs response)
-        );
-// saves to firebase the notificatioos that have been sent
-        db.collection("notifications")
-                .document(userId)
-                .collection("messages")
-                .add(notification)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "Win notification sent successfully to " + userId);
+        // Fetch organizer name FIRST, then create notification
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventDoc -> {
+                    String organizerName = eventDoc.getString("organizerName");
+                    if (organizerName == null) organizerName = "Unknown Organizer";
+
+                    Map<String, Object> notification = createNotificationData(
+                            TYPE_WIN,
+                            eventId,
+                            eventName,
+                            message,
+                            false,  // responded = false (needs response)
+                            organizerName
+                    );
+
+                    // saves to firebase the notificatioos that have been sent
+                    db.collection("notifications")
+                            .document(userId)
+                            .collection("messages")
+                            .add(notification)
+                            .addOnSuccessListener(documentReference -> {
+                                Log.d(TAG, "Win notification sent successfully to " + userId);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error sending win notification to " + userId, e);
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error sending win notification to " + userId, e);
+                    Log.e(TAG, "Error fetching event for notification", e);
+                    // Still send notification with unknown organizer
+                    Map<String, Object> notification = createNotificationData(
+                            TYPE_WIN,
+                            eventId,
+                            eventName,
+                            message,
+                            false,
+                            "Unknown Organizer"
+                    );
+                    db.collection("notifications")
+                            .document(userId)
+                            .collection("messages")
+                            .add(notification);
                 });
     }
 
@@ -81,25 +106,47 @@ public class NotificationManager {
         String message = "Unfortunately, you were not selected for \"" + eventName + "\". " +
                 "You can join the retry pool for a chance to be selected if spots open up.";
 
-        // Create notification document
-        Map<String, Object> notification = createNotificationData(
-                TYPE_LOSS,
-                eventId,
-                eventName,
-                message,
-                false  // responded = false for interactions
-        );
+        // Fetch organizer name FIRST, then create notification
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventDoc -> {
+                    String organizerName = eventDoc.getString("organizerName");
+                    if (organizerName == null) organizerName = "Unknown Organizer";
 
-        // send loss notificaiton to the person for not being selected
-        db.collection("notifications")
-                .document(userId)
-                .collection("messages")
-                .add(notification)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "Loss notification sent successfully to " + userId);
+                    Map<String, Object> notification = createNotificationData(
+                            TYPE_LOSS,
+                            eventId,
+                            eventName,
+                            message,
+                            false,  // responded = false for interactions
+                            organizerName
+                    );
+
+                    // send loss notificaiton to the person for not being selected
+                    db.collection("notifications")
+                            .document(userId)
+                            .collection("messages")
+                            .add(notification)
+                            .addOnSuccessListener(documentReference -> {
+                                Log.d(TAG, "Loss notification sent successfully to " + userId);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error sending loss notification to " + userId, e);
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error sending loss notification to " + userId, e);
+                    Log.e(TAG, "Error fetching event for notification", e);
+                    Map<String, Object> notification = createNotificationData(
+                            TYPE_LOSS,
+                            eventId,
+                            eventName,
+                            message,
+                            false,
+                            "Unknown Organizer"
+                    );
+                    db.collection("notifications")
+                            .document(userId)
+                            .collection("messages")
+                            .add(notification);
                 });
     }
 
@@ -122,26 +169,47 @@ public class NotificationManager {
         String message = "Congratulations! You've been selected for \"" + eventName + "\". " +
                 "Please accept or decline your invitation.";
 
-        // Create notification document
-        // Keep type as "replacement" for internal tracking, but user sees same message as win
-        Map<String, Object> notification = createNotificationData(
-                TYPE_REPLACEMENT,
-                eventId,
-                eventName,
-                message,
-                false  // responded = false (needs response)
-        );
+        // Fetch organizer name FIRST, then create notification
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventDoc -> {
+                    String organizerName = eventDoc.getString("organizerName");
+                    if (organizerName == null) organizerName = "Unknown Organizer";
 
-        // save to fire base
-        db.collection("notifications")
-                .document(userId)
-                .collection("messages")
-                .add(notification)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "Replacement notification sent successfully to " + userId);
+                    Map<String, Object> notification = createNotificationData(
+                            TYPE_REPLACEMENT,
+                            eventId,
+                            eventName,
+                            message,
+                            false,  // responded = false (needs response)
+                            organizerName
+                    );
+
+                    // save to fire base
+                    db.collection("notifications")
+                            .document(userId)
+                            .collection("messages")
+                            .add(notification)
+                            .addOnSuccessListener(documentReference -> {
+                                Log.d(TAG, "Replacement notification sent successfully to " + userId);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error sending replacement notification to " + userId, e);
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error sending replacement notification to " + userId, e);
+                    Log.e(TAG, "Error fetching event for notification", e);
+                    Map<String, Object> notification = createNotificationData(
+                            TYPE_REPLACEMENT,
+                            eventId,
+                            eventName,
+                            message,
+                            false,
+                            "Unknown Organizer"
+                    );
+                    db.collection("notifications")
+                            .document(userId)
+                            .collection("messages")
+                            .add(notification);
                 });
     }
 
@@ -196,7 +264,7 @@ public class NotificationManager {
 
     private Map<String, Object> createNotificationData(String type, String eventId,
                                                        String eventName, String message,
-                                                       boolean responded) {
+                                                       boolean responded, String organizerName) {
         Map<String, Object> notification = new HashMap<>();
 
         notification.put("type", type);
@@ -206,6 +274,7 @@ public class NotificationManager {
         notification.put("timestamp", System.currentTimeMillis());
         notification.put("read", false);
         notification.put("responded", responded);
+        notification.put("organizerName", organizerName != null ? organizerName : "Unknown Organizer");
 
         return notification;
     }
