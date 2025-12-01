@@ -224,7 +224,9 @@ public class EventDetailActivity extends AppCompatActivity {
                     != PackageManager.PERMISSION_GRANTED) {
                 // Request Permission
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION},
                         LOCATION_PERMISSION_REQUEST_CODE);
             } else {
                 // Permission already granted
